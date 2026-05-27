@@ -30,3 +30,6 @@ pnpm-debug.log*
 # 10x
 .claude/.10x*
 .claude/**/10x-*
+
+# claude
+.claude/settings.local.json
