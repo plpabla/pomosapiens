@@ -16,7 +16,6 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
-      - run: npx astro sync
       - run: npm run lint
       - run: npm run build
         env:
