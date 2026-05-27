@@ -16,7 +16,9 @@
       "Read",
       "Edit",
       "Write",
-      "PowerShell(Set-Clipboard *)"
+      "PowerShell(Set-Clipboard *)",
+      "Bash(Get-ChildItem -Path \"D:\\\\sandbox\\\\12_10xDevs\\\\PomoSapiens\" -Force)",
+      "Bash(Select-Object Name, Mode)"
     ],
     "deny": [
       "Bash(rm -rf *)"
