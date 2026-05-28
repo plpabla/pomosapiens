@@ -1,3 +1,3 @@
 # PomoSapiens
 
-Hosted: https://pomo-sapiens.p-blaszczy.workers.dev/
+Hosted: https://pomo-sapiens.com/

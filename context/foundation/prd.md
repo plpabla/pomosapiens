@@ -154,6 +154,7 @@ There is no shared workspace, no peer / tutor read-access, and no team feature i
 
 ### Functional non-goals (capabilities v1 explicitly does not provide)
 
+- **No non logged-in user scenario with utilization of localStorage** Add as follow up
 - **No third-party music-streaming integration or embedded player.** Originally in idea-notes as a "stay in one window" feature; deferred. Adds another federated-identity scope, a third-party media-player surface, and a category of bugs (playback stalls, account-disconnect flows) that would distract from validating the contextual-data insight.
 - **No AI-generated animated backgrounds.** Originally in idea-notes; deferred. Real cost in v1 (image generation, prompt UI, animation pipeline). Plain static backgrounds in v1.
 - **No gamification — streaks, achievements, badges, leaderboards.** Originally in idea-notes; deferred. Cosmetic and habit-reinforcement features layered on top of the core capture loop; meaningless until the loop itself is shown to be sticky.
