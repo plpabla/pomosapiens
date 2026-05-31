@@ -446,28 +446,28 @@ This is the first application migration; there is no prior data to migrate. Forw
 
 #### Automated
 
-- [x] 3.1 `npm run db:reset` re-applies cleanly with the appended block
-- [x] 3.2 `pg_policies` query returns 4 policies for each of the three tables (12 total)
-- [x] 3.3 `pg_class.relrowsecurity = true` for all three tables
+- [x] 3.1 `npm run db:reset` re-applies cleanly with the appended block — b702542
+- [x] 3.2 `pg_policies` query returns 4 policies for each of the three tables (12 total) — b702542
+- [x] 3.3 `pg_class.relrowsecurity = true` for all three tables — b702542
 
 #### Manual
 
-- [x] 3.4 Studio (service role) still shows all rows
-- [x] 3.5 PostgREST as `anon` returns empty for `/rest/v1/sessions`
-- [x] 3.6 PostgREST as a signed-in user returns only that user's rows
+- [x] 3.4 Studio (service role) still shows all rows — b702542
+- [x] 3.5 PostgREST as `anon` returns empty for `/rest/v1/sessions` — b702542
+- [x] 3.6 PostgREST as a signed-in user returns only that user's rows — b702542
 
 ### Phase 4: pgTAP cross-user isolation tests
 
 #### Automated
 
-- [ ] 4.1 `npm run db:test` reports all assertions passing
-- [ ] 4.2 No failed tests in any `finish()` summary
-- [ ] 4.3 Deliberately breaking one policy causes the corresponding test to fail (regression-net spot check, then revert)
+- [x] 4.1 `npm run db:test` reports all assertions passing
+- [x] 4.2 No failed tests in any `finish()` summary
+- [x] 4.3 Deliberately breaking one policy causes the corresponding test to fail (regression-net spot check, then revert)
 
 #### Manual
 
-- [ ] 4.4 Test files cover the 4 ops × 3 tables × 3 roles matrix
-- [ ] 4.5 Test files leave no persistent state (BEGIN/ROLLBACK convention honored)
+- [x] 4.4 Test files cover the 4 ops × 3 tables × 3 roles matrix
+- [x] 4.5 Test files leave no persistent state (BEGIN/ROLLBACK convention honored)
 
 ### Phase 5: TypeScript plumbing + final CLAUDE.md
 
