@@ -418,29 +418,29 @@ This is the first application migration; there is no prior data to migrate. Forw
 
 #### Automated
 
-- [x] 1.1 `npm run lint` passes
-- [x] 1.2 `npm run db:start` brings up Supabase locally (Docker required)
-- [x] 1.3 `npm run db:test` exits 0 on an empty `supabase/tests/` directory
-- [x] 1.4 `npm run db:stop` shuts down cleanly
+- [x] 1.1 `npm run lint` passes — 39704d8
+- [x] 1.2 `npm run db:start` brings up Supabase locally (Docker required) — 39704d8
+- [x] 1.3 `npm run db:test` exits 0 on an empty `supabase/tests/` directory — 39704d8
+- [x] 1.4 `npm run db:stop` shuts down cleanly — 39704d8
 
 #### Manual
 
-- [x] 1.5 Supabase Studio reachable at `http://localhost:54323` after `npm run db:start`
-- [x] 1.6 `src/db/` and `supabase/tests/` directories exist in the working tree
+- [x] 1.5 Supabase Studio reachable at `http://localhost:54323` after `npm run db:start` — 39704d8
+- [x] 1.6 `src/db/` and `supabase/tests/` directories exist in the working tree — 39704d8
 
 ### Phase 2: Schema DDL + seeds
 
 #### Automated
 
-- [ ] 2.1 `npm run db:reset` applies the migration without errors
-- [ ] 2.2 `npm run lint` still passes
-- [ ] 2.3 `psql ... "\dt public.*"` lists the three tables
-- [ ] 2.4 `psql ... "SELECT count(*) FROM public.material_formats WHERE owner_id IS NULL"` returns 5
+- [x] 2.1 `npm run db:reset` applies the migration without errors
+- [x] 2.2 `npm run lint` still passes
+- [x] 2.3 `psql ... "\dt public.*"` lists the three tables
+- [x] 2.4 `psql ... "SELECT count(*) FROM public.material_formats WHERE owner_id IS NULL"` returns 5
 
 #### Manual
 
-- [ ] 2.5 Three tables visible in Studio; `duration_seconds` column on `sessions` is marked generated
-- [ ] 2.6 Insert/UPDATE round-trip on `sessions` shows `duration_seconds` populating when `ended_at` is set
+- [x] 2.5 Three tables visible in Studio; `duration_seconds` column on `sessions` is marked generated
+- [x] 2.6 Insert/UPDATE round-trip on `sessions` shows `duration_seconds` populating when `ended_at` is set
 
 ### Phase 3: RLS policies
 
