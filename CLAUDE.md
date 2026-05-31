@@ -52,6 +52,14 @@ Full SSR (`output: "server"` in `astro.config.mjs`). All pages are server-render
 
 `.github/workflows/ci.yml` runs lint + build on push and PR to `master`. Requires `SUPABASE_URL` / `SUPABASE_KEY` repository secrets for the build step (Astro `astro:env` validates them at build).
 
+### Database workflow
+
+- `npm run db:start` / `npm run db:stop` — local Supabase stack (Docker required).
+- `npm run db:reset` — drop and re-apply all migrations from `supabase/migrations/`.
+- `npm run db:migrate:new <name>` — scaffold a new timestamped migration file.
+- `npm run db:types` — regenerate `src/db/database.types.ts` from the local DB; commit the output.
+- `npm run db:test` — run pgTAP suites under `supabase/tests/`, the cross-user RLS regression net. Local prerequisite before opening a PR (not yet wired into CI).
+
 <!-- BEGIN @przeprogramowani/10x-cli -->
 
 ## 10xDevs AI Toolkit - Module 2, Lesson 2

@@ -418,15 +418,15 @@ This is the first application migration; there is no prior data to migrate. Forw
 
 #### Automated
 
-- [ ] 1.1 `npm run lint` passes
-- [ ] 1.2 `npm run db:start` brings up Supabase locally (Docker required)
-- [ ] 1.3 `npm run db:test` exits 0 on an empty `supabase/tests/` directory
-- [ ] 1.4 `npm run db:stop` shuts down cleanly
+- [x] 1.1 `npm run lint` passes
+- [x] 1.2 `npm run db:start` brings up Supabase locally (Docker required)
+- [x] 1.3 `npm run db:test` exits 0 on an empty `supabase/tests/` directory
+- [x] 1.4 `npm run db:stop` shuts down cleanly
 
 #### Manual
 
-- [ ] 1.5 Supabase Studio reachable at `http://localhost:54323` after `npm run db:start`
-- [ ] 1.6 `src/db/` and `supabase/tests/` directories exist in the working tree
+- [x] 1.5 Supabase Studio reachable at `http://localhost:54323` after `npm run db:start`
+- [x] 1.6 `src/db/` and `supabase/tests/` directories exist in the working tree
 
 ### Phase 2: Schema DDL + seeds
 
