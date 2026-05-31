@@ -118,3 +118,74 @@ INSERT INTO public.material_formats (owner_id, name) VALUES
   (NULL, 'Writing code'),
   (NULL, 'Drilling problems'),
   (NULL, 'Other');
+
+-- ---------------------------------------------------------------------------
+-- 7. Row Level Security
+-- Every table: RLS on + 4 per-operation policies scoped to `authenticated`.
+-- `anon` gets no policy and is fully denied by default.
+-- `(SELECT auth.uid())` form used throughout — Postgres caches the result
+-- per query (Supabase-recommended performance pattern).
+-- ---------------------------------------------------------------------------
+
+-- sessions ----------------------------------------------------------------
+
+ALTER TABLE public.sessions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY sessions_select_own ON public.sessions
+  FOR SELECT TO authenticated
+  USING (user_id = (SELECT auth.uid()));
+
+CREATE POLICY sessions_insert_own ON public.sessions
+  FOR INSERT TO authenticated
+  WITH CHECK (user_id = (SELECT auth.uid()));
+
+CREATE POLICY sessions_update_own ON public.sessions
+  FOR UPDATE TO authenticated
+  USING  (user_id = (SELECT auth.uid()))
+  WITH CHECK (user_id = (SELECT auth.uid()));
+
+CREATE POLICY sessions_delete_own ON public.sessions
+  FOR DELETE TO authenticated
+  USING (user_id = (SELECT auth.uid()));
+
+-- topics ------------------------------------------------------------------
+
+ALTER TABLE public.topics ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY topics_select_own_or_default ON public.topics
+  FOR SELECT TO authenticated
+  USING (owner_id IS NULL OR owner_id = (SELECT auth.uid()));
+
+CREATE POLICY topics_insert_own ON public.topics
+  FOR INSERT TO authenticated
+  WITH CHECK (owner_id = (SELECT auth.uid()));
+
+CREATE POLICY topics_update_own ON public.topics
+  FOR UPDATE TO authenticated
+  USING  (owner_id = (SELECT auth.uid()))
+  WITH CHECK (owner_id = (SELECT auth.uid()));
+
+CREATE POLICY topics_delete_own ON public.topics
+  FOR DELETE TO authenticated
+  USING (owner_id = (SELECT auth.uid()));
+
+-- material_formats --------------------------------------------------------
+
+ALTER TABLE public.material_formats ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY material_formats_select_own_or_default ON public.material_formats
+  FOR SELECT TO authenticated
+  USING (owner_id IS NULL OR owner_id = (SELECT auth.uid()));
+
+CREATE POLICY material_formats_insert_own ON public.material_formats
+  FOR INSERT TO authenticated
+  WITH CHECK (owner_id = (SELECT auth.uid()));
+
+CREATE POLICY material_formats_update_own ON public.material_formats
+  FOR UPDATE TO authenticated
+  USING  (owner_id = (SELECT auth.uid()))
+  WITH CHECK (owner_id = (SELECT auth.uid()));
+
+CREATE POLICY material_formats_delete_own ON public.material_formats
+  FOR DELETE TO authenticated
+  USING (owner_id = (SELECT auth.uid()));

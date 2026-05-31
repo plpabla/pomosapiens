@@ -432,29 +432,29 @@ This is the first application migration; there is no prior data to migrate. Forw
 
 #### Automated
 
-- [x] 2.1 `npm run db:reset` applies the migration without errors
-- [x] 2.2 `npm run lint` still passes
-- [x] 2.3 `psql ... "\dt public.*"` lists the three tables
-- [x] 2.4 `psql ... "SELECT count(*) FROM public.material_formats WHERE owner_id IS NULL"` returns 5
+- [x] 2.1 `npm run db:reset` applies the migration without errors — 575acbd
+- [x] 2.2 `npm run lint` still passes — 575acbd
+- [x] 2.3 `psql ... "\dt public.*"` lists the three tables — 575acbd
+- [x] 2.4 `psql ... "SELECT count(*) FROM public.material_formats WHERE owner_id IS NULL"` returns 5 — 575acbd
 
 #### Manual
 
-- [x] 2.5 Three tables visible in Studio; `duration_seconds` column on `sessions` is marked generated
-- [x] 2.6 Insert/UPDATE round-trip on `sessions` shows `duration_seconds` populating when `ended_at` is set
+- [x] 2.5 Three tables visible in Studio; `duration_seconds` column on `sessions` is marked generated — 575acbd
+- [x] 2.6 Insert/UPDATE round-trip on `sessions` shows `duration_seconds` populating when `ended_at` is set — 575acbd
 
 ### Phase 3: RLS policies
 
 #### Automated
 
-- [ ] 3.1 `npm run db:reset` re-applies cleanly with the appended block
-- [ ] 3.2 `pg_policies` query returns 4 policies for each of the three tables (12 total)
-- [ ] 3.3 `pg_class.relrowsecurity = true` for all three tables
+- [x] 3.1 `npm run db:reset` re-applies cleanly with the appended block
+- [x] 3.2 `pg_policies` query returns 4 policies for each of the three tables (12 total)
+- [x] 3.3 `pg_class.relrowsecurity = true` for all three tables
 
 #### Manual
 
-- [ ] 3.4 Studio (service role) still shows all rows
-- [ ] 3.5 PostgREST as `anon` returns empty for `/rest/v1/sessions`
-- [ ] 3.6 PostgREST as a signed-in user returns only that user's rows
+- [x] 3.4 Studio (service role) still shows all rows
+- [x] 3.5 PostgREST as `anon` returns empty for `/rest/v1/sessions`
+- [x] 3.6 PostgREST as a signed-in user returns only that user's rows
 
 ### Phase 4: pgTAP cross-user isolation tests
 
