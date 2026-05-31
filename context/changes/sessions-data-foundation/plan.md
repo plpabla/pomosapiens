@@ -473,13 +473,13 @@ This is the first application migration; there is no prior data to migrate. Forw
 
 #### Automated
 
-- [x] 5.1 `npm run db:types` produces a non-empty `src/db/database.types.ts`
-- [x] 5.2 `npm run lint` passes
-- [x] 5.3 `npm run build` passes
-- [x] 5.4 `src/db/database.types.ts` is a new tracked file in `git status`
-- [x] 5.5 Spot-check import of `Database['public']['Tables']['sessions']['Row']` compiles
+- [x] 5.1 `npm run db:types` produces a non-empty `src/db/database.types.ts` — a366198
+- [x] 5.2 `npm run lint` passes — a366198
+- [x] 5.3 `npm run build` passes — a366198
+- [x] 5.4 `src/db/database.types.ts` is a new tracked file in `git status` — a366198
+- [x] 5.5 Spot-check import of `Database['public']['Tables']['sessions']['Row']` compiles — a366198
 
 #### Manual
 
-- [x] 5.6 `src/db/database.types.ts` reflects the three tables and the enum
-- [x] 5.7 Finalized CLAUDE.md Database Workflow section is sufficient for a fresh contributor
+- [x] 5.6 `src/db/database.types.ts` reflects the three tables and the enum — a366198
+- [x] 5.7 Finalized CLAUDE.md Database Workflow section is sufficient for a fresh contributor — a366198
