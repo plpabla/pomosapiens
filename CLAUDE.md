@@ -56,9 +56,9 @@ Full SSR (`output: "server"` in `astro.config.mjs`). All pages are server-render
 
 - `npm run db:start` / `npm run db:stop` — local Supabase stack (Docker required).
 - `npm run db:reset` — drop and re-apply all migrations from `supabase/migrations/`.
-- `npm run db:migrate:new <name>` — scaffold a new timestamped migration file.
-- `npm run db:types` — regenerate `src/db/database.types.ts` from the local DB; commit the output.
-- `npm run db:test` — run pgTAP suites under `supabase/tests/`, the cross-user RLS regression net. Local prerequisite before opening a PR (not yet wired into CI).
+- `npm run db:migrate:new <name>` — scaffold a new timestamped migration file. Filename format: `YYYYMMDDHHmmss_short_description.sql`. Always enable RLS on new tables in the same migration (see "Supabase migrations" under Key conventions).
+- `npm run db:types` — regenerate `src/db/database.types.ts` from the local DB schema. Re-run after every schema change and commit the output so CI's `lint + build` doesn't need a running Supabase to typecheck. The Supabase client in `src/lib/supabase.ts` is typed as `SupabaseClient<Database>` — the generated file is the source of that type.
+- `npm run db:test` — run pgTAP suites under `supabase/tests/`, the cross-user RLS regression net required by the privacy NFR. One file per RLS-bearing table (e.g., `rls_sessions.sql`). Each file wraps its fixtures in `BEGIN … ROLLBACK` so it leaves no persistent state. **Local prerequisite before opening a PR** (not yet wired into CI).
 
 <!-- BEGIN @przeprogramowani/10x-cli -->
 

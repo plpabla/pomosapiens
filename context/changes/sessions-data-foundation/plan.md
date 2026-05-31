@@ -460,26 +460,26 @@ This is the first application migration; there is no prior data to migrate. Forw
 
 #### Automated
 
-- [x] 4.1 `npm run db:test` reports all assertions passing
-- [x] 4.2 No failed tests in any `finish()` summary
-- [x] 4.3 Deliberately breaking one policy causes the corresponding test to fail (regression-net spot check, then revert)
+- [x] 4.1 `npm run db:test` reports all assertions passing — 0cb1027
+- [x] 4.2 No failed tests in any `finish()` summary — 0cb1027
+- [x] 4.3 Deliberately breaking one policy causes the corresponding test to fail (regression-net spot check, then revert) — 0cb1027
 
 #### Manual
 
-- [x] 4.4 Test files cover the 4 ops × 3 tables × 3 roles matrix
-- [x] 4.5 Test files leave no persistent state (BEGIN/ROLLBACK convention honored)
+- [x] 4.4 Test files cover the 4 ops × 3 tables × 3 roles matrix — 0cb1027
+- [x] 4.5 Test files leave no persistent state (BEGIN/ROLLBACK convention honored) — 0cb1027
 
 ### Phase 5: TypeScript plumbing + final CLAUDE.md
 
 #### Automated
 
-- [ ] 5.1 `npm run db:types` produces a non-empty `src/db/database.types.ts`
-- [ ] 5.2 `npm run lint` passes
-- [ ] 5.3 `npm run build` passes
-- [ ] 5.4 `src/db/database.types.ts` is a new tracked file in `git status`
-- [ ] 5.5 Spot-check import of `Database['public']['Tables']['sessions']['Row']` compiles
+- [x] 5.1 `npm run db:types` produces a non-empty `src/db/database.types.ts`
+- [x] 5.2 `npm run lint` passes
+- [x] 5.3 `npm run build` passes
+- [x] 5.4 `src/db/database.types.ts` is a new tracked file in `git status`
+- [x] 5.5 Spot-check import of `Database['public']['Tables']['sessions']['Row']` compiles
 
 #### Manual
 
-- [ ] 5.6 `src/db/database.types.ts` reflects the three tables and the enum
-- [ ] 5.7 Finalized CLAUDE.md Database Workflow section is sufficient for a fresh contributor
+- [x] 5.6 `src/db/database.types.ts` reflects the three tables and the enum
+- [x] 5.7 Finalized CLAUDE.md Database Workflow section is sufficient for a fresh contributor
