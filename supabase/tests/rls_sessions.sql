@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(8);
+SELECT plan(9);
 
 -- -------------------------------------------------------------------------
 -- Setup: two test users + one session each (runs as postgres/service role)
@@ -44,7 +44,17 @@ WITH del AS (
 SELECT is(count(*)::int, 0, 'user A cannot delete user B session')
 FROM del;
 
--- 4. User A cannot INSERT claiming user B's id (RLS WITH CHECK violation → 42501)
+-- 4. User A cannot DELETE their OWN session either — sessions are immutable
+-- (sessions_delete_own was dropped by 20260601120000_drop_sessions_delete_policy.sql)
+WITH del AS (
+  DELETE FROM public.sessions
+  WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001'
+  RETURNING id
+)
+SELECT is(count(*)::int, 0, 'user A cannot delete their own session (immutability)')
+FROM del;
+
+-- 5. User A cannot INSERT claiming user B's id (RLS WITH CHECK violation → 42501)
 SELECT throws_ok(
   $$INSERT INTO public.sessions (user_id, started_at, energy_level)
     VALUES ('00000000-0000-0000-0000-000000000002', now(), 'low')$$,
@@ -60,11 +70,11 @@ SELECT throws_ok(
 RESET ROLE;
 SET LOCAL ROLE anon;
 
--- 5. anon sees no sessions
+-- 6. anon sees no sessions
 SELECT is(count(*)::int, 0, 'anon sees 0 sessions')
 FROM public.sessions;
 
--- 6. anon cannot INSERT (no INSERT policy for anon → 42501)
+-- 7. anon cannot INSERT (no INSERT policy for anon → 42501)
 SELECT throws_ok(
   $$INSERT INTO public.sessions (user_id, started_at, energy_level)
     VALUES ('00000000-0000-0000-0000-000000000001', now(), 'low')$$,
@@ -73,7 +83,7 @@ SELECT throws_ok(
   'anon cannot insert session'
 );
 
--- 7. anon cannot UPDATE (no rows visible)
+-- 8. anon cannot UPDATE (no rows visible)
 WITH upd AS (
   UPDATE public.sessions SET note = 'hacked'
   WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001'
@@ -82,7 +92,7 @@ WITH upd AS (
 SELECT is(count(*)::int, 0, 'anon cannot update session')
 FROM upd;
 
--- 8. anon cannot DELETE (no rows visible)
+-- 9. anon cannot DELETE (no rows visible)
 WITH del AS (
   DELETE FROM public.sessions
   WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001'

@@ -346,6 +346,14 @@ Generate the `Database` type, commit it, type the Supabase client returned by `c
 
 **Contract**: A final ~15-line `### Database workflow` subsection. References the FR / NFR provenance (cross-user-isolation tests required by the privacy NFR).
 
+#### 5. Ignore generated types in ESLint (epilogue addendum)
+
+**File**: `eslint.config.js`
+
+**Intent**: Exclude the generator-produced `src/db/database.types.ts` from lint. Without it, the `strictTypeChecked` ruleset flags generator output and breaks success criterion 5.2 (`npm run lint` passes).
+
+**Contract**: Add a flat-config entry `{ ignores: ["src/db/database.types.ts"] }`. Pure ignore — no rule overrides. Recorded retrospectively from the impl-review of 2026-05-31 (the plan was silent on this).
+
 ### Success Criteria
 
 #### Automated Verification
