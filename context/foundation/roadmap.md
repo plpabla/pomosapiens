@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-05-28
+updated: 2026-06-02
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -27,13 +27,14 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 
 ## At a glance
 
-| ID   | Change ID                          | Outcome (user can …)                                                              | Prerequisites | PRD refs                                              | Status   |
-| ---- | ---------------------------------- | --------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | -------- |
-| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                                | —             | NFR (privacy), Access Control                         | ready    |
-| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history                   | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | proposed |
-| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                   | S-01          | FR-007, FR-008, FR-017                                | proposed |
-| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session             | S-01          | FR-004, FR-005, FR-010                                | proposed |
-| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time         | S-01          | FR-014, FR-016                                        | proposed |
+| ID   | Change ID                          | Outcome (user can …)                                                      | Prerequisites | PRD refs                                              | Status      |
+| ---- | ---------------------------------- | ------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | ----------- |
+| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                        | —             | — (US-01 acquisition surface)                         | ready       |
+| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                        | —             | NFR (privacy), Access Control                         | done        |
+| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history           | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | proposed    |
+| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format           | S-01          | FR-007, FR-008, FR-017                                | proposed    |
+| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session     | S-01          | FR-004, FR-005, FR-010                                | proposed    |
+| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time | S-01          | FR-014, FR-016                                        | proposed    |
 
 ## Baseline
 
@@ -55,14 +56,27 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **PRD refs:** NFR "Privacy of session content" ("Cross-user leakage of any session field is a regression even if the primary flow works"); Access Control ("All access decisions reduce to 'is this the session-owning user, or is this an admin?'").
 - **Unlocks:** S-01 (no session can be saved without this), and by transitive prereq S-02 / S-03 / S-04 (all read or extend the sessions row). Reduces the privacy-leak risk that would otherwise have to be retrofitted under deadline pressure.
 - **Prerequisites:** —
-- **Parallel with:** —
+- **Parallel with:** S-00 (pure DB work vs pure frontend — no shared files)
 - **Blockers:** —
 - **Unknowns:**
   - Minimum sessions column set that supports S-01 plus S-02/S-03/S-04 without painful follow-on migrations — Owner: implementer (decided at `/10x-plan` time). Block: no — additive nullable columns are cheap.
 - **Risk:** Sequenced first because every slice depends on session persistence; if RLS is wrong here, every later slice inherits the leak. Investing in this layer (the one investment area `speed` does NOT trade away) is cheaper here than retrofitting after S-01 ships.
-- **Status:** ready
+- **Status:** done
 
 ## Slices
+
+### S-00: Landing page
+
+- **Outcome:** A first-time visitor to `/` sees a hero explaining the wedge (energy-gated focus sessions with contextual capture bound to each session) and taps a primary CTA that routes to `/auth/signup`. Replaces the placeholder `src/pages/index.astro`. Authenticated visitors are redirected to `/dashboard`.
+- **Change ID:** `landing-page`
+- **PRD refs:** — no direct FR. Serves as the acquisition surface that feeds US-01's sign-up path (FR-001 / FR-002 already shipped per Baseline).
+- **Prerequisites:** —
+- **Parallel with:** F-01 (no shared files; frontend-only vs DB-only)
+- **Blockers:** —
+- **Unknowns:**
+  - Final hero copy and visual treatment (illustration vs screenshot vs blank slate) — Owner: project author (decided at `/10x-plan` time). Block: no.
+- **Risk:** Lowest-risk slice — pure frontend, no data, no auth changes. The real risk is **scope creep**: over-investing in marketing polish (feature grids, FAQs, animations, analytics) before S-01 validates the wedge. Hold the line at hero + value prop + CTA. S-00 is **not** the north star — S-01 remains the slice that proves the wedge; S-00 only opens the front door.
+- **Status:** ready
 
 ### S-01: First session capture loop
 
@@ -119,13 +133,14 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                          | Suggested issue title                                                | Ready for `/10x-plan` | Notes                                |
-| ---------- | ---------------------------------- | -------------------------------------------------------------------- | --------------------- | ------------------------------------ |
-| F-01       | `sessions-data-foundation`         | Sessions data foundation — table + per-user RLS                      | yes                   | Run `/10x-plan sessions-data-foundation` |
-| S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)                   | no                    | Waits on F-01                        |
-| S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format          | no                    | Waits on S-01                        |
-| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker        | no                    | Waits on S-01                        |
-| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                                | no                    | Waits on S-01                        |
+| Roadmap ID | Change ID                          | Suggested issue title                                         | Ready for `/10x-plan` | Notes                               |
+| ---------- | ---------------------------------- | ------------------------------------------------------------- | --------------------- | ----------------------------------- |
+| S-00       | `landing-page`                     | Landing page — hero + value prop + sign-up CTA                | yes                   | Independent of F-01; can ship first |
+| F-01       | `sessions-data-foundation`         | Sessions data foundation — table + per-user RLS               | yes                   | Implemented                         |
+| S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)            | no                    | Waits on F-01                       |
+| S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Waits on S-01                       |
+| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Waits on S-01                       |
+| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                       |
 
 ## Open Roadmap Questions
 
@@ -149,4 +164,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 
 ## Done
 
-(Empty on first generation. `/10x-archive` appends entries here — and flips the corresponding item's `Status` to `done` — when a change whose `Change ID` matches a roadmap item is archived. Do NOT pre-populate.)
+- **F-01: (foundation) sessions data model with per-user RLS** — Archived 2026-06-02 → `context/archive/2026-05-29-sessions-data-foundation/`. Lesson: —.
