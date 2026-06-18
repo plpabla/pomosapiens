@@ -1,20 +1,27 @@
 ---
+import { Image } from "astro:assets";
+import iconImage from "@/assets/icon.png";
+
 const { user } = Astro.locals;
 ---
 
 <div
-  class="mb-4 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/80"
+  class="border-charred bg-ember text-off-white/80 mb-4 flex items-center justify-between rounded-xl border px-4 py-2 text-sm"
 >
   {
     user ? (
       <>
-        <span class="text-blue-100/70">{user.email}</span>
+        <div class="flex items-center gap-2">
+          <Image src={iconImage} alt="PomoSapiens" width={28} height={28} class="rounded" />
+          <span class="text-ash">{user.email}</span>
+        </div>
         <div class="flex items-center gap-3">
-          <a href="/dashboard" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-            Dashboard
+          <a href="/dashboard" class="text-blaze hover:text-spark transition-colors hover:underline">
+            {" "}
+            Dashboard{" "}
           </a>
           <form method="POST" action="/api/auth/signout">
-            <button type="submit" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
+            <button type="submit" class="text-blaze hover:text-spark transition-colors hover:underline">
               Sign out
             </button>
           </form>
@@ -22,13 +29,18 @@ const { user } = Astro.locals;
       </>
     ) : (
       <>
-        <span class="text-blue-100/70">Not signed in</span>
+        <div class="flex items-center gap-2">
+          <Image src={iconImage} alt="PomoSapiens" width={28} height={28} class="rounded" />
+          <span class="text-ash">Not signed in</span>
+        </div>
         <div class="flex gap-3">
-          <a href="/auth/signin" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-            Sign in
+          <a href="/auth/signin" class="text-blaze hover:text-spark transition-colors hover:underline">
+            {" "}
+            Sign in{" "}
           </a>
-          <a href="/auth/signup" class="text-purple-300 transition-colors hover:text-purple-100 hover:underline">
-            Sign up
+          <a href="/auth/signup" class="text-blaze hover:text-spark transition-colors hover:underline">
+            {" "}
+            Sign up{" "}
           </a>
         </div>
       </>

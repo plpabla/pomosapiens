@@ -333,21 +333,21 @@ None. Content-only change to one component + a 3-line middleware extension.
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Build passes: `npm run build`
-- [x] 1.3 Format check passes: `npm run format`
+- [x] 1.1 Lint passes: `npm run lint` — c43b190
+- [x] 1.2 Build passes: `npm run build` — c43b190
+- [x] 1.3 Format check passes: `npm run format` — c43b190
 
 #### Manual
 
-- [x] 1.4 Anonymous visit to `/` shows new hero copy, wedge-named cards, primary Sign Up button, secondary Sign In link
-- [x] 1.5 Tapping Sign Up routes to `/auth/signup`
-- [x] 1.6 Tapping the secondary Sign In link routes to `/auth/signin`
-- [x] 1.7 After signing in, visiting `/` redirects to `/dashboard` without flicker
-- [x] 1.8 After signing out, visiting `/` renders the landing page (no redirect)
-- [x] 1.9 Topbar renders correctly for the anonymous state on `/`
-- [x] 1.10 Cosmic-theme background and glassmorphic cards still render
-- [x] 1.11 Hero, CTAs, and cards render correctly on mobile (≤ sm breakpoint)
-- [x] 1.12 Browser DevTools console shows no errors
+- [x] 1.4 Anonymous visit to `/` shows new hero copy, wedge-named cards, primary Sign Up button, secondary Sign In link — c43b190
+- [x] 1.5 Tapping Sign Up routes to `/auth/signup` — c43b190
+- [x] 1.6 Tapping the secondary Sign In link routes to `/auth/signin` — c43b190
+- [x] 1.7 After signing in, visiting `/` redirects to `/dashboard` without flicker — c43b190
+- [x] 1.8 After signing out, visiting `/` renders the landing page (no redirect) — c43b190
+- [x] 1.9 Topbar renders correctly for the anonymous state on `/` — c43b190
+- [x] 1.10 Cosmic-theme background and glassmorphic cards still render — c43b190
+- [x] 1.11 Hero, CTAs, and cards render correctly on mobile (≤ sm breakpoint) — c43b190
+- [x] 1.12 Browser DevTools console shows no errors — c43b190
 
 ### Phase 2: Hero image + Topbar icon mark
 
