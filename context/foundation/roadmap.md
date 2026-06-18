@@ -27,14 +27,14 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 
 ## At a glance
 
-| ID   | Change ID                          | Outcome (user can …)                                                      | Prerequisites | PRD refs                                              | Status      |
-| ---- | ---------------------------------- | ------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | ----------- |
-| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                        | —             | — (US-01 acquisition surface)                         | ready       |
-| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                        | —             | NFR (privacy), Access Control                         | done        |
-| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history           | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | proposed    |
-| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format           | S-01          | FR-007, FR-008, FR-017                                | proposed    |
-| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session     | S-01          | FR-004, FR-005, FR-010                                | proposed    |
-| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time | S-01          | FR-014, FR-016                                        | proposed    |
+| ID   | Change ID                          | Outcome (user can …)                                                      | Prerequisites | PRD refs                                              | Status   |
+| ---- | ---------------------------------- | ------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | -------- |
+| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                        | —             | — (US-01 acquisition surface)                         | ready    |
+| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                        | —             | NFR (privacy), Access Control                         | done     |
+| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history           | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | proposed |
+| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format           | S-01          | FR-007, FR-008, FR-017                                | proposed |
+| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session     | S-01          | FR-004, FR-005, FR-010                                | proposed |
+| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time | S-01          | FR-014, FR-016                                        | proposed |
 
 ## Baseline
 

@@ -60,7 +60,7 @@ There is no shared workspace, no peer/tutor read-access, and no team feature in 
 
 ### Secondary
 
-- A returning student opens their session-history view and recognizes at least one personal pattern in their own logged data — e.g. "evening sessions consistently score lower," "video lectures rate worse than coding," "Mondays after 22:00 are wasted." This is the leading indicator that the *contextual-data* insight is real, even before any AI synthesis lands.
+- A returning student opens their session-history view and recognizes at least one personal pattern in their own logged data — e.g. "evening sessions consistently score lower," "video lectures rate worse than coding," "Mondays after 22:00 are wasted." This is the leading indicator that the _contextual-data_ insight is real, even before any AI synthesis lands.
 
 ### Guardrails
 
@@ -100,8 +100,6 @@ There is no shared workspace, no peer/tutor read-access, and no team feature in 
 - **No offline-first guarantee.** Connectivity is required to run a session, save data, and view history. Offline sync is genuine work (conflict resolution, queueing, retry) and isn't justified by the persona's behavior — university and bootcamp students study with internet available.
 - **No multi-region SLA.** Single-region hosting is sufficient at the medium-scale target.
 - **No compliance certification beyond baseline GDPR-style privacy.** No HIPAA, no SOC 2, no accessibility certification in v1 (basic WCAG-friendly markup is desirable but not certified).
-
-
 
 ## Functional Requirements
 
@@ -185,7 +183,7 @@ All four pre-session pickers (topic, format, energy, timer mode) are presented o
 
 The inputs to this rule are everything captured around a single session: the pre-session energy level (always present), optional topic and material format, the timer mode actually run, the day-of-week and time-of-day at which the focus phase ran, the elapsed duration of the focus phase, and the student's post-session focus rating (1–5 or "skip"). The output is a pattern view that lets the student see, across their own log, how their reported focus varies as those inputs change — most simply as a chart of focus-rating over time (FR-016), and more richly in future iterations as cross-tabs (e.g. "low-energy + video → median rating 2"; "high-energy + writing-code → median rating 4") and eventually an LLM-synthesized weekly report.
 
-The student encounters the rule's output in the history view: a session list (FR-015) for raw evidence, and a focus-rating chart (FR-016) for the first visible pattern. The rule's *capture machinery* — pre-session energy as the only required field (FR-009), topic / format / mode as optional but structured (FR-007 / FR-008 / FR-010), focus rating with a skip option (FR-013) — is shaped specifically to feed this rule with clean inputs while keeping the start-of-session friction at three taps.
+The student encounters the rule's output in the history view: a session list (FR-015) for raw evidence, and a focus-rating chart (FR-016) for the first visible pattern. The rule's _capture machinery_ — pre-session energy as the only required field (FR-009), topic / format / mode as optional but structured (FR-007 / FR-008 / FR-010), focus rating with a skip option (FR-013) — is shaped specifically to feed this rule with clean inputs while keeping the start-of-session friction at three taps.
 
 What the rule explicitly is NOT in v1: it is not a recommendation engine ("study X next"), it is not a prescriptive coach, and it does not infer causation. It surfaces correlations the student can interpret. AI-synthesized weekly insights (a step toward recommendation) are a deferred v2 capability.
 
@@ -213,4 +211,3 @@ Run at end of Phase 7 (2026-05-21). All gates passed:
 - Preserved behavior — n/a (greenfield).
 
 `quality_check_status: accepted`. No gaps to mirror into PRD's `## Open Questions` from this cross-check (the two Open Questions above were captured during normal phase flow, not as gate failures).
-

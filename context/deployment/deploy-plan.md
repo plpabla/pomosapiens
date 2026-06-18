@@ -77,7 +77,7 @@ Two prerequisites from research are still open and gate the deploy:
   - `GET /` → **200** (SSR landing renders).
   - `GET /dashboard` (unauth) → **302 → /auth/signin** (middleware runs).
   - `GET /auth/signin` → **200**.
-  - **Stronger secrets-resolved proof:** `POST /api/auth/signin` with dummy creds (and a matching `Origin` header to pass Astro's CSRF check) → **302 → /auth/signin?error=Invalid login credentials**. This is a *real Supabase auth rejection*, not the `Supabase is not configured` no-op path — so the 46-char publishable `SUPABASE_KEY` resolves at runtime and the request reaches Supabase. Watch-item from Step 1 closed positively.
+  - **Stronger secrets-resolved proof:** `POST /api/auth/signin` with dummy creds (and a matching `Origin` header to pass Astro's CSRF check) → **302 → /auth/signin?error=Invalid login credentials**. This is a _real Supabase auth rejection_, not the `Supabase is not configured` no-op path — so the 46-char publishable `SUPABASE_KEY` resolves at runtime and the request reaches Supabase. Watch-item from Step 1 closed positively.
   - **CSRF note:** a POST without an `Origin` header returns **403** (Astro's built-in `checkOrigin`). Expected; real browser form submits send `Origin` automatically.
   - `wrangler tail` during the click-through: both auth POSTs logged as `Ok`, **no unhandled exceptions**, no `nodejs_compat` runtime failures.
 - Exercise the auth path (sign-in page loads, `astro:env/server` resolved Supabase — no 500s).
@@ -88,7 +88,7 @@ Two prerequisites from research are still open and gate the deploy:
 
 - Note the active version ID from `wrangler deployments list`. Rollback if needed: `npx wrangler rollback [version-id]` (seconds).
 - **Caveat:** Supabase schema migrations do NOT roll back with the Worker — they are forward-only and reverted separately in Supabase.
-- **Result — current LIVE version (fully configured): `dd002261-81bb-4444-a563-5857b4451890`** (Source: `Secret Change`, created 2026-05-27T14:05:21Z). This is the version to keep; it includes both secrets. Earlier versions this session: `4eccff65-…` (first code deploy, pre-secrets), `5446fddd-…`, plus an intermediate secret-set version — all pre-secret or partial, so rolling back to them would lose the configured key. The meaningful rollback target for a *future* bad deploy is whatever the last-known-good is at that time; today's known-good handle is **`dd002261-81bb-4444-a563-5857b4451890`**. Rollback command: `npx wrangler rollback dd002261-81bb-4444-a563-5857b4451890`.
+- **Result — current LIVE version (fully configured): `dd002261-81bb-4444-a563-5857b4451890`** (Source: `Secret Change`, created 2026-05-27T14:05:21Z). This is the version to keep; it includes both secrets. Earlier versions this session: `4eccff65-…` (first code deploy, pre-secrets), `5446fddd-…`, plus an intermediate secret-set version — all pre-secret or partial, so rolling back to them would lose the configured key. The meaningful rollback target for a _future_ bad deploy is whatever the last-known-good is at that time; today's known-good handle is **`dd002261-81bb-4444-a563-5857b4451890`**. Rollback command: `npx wrangler rollback dd002261-81bb-4444-a563-5857b4451890`.
 
 ## Assessment (anti-bias carry-over from research)
 
@@ -120,10 +120,11 @@ Steps:
 4. **Build command:** `npm run lint && npm run build` (the `&& lint` is what enforces the gate within Workers Builds).
 5. **Deploy command:** `npx wrangler deploy` (NOT `pages deploy`).
 6. **Root directory:** `/` (default).
-7. **Build-time environment variables:** add `SUPABASE_URL` and `SUPABASE_KEY` (Astro's `astro:env` validates them at build). These are *build-time* vars — separate from the *runtime* Worker Secrets already set in Step 1, which persist independently.
+7. **Build-time environment variables:** add `SUPABASE_URL` and `SUPABASE_KEY` (Astro's `astro:env` validates them at build). These are _build-time_ vars — separate from the _runtime_ Worker Secrets already set in Step 1, which persist independently.
 8. Save → next push/merge to `main` triggers a build → deploy. Optionally disable non-production-branch builds (or enable PR preview builds) per preference.
 
 **Verify:** push a trivial commit to `main` → Workers Builds shows a green build → `wrangler deployments list` shows a new version with Source ≠ `Upload`.
+
 - **`.dev.vars`** — local-dev only; create by copying `.env` if running `npm run dev` against workerd. Does not affect production deploy.
 - **Custom domain, multi-region/HA, Docker** — explicitly out of MVP scope.
 

@@ -16,20 +16,20 @@ One migration applied, three tables visible in Studio with RLS enabled and 12 pe
 
 ## Key Decisions Made
 
-| Decision                          | Choice                                                                            | Why (1 sentence)                                                                                                  | Source |
-| --------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------ |
-| Column-set scope                  | Anticipating-but-nullable                                                         | Roadmap explicitly endorses "additive nullable columns are cheap"; avoids 3 follow-on migrations on `sessions`.   | Plan   |
-| Constrained-value modeling        | Postgres enum for `energy_level`; lookup tables for `topics`/`material_formats`   | Energy is closed (3 values); topics/formats are per-user open sets with seeded NULL-owner defaults.               | Plan   |
-| Time representation               | `started_at` + `ended_at` + computed `duration_seconds` (STORED)                  | Server-stored `started_at` keeps S-01's timer-resilience options open; generated col stays in sync automatically. | Plan   |
-| Lookup ownership model            | NULL-owner defaults + per-user rows; RLS `owner_id IS NULL OR owner_id = uid()`   | Simplest mental model; no copy-on-write trigger; defaults stay in one place.                                      | Plan   |
-| Primary keys                      | uuid (`gen_random_uuid()`)                                                        | Non-enumerable in any future URLs; matches the privacy NFR posture; ecosystem default.                            | Plan   |
-| FK to `auth.users`                | `ON DELETE CASCADE`                                                               | Privacy-aligned: deleting a user wipes their data; no orphan rows holding session content.                        | Plan   |
-| Admin access                      | Supabase Studio + service-role bypass; no policy                                  | PRD §Access Control: admin is "assigned out-of-band, not exposed in normal user-facing UI"; service role suffices.| Plan   |
-| Realtime publication              | Excluded                                                                          | No FR demands cross-tab live sync; single-user product; smaller attack surface.                                   | Plan   |
-| `updated_at`                      | Trigger-driven (`set_updated_at()` shared across tables)                          | Impossible to forget in app code; one source of truth for mutation timestamps.                                    | Plan   |
-| Typegen                           | Generate and commit `src/db/database.types.ts`                                    | CI lint+build doesn't need a running Supabase; later slices import typed Row/Insert types directly.               | Plan   |
-| Cross-user-leak verification      | pgTAP under `supabase/tests/` via `npm run db:test`                               | Supabase-native; CI-runnable; becomes the regression net every later slice extends.                               | Plan   |
-| DB workflow scripts               | Full `db:start/stop/reset/migrate:new/types/test` set                             | One vocabulary; CLAUDE.md updated once; contributors and CI share the same commands.                              | Plan   |
+| Decision                     | Choice                                                                          | Why (1 sentence)                                                                                                   | Source |
+| ---------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------ |
+| Column-set scope             | Anticipating-but-nullable                                                       | Roadmap explicitly endorses "additive nullable columns are cheap"; avoids 3 follow-on migrations on `sessions`.    | Plan   |
+| Constrained-value modeling   | Postgres enum for `energy_level`; lookup tables for `topics`/`material_formats` | Energy is closed (3 values); topics/formats are per-user open sets with seeded NULL-owner defaults.                | Plan   |
+| Time representation          | `started_at` + `ended_at` + computed `duration_seconds` (STORED)                | Server-stored `started_at` keeps S-01's timer-resilience options open; generated col stays in sync automatically.  | Plan   |
+| Lookup ownership model       | NULL-owner defaults + per-user rows; RLS `owner_id IS NULL OR owner_id = uid()` | Simplest mental model; no copy-on-write trigger; defaults stay in one place.                                       | Plan   |
+| Primary keys                 | uuid (`gen_random_uuid()`)                                                      | Non-enumerable in any future URLs; matches the privacy NFR posture; ecosystem default.                             | Plan   |
+| FK to `auth.users`           | `ON DELETE CASCADE`                                                             | Privacy-aligned: deleting a user wipes their data; no orphan rows holding session content.                         | Plan   |
+| Admin access                 | Supabase Studio + service-role bypass; no policy                                | PRD §Access Control: admin is "assigned out-of-band, not exposed in normal user-facing UI"; service role suffices. | Plan   |
+| Realtime publication         | Excluded                                                                        | No FR demands cross-tab live sync; single-user product; smaller attack surface.                                    | Plan   |
+| `updated_at`                 | Trigger-driven (`set_updated_at()` shared across tables)                        | Impossible to forget in app code; one source of truth for mutation timestamps.                                     | Plan   |
+| Typegen                      | Generate and commit `src/db/database.types.ts`                                  | CI lint+build doesn't need a running Supabase; later slices import typed Row/Insert types directly.                | Plan   |
+| Cross-user-leak verification | pgTAP under `supabase/tests/` via `npm run db:test`                             | Supabase-native; CI-runnable; becomes the regression net every later slice extends.                                | Plan   |
+| DB workflow scripts          | Full `db:start/stop/reset/migrate:new/types/test` set                           | One vocabulary; CLAUDE.md updated once; contributors and CI share the same commands.                               | Plan   |
 
 ## Scope
 
@@ -57,13 +57,13 @@ One migration file containing the entire schema (DDL + RLS in the same file — 
 
 ## Phases at a Glance
 
-| Phase                                       | What it delivers                                                     | Key risk                                                                |
-| ------------------------------------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| 1. Workflow scripts + scaffolding           | `db:*` npm scripts; empty `src/db/` + `supabase/tests/` dirs         | Forgetting `db:test` script means Phase 4's gate can't run              |
-| 2. Schema DDL + seeds                       | Migration creates 3 tables + enum + trigger fn + indexes + seeds     | Computed `duration_seconds` semantics under NULL `ended_at`             |
-| 3. RLS policies (same migration appended)   | 12 per-op policies + `ENABLE ROW LEVEL SECURITY` on all three        | `(SELECT auth.uid())` form vs bare `auth.uid()` — perf-grade            |
-| 4. pgTAP cross-user isolation tests         | 3 test files proving 4-op × 3-role isolation matrix                  | pgTAP role-switching idiom under Supabase is non-obvious                |
-| 5. TypeScript plumbing + final CLAUDE.md    | Committed `database.types.ts`; typed `SupabaseClient<Database>`      | Generated type file merge conflicts on parallel slice work              |
+| Phase                                     | What it delivers                                                 | Key risk                                                     |
+| ----------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------ |
+| 1. Workflow scripts + scaffolding         | `db:*` npm scripts; empty `src/db/` + `supabase/tests/` dirs     | Forgetting `db:test` script means Phase 4's gate can't run   |
+| 2. Schema DDL + seeds                     | Migration creates 3 tables + enum + trigger fn + indexes + seeds | Computed `duration_seconds` semantics under NULL `ended_at`  |
+| 3. RLS policies (same migration appended) | 12 per-op policies + `ENABLE ROW LEVEL SECURITY` on all three    | `(SELECT auth.uid())` form vs bare `auth.uid()` — perf-grade |
+| 4. pgTAP cross-user isolation tests       | 3 test files proving 4-op × 3-role isolation matrix              | pgTAP role-switching idiom under Supabase is non-obvious     |
+| 5. TypeScript plumbing + final CLAUDE.md  | Committed `database.types.ts`; typed `SupabaseClient<Database>`  | Generated type file merge conflicts on parallel slice work   |
 
 **Prerequisites:** Docker running locally (for `supabase start`); `supabase` CLI installed (already a devDep).
 **Estimated effort:** ~1 working session (~3-5 hours) across the 5 phases; bulk of the time is writing the three pgTAP test files in Phase 4.

@@ -1,4 +1,5 @@
 <!-- IMPL-REVIEW-REPORT -->
+
 # Implementation Review: Sessions Data Foundation — table + per-user RLS
 
 - **Plan**: context/changes/sessions-data-foundation/plan.md
@@ -9,14 +10,14 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| Plan Adherence | PASS |
-| Scope Discipline | WARNING |
-| Safety & Quality | PASS |
-| Architecture | PASS |
-| Pattern Consistency | PASS |
-| Success Criteria | PASS |
+| Dimension           | Verdict |
+| ------------------- | ------- |
+| Plan Adherence      | PASS    |
+| Scope Discipline    | WARNING |
+| Safety & Quality    | PASS    |
+| Architecture        | PASS    |
+| Pattern Consistency | PASS    |
+| Success Criteria    | PASS    |
 
 ## Findings
 

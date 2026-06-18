@@ -83,6 +83,7 @@ Establish the developer workflow before writing any schema: `db:*` npm scripts, 
 **Intent**: Add six scripts wrapping the Supabase CLI so contributors and CI use one vocabulary. Each is a thin pass-through.
 
 **Contract**: New entries under `"scripts"`:
+
 - `"db:start": "supabase start"`
 - `"db:stop": "supabase stop"`
 - `"db:reset": "supabase db reset"`
@@ -253,6 +254,7 @@ Write the regression net for the privacy NFR. Three test files under `supabase/t
 **Intent**: Prove the four `sessions` policies behave correctly under two synthetic authenticated users and the anonymous role.
 
 **Contract**: A pgTAP-style SQL script that:
+
 - Creates two test users via `auth.users` (with arbitrary UUIDs, e.g., `'00000000-0000-0000-0000-000000000001'` and `'...0002'`)
 - Inserts one session per user (as service role) to seed data
 - Switches role to `authenticated` and impersonates User A by setting `request.jwt.claims` (the pgTAP idiom is to set the local config); asserts:
@@ -277,6 +279,7 @@ SET LOCAL ROLE authenticated;
 **Intent**: Prove `topics` policies behave correctly, including the NULL-owner default-row semantics.
 
 **Contract**: Same shape as `rls_sessions.sql`, plus extra assertions:
+
 - A NULL-owner row inserted (as service role) is visible to both User A and User B under `SELECT` (the "default visible to everyone" branch of the policy)
 - Neither User A nor User B can `UPDATE` or `DELETE` the NULL-owner row (it has no `owner_id` matching their `auth.uid()`)
 - `anon` cannot SELECT the NULL-owner row either (no policy applies to `anon` role)

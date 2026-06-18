@@ -42,10 +42,10 @@ A solo, after-hours developer shipping a 3-week MVP for a formal-education stude
 
 ## Pre-scaffold verification
 
-| Signal       | Value                                                          | Severity | Notes                                                                                                                  |
-| ------------ | -------------------------------------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| npm package  | not run                                                        | n/a      | cmd_template starts with `git clone` — no npm CLI is invoked at scaffold time, so no package version to read           |
-| GitHub repo  | przeprogramowani/10x-astro-starter last pushed 2026-05-17      | fresh    | from card.docs_url; fetched via unauthenticated `curl` to `api.github.com` (gh CLI was not authenticated in this env)  |
+| Signal      | Value                                                     | Severity | Notes                                                                                                                 |
+| ----------- | --------------------------------------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------- |
+| npm package | not run                                                   | n/a      | cmd_template starts with `git clone` — no npm CLI is invoked at scaffold time, so no package version to read          |
+| GitHub repo | przeprogramowani/10x-astro-starter last pushed 2026-05-17 | fresh    | from card.docs_url; fetched via unauthenticated `curl` to `api.github.com` (gh CLI was not authenticated in this env) |
 
 ## Scaffold log
 
@@ -127,21 +127,21 @@ None.
 
 ## Hints recorded but not acted on
 
-| Hint                       | Value                  |
-| -------------------------- | ---------------------- |
-| bootstrapper_confidence    | first-class            |
-| quality_override           | false                  |
-| path_taken                 | standard               |
-| self_check_answers         | null                   |
-| team_size                  | solo                   |
-| deployment_target          | cloudflare-pages       |
-| ci_provider                | github-actions         |
-| ci_default_flow            | auto-deploy-on-merge   |
-| has_auth                   | true                   |
-| has_payments               | false                  |
-| has_realtime               | false                  |
-| has_ai                     | true                   |
-| has_background_jobs        | false                  |
+| Hint                    | Value                |
+| ----------------------- | -------------------- |
+| bootstrapper_confidence | first-class          |
+| quality_override        | false                |
+| path_taken              | standard             |
+| self_check_answers      | null                 |
+| team_size               | solo                 |
+| deployment_target       | cloudflare-pages     |
+| ci_provider             | github-actions       |
+| ci_default_flow         | auto-deploy-on-merge |
+| has_auth                | true                 |
+| has_payments            | false                |
+| has_realtime            | false                |
+| has_ai                  | true                 |
+| has_background_jobs     | false                |
 
 These hints were carried through from the hand-off but bootstrapper v1 does not act on them (no CI scaffolding, no auth wiring, no feature-flag-driven template branching). They are recorded here for the future M1L4 ("Memory Architecture") skill to consume.
 
