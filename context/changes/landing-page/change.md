@@ -1,7 +1,7 @@
 ---
 change_id: landing-page
 title: Landing page — hero, value prop, sign-up CTA
-status: implementing
+status: implemented
 created: 2026-06-18
 updated: 2026-06-18
 archived_at: null

@@ -371,20 +371,20 @@ None. Content-only change to one component + a 3-line middleware extension.
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Build passes: `npm run build`
-- [x] 3.3 Format check passes: `npm run format`
-- [x] 3.4 Grep gate: no `blue-N/purple-N/indigo-N/pink-N` utilities in src/ (Google brand SVG hex fills allowed)
+- [x] 3.1 Lint passes: `npm run lint` — 39fb099
+- [x] 3.2 Build passes: `npm run build` — 39fb099
+- [x] 3.3 Format check passes: `npm run format` — 39fb099
+- [x] 3.4 Grep gate: no `blue-N/purple-N/indigo-N/pink-N` utilities in src/ (Google brand SVG hex fills allowed) — 39fb099
 
 #### Manual
 
-- [x] 3.5 Landing `/` renders new palette; no visible blue/purple/pink anywhere
-- [x] 3.6 Hero headline gradient reads off-white → orange/red
-- [x] 3.7 Cosmic orbs read as warm reds/oranges, still soft glows
-- [x] 3.8 Primary CTA hover shifts Neon Red → Blaze Orange
-- [x] 3.9 Topbar matches new palette
-- [x] 3.10 Sign in / Sign up / Confirm email pages all use the new palette consistently
-- [x] 3.11 Dashboard uses the new palette
-- [x] 3.12 Form fields, error state, submit button colors match palette
-- [x] 3.13 Google "Continue with" logo retains its official brand colors
-- [x] 3.14 DevTools console clean
+- [x] 3.5 Landing `/` renders new palette; no visible blue/purple/pink anywhere — 39fb099
+- [x] 3.6 Hero headline gradient reads off-white → orange/red — 39fb099
+- [x] 3.7 Cosmic orbs read as warm reds/oranges, still soft glows — 39fb099
+- [x] 3.8 Primary CTA hover shifts Neon Red → Blaze Orange — 39fb099
+- [x] 3.9 Topbar matches new palette — 39fb099
+- [x] 3.10 Sign in / Sign up / Confirm email pages all use the new palette consistently — 39fb099
+- [x] 3.11 Dashboard uses the new palette — 39fb099
+- [x] 3.12 Form fields, error state, submit button colors match palette — 39fb099
+- [x] 3.13 Google "Continue with" logo retains its official brand colors — 39fb099
+- [x] 3.14 DevTools console clean — 39fb099
