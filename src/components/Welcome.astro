@@ -1,19 +1,25 @@
 ---
+import { Image } from "astro:assets";
 import Topbar from "@/components/Topbar.astro";
+import heroImage from "@/assets/hero.png";
 ---
 
 <div class="bg-cosmic relative min-h-screen w-full overflow-hidden">
+  <!-- Hero background image -->
+  <Image
+    src={heroImage}
+    alt=""
+    loading="eager"
+    class="pointer-events-none absolute inset-0 z-0 h-full w-full object-cover opacity-30"
+  />
+
   <!-- Cosmic orbs -->
-  <div
-    class="pointer-events-none absolute top-1/4 -left-24 h-[350px] w-[350px] rounded-full bg-purple-500/20 blur-[120px]"
-  >
+  <div class="bg-neon/20 pointer-events-none absolute top-1/4 -left-24 h-[350px] w-[350px] rounded-full blur-[120px]">
+  </div>
+  <div class="bg-blaze/15 pointer-events-none absolute top-2/3 -right-16 h-[250px] w-[250px] rounded-full blur-[100px]">
   </div>
   <div
-    class="pointer-events-none absolute top-2/3 -right-16 h-[250px] w-[250px] rounded-full bg-blue-500/15 blur-[100px]"
-  >
-  </div>
-  <div
-    class="pointer-events-none absolute top-0 left-1/2 h-[300px] w-[300px] -translate-x-1/2 rounded-full bg-indigo-400/10 blur-[140px]"
+    class="bg-spark/10 pointer-events-none absolute top-0 left-1/2 h-[300px] w-[300px] -translate-x-1/2 rounded-full blur-[140px]"
   >
   </div>
 
@@ -30,30 +36,31 @@ import Topbar from "@/components/Topbar.astro";
     <!-- Hero section -->
     <div class="mx-auto flex max-w-4xl flex-col items-center justify-center px-4 py-24 text-center sm:py-32 lg:py-40">
       <h1
-        class="mb-6 bg-gradient-to-r from-blue-200 via-purple-200 to-pink-200 bg-clip-text text-5xl leading-tight font-bold text-transparent sm:text-6xl lg:text-7xl"
+        class="from-off-white via-blaze to-spark mb-6 bg-gradient-to-r bg-clip-text text-5xl leading-tight font-bold text-transparent sm:text-6xl lg:text-7xl"
       >
-        PomoSapiens
+        Find the focus that fits you.
       </h1>
-      <p class="mb-10 max-w-2xl text-lg text-blue-100/70 sm:text-xl">Coming soon!</p>
-      <div class="flex flex-col gap-4 sm:flex-row">
-        <a
-          href="/auth/signin"
-          class="inline-flex items-center justify-center rounded-lg bg-purple-600 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-purple-500"
-        >
-          Sign In
-        </a>
+      <p class="text-off-white/70 mb-10 max-w-2xl text-lg sm:text-xl">
+        PomoSapiens turns every focus session into a data point. Capture your energy, time of day, material format, and
+        topic before you start — then learn which combinations actually produce your best work.
+      </p>
+      <div class="flex flex-col items-center gap-3">
         <a
           href="/auth/signup"
-          class="inline-flex items-center justify-center rounded-lg border border-white/20 px-6 py-3 text-base font-medium text-white transition-colors hover:bg-white/10"
+          class="bg-neon text-off-white hover:bg-blaze inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors"
         >
           Sign Up
         </a>
+        <p class="text-off-white/60 text-sm">
+          Already have an account?
+          <a href="/auth/signin" class="text-spark underline-offset-4 hover:underline">Sign in</a>
+        </p>
       </div>
     </div>
 
     <!-- Feature cards -->
     <div class="mx-auto grid max-w-4xl grid-cols-1 gap-6 px-4 pb-24 sm:grid-cols-3">
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+      <div class="border-charred bg-ember rounded-xl border p-6 backdrop-blur-xl">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -64,18 +71,19 @@ import Topbar from "@/components/Topbar.astro";
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="mb-4 text-purple-300"
+          class="text-blaze mb-4"
         >
-          <rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"></path>
+          <path d="M9 11V5a3 3 0 0 1 6 0v6"></path>
+          <line x1="12" y1="15" x2="12" y2="18"></line>
         </svg>
-        <h3 class="mb-2 text-lg font-semibold text-white">Authentication Ready</h3>
-        <p class="text-sm leading-relaxed text-blue-100/60">
-          Built-in Supabase auth with sign in, sign up, and protected routes out of the box.
+        <h3 class="text-off-white mb-2 text-lg font-semibold">Capture context, not just time</h3>
+        <p class="text-off-white/60 text-sm leading-relaxed">
+          Log energy, time of day, material format, and topic in seconds — before each session, while it still matters.
         </p>
       </div>
 
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+      <div class="border-charred bg-ember rounded-xl border p-6 backdrop-blur-xl">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -86,19 +94,19 @@ import Topbar from "@/components/Topbar.astro";
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="mb-4 text-purple-300"
+          class="text-blaze mb-4"
         >
-          <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-          <polyline points="2 17 12 22 22 17"></polyline>
-          <polyline points="2 12 12 17 22 12"></polyline>
+          <polygon
+            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+          ></polygon>
         </svg>
-        <h3 class="mb-2 text-lg font-semibold text-white">Modern Stack</h3>
-        <p class="text-sm leading-relaxed text-blue-100/60">
-          Astro 5, React 19, Tailwind 4, and TypeScript — the latest tools, ready to go.
+        <h3 class="text-off-white mb-2 text-lg font-semibold">Rate the session honestly</h3>
+        <p class="text-off-white/60 text-sm leading-relaxed">
+          A single self-rated focus score after each Pomodoro — fast enough to actually do, rich enough to compare.
         </p>
       </div>
 
-      <div class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+      <div class="border-charred bg-ember rounded-xl border p-6 backdrop-blur-xl">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -109,14 +117,14 @@ import Topbar from "@/components/Topbar.astro";
           stroke-width="2"
           stroke-linecap="round"
           stroke-linejoin="round"
-          class="mb-4 text-purple-300"
+          class="text-blaze mb-4"
         >
-          <polyline points="16 18 22 12 16 6"></polyline>
-          <polyline points="8 6 2 12 8 18"></polyline>
+          <line x1="3" y1="20" x2="21" y2="20"></line>
+          <polyline points="3 16 8 11 12 14 17 8 21 12"></polyline>
         </svg>
-        <h3 class="mb-2 text-lg font-semibold text-white">Developer Experience</h3>
-        <p class="text-sm leading-relaxed text-blue-100/60">
-          ESLint, Prettier, and pre-commit hooks keep your codebase clean from day one.
+        <h3 class="text-off-white mb-2 text-lg font-semibold">See your own patterns</h3>
+        <p class="text-off-white/60 text-sm leading-relaxed">
+          Discover which contexts correlate with your best focus — not someone else's productivity advice.
         </p>
       </div>
     </div>

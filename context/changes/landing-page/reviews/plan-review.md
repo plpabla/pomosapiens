@@ -1,4 +1,5 @@
 <!-- PLAN-REVIEW-REPORT -->
+
 # Plan Review: Landing Page Implementation Plan
 
 - **Plan**: context/changes/landing-page/plan.md
@@ -9,13 +10,13 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| End-State Alignment | PASS |
-| Lean Execution | PASS |
-| Architectural Fitness | PASS |
-| Blind Spots | PASS |
-| Plan Completeness | PASS (1 observation) |
+| Dimension             | Verdict              |
+| --------------------- | -------------------- |
+| End-State Alignment   | PASS                 |
+| Lean Execution        | PASS                 |
+| Architectural Fitness | PASS                 |
+| Blind Spots           | PASS                 |
+| Plan Completeness     | PASS (1 observation) |
 
 ## Grounding
 

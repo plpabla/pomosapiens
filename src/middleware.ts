@@ -2,6 +2,7 @@ import { defineMiddleware } from "astro:middleware";
 import { createClient } from "@/lib/supabase";
 
 const PROTECTED_ROUTES = ["/dashboard"];
+const AUTHED_REDIRECTS: Record<string, string> = { "/": "/dashboard" };
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const supabase = createClient(context.request.headers, context.cookies);
@@ -13,6 +14,13 @@ export const onRequest = defineMiddleware(async (context, next) => {
     context.locals.user = user ?? null;
   } else {
     context.locals.user = null;
+  }
+
+  if (context.locals.user) {
+    const target = AUTHED_REDIRECTS[context.url.pathname];
+    if (target) {
+      return context.redirect(target);
+    }
   }
 
   if (PROTECTED_ROUTES.some((route) => context.url.pathname.startsWith(route))) {

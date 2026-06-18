@@ -16,25 +16,27 @@ Anonymous visitors at `/` see a persona-direct headline (e.g. "Learn which study
 
 ## Key Decisions Made
 
-| Decision                    | Choice                                              | Why (1 sentence)                                                                          | Source |
-| --------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------- | ------ |
-| Hero angle                  | Persona-direct claim                                | Names the persona's pain (decision paralysis at session start); matches PRD Vision tone   | Plan   |
-| Below-hero layout           | 3 wedge-specific cards                              | Reuses the existing glassmorphic card grid — zero structural work, only copy changes      | Plan   |
-| CTA hierarchy               | Sign Up primary, Sign In secondary text link        | Landing is the acquisition surface; new visitors should be funneled to Sign Up            | Plan   |
-| Authed-`/` redirect         | Middleware `AUTHED_REDIRECTS` map (`/`→`/dashboard`) | Mirrors the existing `PROTECTED_ROUTES` pattern; symmetric primitive for future routes   | Plan   |
-| Scope freeze                | Marketing extras + analytics tracking explicitly out| Matches the roadmap's named risk and PRD privacy NFR                                      | Plan   |
-| Animations / illustrations  | No motion beyond hover, no hero illustration in v1  | PRD Non-Goal #3 forbids AI-generated animations; static cosmic theme remains              | Plan   |
-| `Welcome.astro` vs inline   | Edit `Welcome.astro` in place                       | Surgical-changes principle; single-call-site refactor not justified by this slice         | Plan   |
-| Graphic asset locations     | `public/` for URL-referenced; `src/assets/` for `<Image>`-optimized | Astro convention; S-00 ships no images but documents the pattern for follow-ups | Plan   |
+| Decision                   | Choice                                                              | Why (1 sentence)                                                                        | Source |
+| -------------------------- | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- | ------ |
+| Hero angle                 | Persona-direct claim                                                | Names the persona's pain (decision paralysis at session start); matches PRD Vision tone | Plan   |
+| Below-hero layout          | 3 wedge-specific cards                                              | Reuses the existing glassmorphic card grid — zero structural work, only copy changes    | Plan   |
+| CTA hierarchy              | Sign Up primary, Sign In secondary text link                        | Landing is the acquisition surface; new visitors should be funneled to Sign Up          | Plan   |
+| Authed-`/` redirect        | Middleware `AUTHED_REDIRECTS` map (`/`→`/dashboard`)                | Mirrors the existing `PROTECTED_ROUTES` pattern; symmetric primitive for future routes  | Plan   |
+| Scope freeze               | Marketing extras + analytics tracking explicitly out                | Matches the roadmap's named risk and PRD privacy NFR                                    | Plan   |
+| Animations / illustrations | No motion beyond hover, no hero illustration in v1                  | PRD Non-Goal #3 forbids AI-generated animations; static cosmic theme remains            | Plan   |
+| `Welcome.astro` vs inline  | Edit `Welcome.astro` in place                                       | Surgical-changes principle; single-call-site refactor not justified by this slice       | Plan   |
+| Graphic asset locations    | `public/` for URL-referenced; `src/assets/` for `<Image>`-optimized | Astro convention; S-00 ships no images but documents the pattern for follow-ups         | Plan   |
 
 ## Scope
 
 **In scope:**
+
 - Rewrite `src/components/Welcome.astro` hero + card copy + CTA hierarchy
 - Add `AUTHED_REDIRECTS` map and redirect logic to `src/middleware.ts`
 - One-sentence `CLAUDE.md` note documenting the new routing primitive
 
 **Out of scope:**
+
 - Marketing extras (FAQ, testimonials, social proof, screenshots beyond the 3 value cards)
 - Analytics tracking, telemetry, A/B testing
 - Animations, illustrations, AI-generated visuals
@@ -48,9 +50,9 @@ One Astro component edit + one middleware extension. The middleware change adds 
 
 ## Phases at a Glance
 
-| Phase                                  | What it delivers                                                                                                            | Key risk                                                                                          |
-| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| 1. Landing page + authed-visitor redirect | Wedge-named landing page, primary Sign Up funnel, `AUTHED_REDIRECTS` middleware, one-sentence `CLAUDE.md` note               | Scope creep — adding a marketing surface, analytics, or illustration would break the freeze       |
+| Phase                                     | What it delivers                                                                                               | Key risk                                                                                    |
+| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| 1. Landing page + authed-visitor redirect | Wedge-named landing page, primary Sign Up funnel, `AUTHED_REDIRECTS` middleware, one-sentence `CLAUDE.md` note | Scope creep — adding a marketing surface, analytics, or illustration would break the freeze |
 
 **Prerequisites:** None. F-01 is independent (DB-only); auth is already shipped per Baseline.
 **Estimated effort:** One session (1-2 hours) for copy + middleware + manual verification.
