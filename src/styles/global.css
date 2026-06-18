@@ -3,26 +3,40 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Focus Fuels Greatness palette — see context/foundation/color_palette.md */
+@theme {
+  --color-void: #0d0d0f;
+  --color-ember: #1a0a08;
+  --color-charred: #2a1a18;
+  --color-crimson: #4a2020;
+  --color-neon: #c0190d;
+  --color-blaze: #e8320a;
+  --color-spark: #ff5722;
+  --color-off-white: #f5f0eb;
+  --color-ash: #3d3830;
+  --color-leaf: #2d5a1b;
+}
+
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: #0d0d0f;
+  --foreground: #f5f0eb;
+  --card: #1a0a08;
+  --card-foreground: #f5f0eb;
+  --popover: #1a0a08;
+  --popover-foreground: #f5f0eb;
+  --primary: #c0190d;
+  --primary-foreground: #f5f0eb;
+  --secondary: #2a1a18;
+  --secondary-foreground: #f5f0eb;
+  --muted: #2a1a18;
+  --muted-foreground: #3d3830;
+  --accent: #e8320a;
+  --accent-foreground: #f5f0eb;
+  --destructive: #ff5722;
+  --border: #2a1a18;
+  --input: #2a1a18;
+  --ring: #e8320a;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -111,7 +125,7 @@
 }
 
 @utility bg-cosmic {
-  background-image: linear-gradient(to bottom, #0a0e1a, #0f1529, #0a0e1a);
+  background-image: linear-gradient(to bottom, #0d0d0f, #1a0a08, #0d0d0f);
 }
 
 @layer base {

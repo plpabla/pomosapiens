@@ -353,19 +353,19 @@ None. Content-only change to one component + a 3-line middleware extension.
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Build passes: `npm run build`
-- [x] 2.3 Format check passes: `npm run format`
+- [x] 2.1 Lint passes: `npm run lint` — e3efccd
+- [x] 2.2 Build passes: `npm run build` — e3efccd
+- [x] 2.3 Format check passes: `npm run format` — e3efccd
 
 #### Manual
 
-- [x] 2.4 Landing page renders hero PNG as full-bleed background behind orbs/starfield
-- [x] 2.5 Hero headline, subhead, and CTAs remain legible against the image
-- [x] 2.6 Topbar shows icon mark to the left of the email / "Not signed in" label
-- [x] 2.7 DevTools Network shows a WebP/AVIF variant served for the hero image (not raw PNG)
-- [x] 2.8 Topbar layout works on mobile (icon + text left, auth links right, no overflow)
-- [x] 2.9 `public/hero.png` and `public/icon.png` removed; `src/assets/hero.png` and `src/assets/icon.png` present
-- [x] 2.10 Browser DevTools console shows no errors
+- [x] 2.4 Landing page renders hero PNG as full-bleed background behind orbs/starfield — e3efccd
+- [x] 2.5 Hero headline, subhead, and CTAs remain legible against the image — e3efccd
+- [x] 2.6 Topbar shows icon mark to the left of the email / "Not signed in" label — e3efccd
+- [x] 2.7 DevTools Network shows a WebP/AVIF variant served for the hero image (not raw PNG) — e3efccd
+- [x] 2.8 Topbar layout works on mobile (icon + text left, auth links right, no overflow) — e3efccd
+- [x] 2.9 `public/hero.png` and `public/icon.png` removed; `src/assets/hero.png` and `src/assets/icon.png` present — e3efccd
+- [x] 2.10 Browser DevTools console shows no errors — e3efccd
 
 ### Phase 3: Apply Focus Fuels Greatness color palette globally
 

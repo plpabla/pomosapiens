@@ -84,14 +84,14 @@ export default function SignInForm({ serverError }: Props) {
       </SubmitButton>
 
       <div className="relative my-2 flex items-center">
-        <div className="flex-1 border-t border-white/20" />
-        <span className="mx-3 text-xs text-blue-100/40">or</span>
-        <div className="flex-1 border-t border-white/20" />
+        <div className="border-charred flex-1 border-t" />
+        <span className="text-ash mx-3 text-xs">or</span>
+        <div className="border-charred flex-1 border-t" />
       </div>
 
       <a
         href="/api/auth/oauth"
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-white/5 px-4 py-2 text-sm text-white transition hover:bg-white/10"
+        className="border-charred bg-ember text-off-white hover:bg-charred flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2 text-sm transition"
       >
         <svg className="size-4" viewBox="0 0 24 24" aria-hidden="true">
           <path
