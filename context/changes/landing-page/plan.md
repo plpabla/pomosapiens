@@ -249,6 +249,7 @@ Replace the inherited cosmic purple/blue/pink palette with the warm dark red/emb
 - `FormField.tsx`: `bg-white/10` input → `bg-charred`; `text-white placeholder-white/40` → `text-off-white placeholder-ash`; `text-blue-100/80` label → `text-off-white/80`; focus ring `focus:ring-red-400` (error) → `focus:ring-spark`, `focus:ring-purple-400` (default) → `focus:ring-blaze`; `border-red-400/60` (error) → `border-spark`; `border-white/20` → `border-charred`; error text `text-red-300` → `text-spark`.
 - `PasswordToggle.tsx`: `text-white/40 hover:text-white/70` → `text-ash hover:text-off-white`.
 - `SubmitButton.tsx`: `bg-purple-600 hover:bg-purple-500` → `bg-neon hover:bg-blaze`; spinner `border-white/30 border-t-white` → `border-off-white/30 border-t-off-white`; `text-white` → `text-off-white`.
+- **Addendum (post-implementation)**: `src/components/Banner.astro` and `src/components/ui/LibBadge.astro` were also swept in p3 — required to keep the §3 grep gate green. Pure color swap, no behavior change.
 
 #### 4. Tomato Leaf accent — wire success path
 
