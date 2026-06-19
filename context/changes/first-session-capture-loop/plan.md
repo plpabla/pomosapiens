@@ -513,17 +513,17 @@ If for any reason `src/db/database.types.ts` is regenerated during S-01 developm
 
 #### Automated
 
-- [x] 5.1 `npm run lint` exits 0
-- [x] 5.2 `npm run build` exits 0
-- [x] 5.3 `npm run db:test` exits 0 (all pgTAP assertions pass)
+- [x] 5.1 `npm run lint` exits 0 — 8a7b90e
+- [x] 5.2 `npm run build` exits 0 — 8a7b90e
+- [x] 5.3 `npm run db:test` exits 0 (all pgTAP assertions pass) — 8a7b90e
 
 #### Manual
 
-- [x] 5.4 Golden path complete end-to-end run, performed and confirmed
-- [x] 5.5 60 s tab-backgrounding resilience verified mid-session
-- [x] 5.6 Manual stop early records actual elapsed `duration_seconds` (FR-012)
-- [x] 5.7 Skip-rating persists `focus_rating IS NULL`; dashboard renders "Skipped"
-- [x] 5.8 Cross-browser desktop golden path passes on Chrome + Safari + Firefox
-- [x] 5.9 Mobile golden path passes on iOS Safari + Android Chrome
-- [x] 5.10 Cross-user isolation verified — second user cannot view first user's `/session/<id>`
-- [x] 5.11 `lessons.md` either has new lesson(s) appended or the PR notes why none captured
+- [x] 5.4 Golden path complete end-to-end run, performed and confirmed — 8a7b90e
+- [x] 5.5 60 s tab-backgrounding resilience verified mid-session — 8a7b90e
+- [x] 5.6 Manual stop early records actual elapsed `duration_seconds` (FR-012) — 8a7b90e
+- [x] 5.7 Skip-rating persists `focus_rating IS NULL`; dashboard renders "Skipped" — 8a7b90e
+- [x] 5.8 Cross-browser desktop golden path passes on Chrome + Safari + Firefox — 8a7b90e
+- [x] 5.9 Mobile golden path passes on iOS Safari + Android Chrome — 8a7b90e
+- [x] 5.10 Cross-user isolation verified — second user cannot view first user's `/session/<id>` — 8a7b90e
+- [x] 5.11 `lessons.md` either has new lesson(s) appended or the PR notes why none captured — 8a7b90e
