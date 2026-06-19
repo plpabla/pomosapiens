@@ -476,23 +476,23 @@ If for any reason `src/db/database.types.ts` is regenerated during S-01 developm
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `npm run build`
-- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.1 Type checking passes: `npm run build` — acfc811
+- [x] 3.2 Linting passes: `npm run lint` — acfc811
 
 #### Manual
 
-- [ ] 3.3 Unauthenticated `/session/new` redirects to `/auth/signin`
-- [ ] 3.4 Three energy buttons render with selected state; Start disabled until one is picked
-- [ ] 3.5 Tapping Start with `medium` creates a row with correct `user_id`, `energy_level`, `started_at`; navigates to `/session/<id>`
-- [ ] 3.6 Network failure shows inline error and re-enables Start
+- [x] 3.3 Unauthenticated `/session/new` redirects to `/auth/signin`
+- [x] 3.4 Three energy buttons render with selected state; Start disabled until one is picked
+- [x] 3.5 Tapping Start with `medium` creates a row with correct `user_id`, `energy_level`, `started_at`; navigates to `/session/<id>`
+- [x] 3.6 Network failure shows inline error and re-enables Start
 
 ### Phase 4: Active session page + timer + chime + rating
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `npm run build`
-- [ ] 4.2 Linting passes: `npm run lint`
-- [ ] 4.3 Chime asset present at `public/audio/chime.mp3`
+- [x] 4.1 Type checking passes: `npm run build`
+- [x] 4.2 Linting passes: `npm run lint`
+- [x] 4.3 Chime asset present at `public/audio/chime.mp3`
 
 #### Manual
 

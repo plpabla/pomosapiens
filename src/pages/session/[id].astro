@@ -1,0 +1,50 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import SessionRunner from "@/components/session/SessionRunner";
+import { createClient } from "@/lib/supabase";
+
+const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect("/dashboard");
+}
+
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+if (!supabase) {
+  return Astro.redirect("/dashboard");
+}
+
+const { user } = Astro.locals;
+if (!user) {
+  return Astro.redirect("/auth/signin");
+}
+
+const { data, error } = await supabase
+  .from("sessions")
+  .select("id, started_at, ended_at, energy_level")
+  .eq("id", id)
+  .eq("user_id", user.id)
+  .maybeSingle();
+
+if (error || !data) {
+  return Astro.redirect("/dashboard");
+}
+
+if (data.ended_at !== null) {
+  return Astro.redirect("/dashboard");
+}
+
+const FOCUS_PRESET_SECONDS = 25 * 60;
+const ageMs = Date.now() - new Date(data.started_at).getTime();
+if (ageMs > 2 * FOCUS_PRESET_SECONDS * 1000) {
+  return Astro.redirect("/dashboard");
+}
+
+const startedAtMs = new Date(data.started_at).getTime();
+---
+
+<Layout title="Session">
+  <div class="bg-cosmic min-h-screen">
+    <SessionRunner sessionId={data.id} startedAtMs={startedAtMs} focusSeconds={FOCUS_PRESET_SECONDS} client:load />
+  </div>
+</Layout>
