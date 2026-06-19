@@ -35,6 +35,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format           | S-01          | FR-007, FR-008, FR-017                                | proposed |
 | S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session     | S-01          | FR-004, FR-005, FR-010                                | proposed |
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time | S-01          | FR-014, FR-016                                        | proposed |
+| S-05 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01    | FR-018                                                | proposed |
 
 ## Baseline
 
@@ -131,6 +132,20 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Risk:** Lowest-risk slice. The chart needs enough sessions to be meaningful, so v1 value scales with log depth — PRD acknowledges this in the Secondary criterion phrasing ("leading indicator"). If the calendar tightens, this is the slice to thin (drop FR-014 — it's the only nice-to-have FR in v1) or Park.
 - **Status:** proposed
 
+### S-05: Tab title live timer
+
+- **Outcome:** User sees the current timer value (countdown for preset sessions, count-up for open-ended sessions) reflected in the browser tab title while a session is active, so they can monitor time from the OS taskbar or a tab strip without switching focus to the app.
+- **Change ID:** `tab-title-timer`
+- **PRD refs:** FR-018 (tab title timer, nice-to-have), FR-011 (visible countdown -- parent timer capability this extends).
+- **Prerequisites:** S-01
+- **Parallel with:** S-02, S-03, S-04
+- **Blockers:** --
+- **Unknowns:**
+  - Title format while running -- e.g. `[25:00] PomoSapiens` vs `Focus 25:00 | PomoSapiens` -- and whether to show a distinct label during the break phase. -- Owner: project author. Block: no.
+  - Whether the title restores to its default value on session end, on early stop (FR-012), and on page navigation away from the timer. -- Owner: implementer. Block: no.
+- **Risk:** Pure client-side work (document.title updated in a React useEffect inside the running timer component). The only realistic failure mode is forgetting to clean up the effect on unmount, leaving a stale time string in the tab after the session ends. No backend changes; no new schema; no new routes.
+- **Status:** proposed
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                          | Suggested issue title                                         | Ready for `/10x-plan` | Notes                               |
@@ -141,6 +156,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Waits on S-01                       |
 | S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Waits on S-01                       |
 | S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                       |
+| S-05       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Waits on S-01                       |
 
 ## Open Roadmap Questions
 
