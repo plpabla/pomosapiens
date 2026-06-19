@@ -1,6 +1,7 @@
-chime.mp3 — Free Sounds Library (https://www.freesoundslibrary.com)
-License: CC BY-NC 4.0 (https://creativecommons.org/licenses/by-nc/4.0/)
-Attribution: Free Sounds Library
+"Free Sounds Library"
 
-Note: CC BY-NC 4.0 permits non-commercial use with attribution. Replace with a
-CC0 or commercially licensed chime if PomoSapiens is used commercially.
+Free Sound Effects Site.
+
+Licence: License: Attribution 4.0 International (CC BY 4.0). You are allowed to use sound effects free of charge and royalty free in your multimedia projects for commercial or non-commercial purposes.
+
+http://www.freesoundslibrary.com
