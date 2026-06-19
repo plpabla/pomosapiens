@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import Banner from "@/components/Banner.astro";
+import Topbar from "@/components/Topbar.astro";
 import { missingConfigs } from "@/lib/config-status";
 
 interface Props {
@@ -35,6 +36,7 @@ const { title = "PomoSapiens" } = Astro.props;
         </Banner>
       ))
     }
+    {Astro.locals.user && <Topbar />}
     <slot />
   </body>
 </html>

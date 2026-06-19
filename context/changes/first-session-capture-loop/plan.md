@@ -22,6 +22,7 @@ Build the north-star wedge end-to-end: a signed-in student taps **Start session*
 ## Desired End State
 
 A signed-in user can:
+
 1. Land on `/dashboard`, see the **Start session** CTA and (if they've logged any) a chronological history list with each session's started-at timestamp, energy level, duration, and focus rating (or "skipped").
 2. Tap Start, land on `/session/new`, pick one of Low / Medium / High (the picker tap counts as the audio-priming user gesture), tap **Start**, and arrive on `/session/[id]` with the timer counting down from 25:00.
 3. Continue using the laptop normally — switch tabs, lock the screen for 30 seconds, return — and see the timer's remaining time correctly reconciled from `started_at` against the wall clock.
@@ -52,13 +53,13 @@ Verifiable by `npm run lint && npm run build && npm run db:test` plus the manual
 4. **Active session page + timer + chime + rating** — closes the write half of the loop (`PATCH /api/sessions/[id]`); the user can now run a complete session.
 5. **End-to-end verification + lessons sync** — full manual run-through, including the resilience and skip-rating edge cases; harvest lessons from the slice.
 
-The plan favors **server-stored `started_at` + wall-clock reconcile** for timer resilience: the `Date.now() - startedAtMs` calculation runs in the React island on every animation-frame tick *and* on `visibilitychange`, deriving remaining time from a stable server-side anchor. This means INSERT happens at session start (a "running" row exists in the DB until the user rates) — acceptable since DELETE is denied; a never-rated row just stays as a NULL `ended_at`, NULL `focus_rating` row that the user can leave behind without harm.
+The plan favors **server-stored `started_at` + wall-clock reconcile** for timer resilience: the `Date.now() - startedAtMs` calculation runs in the React island on every animation-frame tick _and_ on `visibilitychange`, deriving remaining time from a stable server-side anchor. This means INSERT happens at session start (a "running" row exists in the DB until the user rates) — acceptable since DELETE is denied; a never-rated row just stays as a NULL `ended_at`, NULL `focus_rating` row that the user can leave behind without harm.
 
 ## Critical Implementation Details
 
 - **Audio autoplay policy (two-stage prime — both stages required).** Cross-document user-activation is not reliably carried across `window.location.assign` (Safari is strict, Chrome depends on MEI). The plan therefore primes audio **twice**:
   - **Stage 1 — same-document warm on `/session/new`'s Start click handler.** Before navigating, construct `new Audio('/audio/chime.mp3')`, set `muted = true`, call `.play()` then `.pause()` (resolved or rejected — warming the resource is still useful). This raises Chrome's MEI for the origin and primes the asset cache.
-  - **Stage 2 — first-render warm on `SessionRunner` mount (load-bearing for Safari).** Inside `SessionRunner`'s first `useEffect`, construct the focus-end `Audio` reference *immediately* and run the same muted `.play()` / `.pause()` warm-up. Because the document loaded in direct response to the Start click (same-origin navigation), most browsers — including Safari — count this as a "user-gesture-initiated load" and grant activation for the muted warm-up; the subsequent unmuted `.play()` at focus-end then succeeds on the *same* document that received the gesture. Store the warmed `Audio` reference in a ref so focus-end calls `audioRef.current.play()` rather than constructing a new element.
+  - **Stage 2 — first-render warm on `SessionRunner` mount (load-bearing for Safari).** Inside `SessionRunner`'s first `useEffect`, construct the focus-end `Audio` reference _immediately_ and run the same muted `.play()` / `.pause()` warm-up. Because the document loaded in direct response to the Start click (same-origin navigation), most browsers — including Safari — count this as a "user-gesture-initiated load" and grant activation for the muted warm-up; the subsequent unmuted `.play()` at focus-end then succeeds on the _same_ document that received the gesture. Store the warmed `Audio` reference in a ref so focus-end calls `audioRef.current.play()` rather than constructing a new element.
   - **Verify on Chrome, Safari, Firefox** — Safari is the strictest. If even the Stage-2 prime is blocked on a target browser, the rating view still appears (the chime is fail-open via `.catch`) but the NFR is violated and the implementer must escalate.
 - **Column-scope discipline on PATCH.** RLS allows the owner to mutate any column; the API layer enforces the slice rule. `endSessionSchema` accepts exactly two writable fields: `focus_rating` (1-5 or null for Skip) and `ended_at` (client-snapshotted ISO datetime at the phase-transition tick — see "FR-012 fidelity" below). Server validates `ended_at` is within `[now() - 2h, now() + 5s]` before writing; out-of-range → 400. No other columns are mutable from this endpoint. Combined with the `.is("ended_at", null)` only-if-still-running guard, the row is writable exactly once. This implements the lesson "RLS policies must enforce business-rule immutability, not the UI" that F-01's impl-review codified (research §2).
 - **FR-012 fidelity — client-snapshotted `ended_at`.** `SessionRunner` captures `stoppedAtMs = Date.now()` at the moment of phase transition (focus-end auto OR Stop-early click), stashes it in component state, and sends it as `new Date(stoppedAtMs).toISOString()` in the rating PATCH. The user may take 10-60 s on the rating view; that delay must not pollute `duration_seconds` (FR-012: "the partial elapsed time is recorded as the session's actual duration"). The small trust delegation (client picks the timestamp the DB writes) is bounded by the server's plausibility window; the user can only cheat their own data.
@@ -163,6 +164,7 @@ Make the dashboard real: install the `card` primitive, extend `Layout.astro` so 
 **Contract**: Use `<Layout title="Dashboard">` (Topbar auto-mounts). In the frontmatter, call `createClient(Astro.request.headers, Astro.cookies)`; if null, render a banner saying Supabase is not configured (mirror auth-page pattern); else `supabase.from("sessions").select("id, started_at, energy_level, duration_seconds, focus_rating, ended_at").eq("user_id", user.id).order("started_at", { ascending: false }).limit(50)`. Type the response as the generated `Tables<"sessions">` row.
 
 Markup outline (no code snippet; describe the structure):
+
 - Outer `bg-cosmic min-h-screen p-4` container, max-width inner column.
 - Top: an `<a href="/session/new">` rendered as the primary CTA (use the existing shadcn `Button` `asChild` pattern with the `bg-ember`/`bg-blaze` palette; mirror `Topbar.astro:19-22` styling for color tokens). Label: "Start session". Position prominently — this is the ≤ 3-tap path.
 - Below: a heading "History" and either:
@@ -338,6 +340,7 @@ Run the golden path under the actual NFR/Guardrail conditions, confirm everythin
 **Intent**: One end-to-end pass through the loop the PRD's user story describes, performed as the persona (a logged-in student with no prior session history, then with one).
 
 **Contract**: Verify in order:
+
 - Sign in fresh (or use a clean test account).
 - Hit `/dashboard`: empty-state history visible, Start CTA prominent.
 - Tap Start → `/session/new` loads in well under 200 ms (NFR "User-perceived responsiveness").
@@ -365,6 +368,7 @@ Run the golden path under the actual NFR/Guardrail conditions, confirm everythin
 **Intent**: F-01's impl-review codified "RLS policies must enforce business-rule immutability, not the UI" but it never landed in `lessons.md` (research §2 flagged this drift). If the implementer encounters the same trap during S-01 (or any other recurring pattern emerges — e.g. the audio-priming user-gesture rule, the wall-clock-reconcile pattern), add it now.
 
 **Contract**: Append-only addition to `context/foundation/lessons.md` using the existing convention. Candidates if encountered:
+
 - The RLS+API column-scope-discipline rule from F-01 (overdue from research §2).
 - "Audio playback requires a user-gesture prime on the same page; prime during the click handler that creates the session, not on the page where the audio fires."
 - "Timers in browsers must derive remaining time from a stable server-side anchor (`started_at`) on every tick — never decrement a local counter — to survive backgrounding."
@@ -440,33 +444,33 @@ If for any reason `src/db/database.types.ts` is regenerated during S-01 developm
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `npm run build`
-- [ ] 1.2 Linting passes: `npm run lint`
-- [ ] 1.3 RLS regression suite passes: `npm run db:test`
+- [x] 1.1 Type checking passes: `npm run build`
+- [x] 1.2 Linting passes: `npm run lint`
+- [x] 1.3 RLS regression suite passes: `npm run db:test`
 
 #### Manual
 
-- [ ] 1.4 `curl POST /api/sessions` with valid body returns 201 + `{ id, started_at }`; unauthenticated curl is redirected
-- [ ] 1.5 `curl PATCH /api/sessions/<id>` accepts `{focus_rating:4}` and `{focus_rating:null}`; rejects `{focus_rating:7}` with 400
-- [ ] 1.6 Studio inspection confirms `started_at` server-set, `ended_at` set after PATCH, `duration_seconds` materialized, `user_id` correct
-- [ ] 1.7 PATCH with implausible `ended_at` (e.g., `"2020-01-01T00:00:00Z"`) is rejected 400; row unchanged
-- [ ] 1.8 PATCH with valid `ended_at` near `now()` is accepted; `duration_seconds = ended_at - started_at` materializes correctly; extra unknown fields are stripped
-- [ ] 1.9 Second PATCH against the same session-id returns 409; row's first-write `ended_at` and `focus_rating` remain unchanged (replay guard)
+- [x] 1.4 `curl POST /api/sessions` with valid body returns 201 + `{ id, started_at }`; unauthenticated curl is redirected
+- [x] 1.5 `curl PATCH /api/sessions/<id>` accepts `{focus_rating:4}` and `{focus_rating:null}`; rejects `{focus_rating:7}` with 400
+- [x] 1.6 Studio inspection confirms `started_at` server-set, `ended_at` set after PATCH, `duration_seconds` materialized, `user_id` correct
+- [x] 1.7 PATCH with implausible `ended_at` (e.g., `"2020-01-01T00:00:00Z"`) is rejected 400; row unchanged
+- [x] 1.8 PATCH with valid `ended_at` near `now()` is accepted; `duration_seconds = ended_at - started_at` materializes correctly; extra unknown fields are stripped
+- [x] 1.9 Second PATCH against the same session-id returns 409; row's first-write `ended_at` and `focus_rating` remain unchanged (replay guard)
 
 ### Phase 2: Authed shell + dashboard rewrite + shadcn primitives
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `npm run build`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Astro a11y rules pass for the new dashboard markup
+- [x] 2.1 Type checking passes: `npm run build`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Astro a11y rules pass for the new dashboard markup
 
 #### Manual
 
-- [ ] 2.4 `/dashboard` renders the Topbar for a signed-in user
-- [ ] 2.5 Zero-session user sees the empty state; user with sessions sees them ordered by `started_at DESC`
-- [ ] 2.6 Start session CTA is visually prominent (palette do's)
-- [ ] 2.7 Landing `/` and `/auth/*` pages do NOT show the Topbar (signed-out); no double-mount; auth pages still work; an authed user hitting `/auth/signin` or `/auth/signup` is redirected to `/dashboard` (F6 guard)
+- [x] 2.4 `/dashboard` renders the Topbar for a signed-in user
+- [x] 2.5 Zero-session user sees the empty state; user with sessions sees them ordered by `started_at DESC`
+- [x] 2.6 Start session CTA is visually prominent (palette do's)
+- [x] 2.7 Landing `/` and `/auth/*` pages do NOT show the Topbar (signed-out); no double-mount; auth pages still work; an authed user hitting `/auth/signin` or `/auth/signup` is redirected to `/dashboard` (F6 guard)
 
 ### Phase 3: Pre-session screen
 
@@ -495,7 +499,7 @@ If for any reason `src/db/database.types.ts` is regenerated during S-01 developm
 - [ ] 4.4 25-minute (or dev-shortened) timer runs accurately; chime audible at focus-end; rating view appears
 - [ ] 4.5 Backgrounding tab for 30+ s and returning shows wall-clock-reconciled remaining time
 - [ ] 4.6 Screen-lock briefly during session preserves correct remaining time on unlock
-- [ ] 4.7 Manual stop early at 5:00 remaining: rating view appears (no chime); rating quickly vs. waiting 30 s before rating both yield `duration_seconds` ≈ 20*60 (FR-012, client-snapshot pattern)
+- [ ] 4.7 Manual stop early at 5:00 remaining: rating view appears (no chime); rating quickly vs. waiting 30 s before rating both yield `duration_seconds` ≈ 20\*60 (FR-012, client-snapshot pattern)
 - [ ] 4.8 Skip rating PATCHes `focus_rating: null`; dashboard row shows "Skipped"
 - [ ] 4.9 Rating 4 PATCHes `focus_rating: 4`; dashboard row shows `★ 4 / 5`
 - [ ] 4.10 After PATCH, `/dashboard` shows the new session at the top
