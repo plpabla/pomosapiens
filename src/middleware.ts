@@ -1,8 +1,12 @@
 import { defineMiddleware } from "astro:middleware";
 import { createClient } from "@/lib/supabase";
 
-const PROTECTED_ROUTES = ["/dashboard"];
-const AUTHED_REDIRECTS: Record<string, string> = { "/": "/dashboard" };
+const PROTECTED_ROUTES = ["/dashboard", "/session/"];
+const AUTHED_REDIRECTS: Record<string, string> = {
+  "/": "/dashboard",
+  "/auth/signin": "/dashboard",
+  "/auth/signup": "/dashboard",
+};
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const supabase = createClient(context.request.headers, context.cookies);
