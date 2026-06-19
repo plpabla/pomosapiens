@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-06-02
+updated: 2026-06-19
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -29,7 +29,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 
 | ID   | Change ID                          | Outcome (user can …)                                                      | Prerequisites | PRD refs                                              | Status   |
 | ---- | ---------------------------------- | ------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | -------- |
-| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                        | —             | — (US-01 acquisition surface)                         | ready    |
+| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                        | —             | — (US-01 acquisition surface)                         | done     |
 | F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                        | —             | NFR (privacy), Access Control                         | done     |
 | S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history           | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | proposed |
 | S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format           | S-01          | FR-007, FR-008, FR-017                                | proposed |
@@ -76,7 +76,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Unknowns:**
   - Final hero copy and visual treatment (illustration vs screenshot vs blank slate) — Owner: project author (decided at `/10x-plan` time). Block: no.
 - **Risk:** Lowest-risk slice — pure frontend, no data, no auth changes. The real risk is **scope creep**: over-investing in marketing polish (feature grids, FAQs, animations, analytics) before S-01 validates the wedge. Hold the line at hero + value prop + CTA. S-00 is **not** the north star — S-01 remains the slice that proves the wedge; S-00 only opens the front door.
-- **Status:** ready
+- **Status:** done
 
 ### S-01: First session capture loop
 
@@ -165,3 +165,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 ## Done
 
 - **F-01: (foundation) sessions data model with per-user RLS** — Archived 2026-06-02 → `context/archive/2026-05-29-sessions-data-foundation/`. Lesson: —.
+- **S-00: A first-time visitor to `/` sees a hero explaining the wedge (energy-gated focus sessions with contextual capture bound to each session) and taps a primary CTA that routes to `/auth/signup`. Replaces the placeholder `src/pages/index.astro`. Authenticated visitors are redirected to `/dashboard`.** — Archived 2026-06-19 → `context/archive/2026-06-18-landing-page/`. Lesson: —.
