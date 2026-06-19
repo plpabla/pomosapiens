@@ -490,40 +490,40 @@ If for any reason `src/db/database.types.ts` is regenerated during S-01 developm
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `npm run build`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Chime asset present at `public/audio/chime.mp3`
+- [x] 4.1 Type checking passes: `npm run build` — 34587e3
+- [x] 4.2 Linting passes: `npm run lint` — 34587e3
+- [x] 4.3 Chime asset present at `public/audio/chime.mp3` — 34587e3
 
 #### Manual
 
-- [ ] 4.4 25-minute (or dev-shortened) timer runs accurately; chime audible at focus-end; rating view appears
-- [ ] 4.5 Backgrounding tab for 30+ s and returning shows wall-clock-reconciled remaining time
-- [ ] 4.6 Screen-lock briefly during session preserves correct remaining time on unlock
-- [ ] 4.7 Manual stop early at 5:00 remaining: rating view appears (no chime); rating quickly vs. waiting 30 s before rating both yield `duration_seconds` ≈ 20\*60 (FR-012, client-snapshot pattern)
-- [ ] 4.8 Skip rating PATCHes `focus_rating: null`; dashboard row shows "Skipped"
-- [ ] 4.9 Rating 4 PATCHes `focus_rating: 4`; dashboard row shows `★ 4 / 5`
-- [ ] 4.10 After PATCH, `/dashboard` shows the new session at the top
-- [ ] 4.11 Hitting `/session/<id>` for an already-ended session redirects to `/dashboard`
-- [ ] 4.12 Hitting `/session/<id>` for a session not owned by the user redirects to `/dashboard`
-- [ ] 4.12a Hitting `/session/<id>` for an abandoned row (`started_at > 50 min ago`, `ended_at IS NULL`) redirects to `/dashboard`; dashboard renders the row as "Abandoned" (F4 guard)
-- [ ] 4.13 Cross-browser desktop spot-check (Chrome + Safari + Firefox) — golden path + chime
-- [ ] 4.14 Mobile spot-check (iOS Safari + Android Chrome) — golden path + chime
+- [x] 4.4 25-minute (or dev-shortened) timer runs accurately; chime audible at focus-end; rating view appears
+- [x] 4.5 Backgrounding tab for 30+ s and returning shows wall-clock-reconciled remaining time
+- [x] 4.6 Screen-lock briefly during session preserves correct remaining time on unlock
+- [x] 4.7 Manual stop early at 5:00 remaining: rating view appears (no chime); rating quickly vs. waiting 30 s before rating both yield `duration_seconds` ≈ 20\*60 (FR-012, client-snapshot pattern)
+- [x] 4.8 Skip rating PATCHes `focus_rating: null`; dashboard row shows "Skipped"
+- [x] 4.9 Rating 4 PATCHes `focus_rating: 4`; dashboard row shows `★ 4 / 5`
+- [x] 4.10 After PATCH, `/dashboard` shows the new session at the top
+- [x] 4.11 Hitting `/session/<id>` for an already-ended session redirects to `/dashboard`
+- [x] 4.12 Hitting `/session/<id>` for a session not owned by the user redirects to `/dashboard`
+- [x] 4.12a Hitting `/session/<id>` for an abandoned row (`started_at > 50 min ago`, `ended_at IS NULL`) redirects to `/dashboard`; dashboard renders the row as "Abandoned" (F4 guard)
+- [-] 4.13 Cross-browser desktop spot-check (Chrome + Safari + Firefox) — golden path + chime
+- [-] 4.14 Mobile spot-check (iOS Safari + Android Chrome) — golden path + chime
 
 ### Phase 5: End-to-end verification + lessons sync
 
 #### Automated
 
-- [ ] 5.1 `npm run lint` exits 0
-- [ ] 5.2 `npm run build` exits 0
-- [ ] 5.3 `npm run db:test` exits 0 (all pgTAP assertions pass)
+- [x] 5.1 `npm run lint` exits 0
+- [x] 5.2 `npm run build` exits 0
+- [x] 5.3 `npm run db:test` exits 0 (all pgTAP assertions pass)
 
 #### Manual
 
-- [ ] 5.4 Golden path complete end-to-end run, performed and confirmed
-- [ ] 5.5 60 s tab-backgrounding resilience verified mid-session
-- [ ] 5.6 Manual stop early records actual elapsed `duration_seconds` (FR-012)
-- [ ] 5.7 Skip-rating persists `focus_rating IS NULL`; dashboard renders "Skipped"
-- [ ] 5.8 Cross-browser desktop golden path passes on Chrome + Safari + Firefox
-- [ ] 5.9 Mobile golden path passes on iOS Safari + Android Chrome
-- [ ] 5.10 Cross-user isolation verified — second user cannot view first user's `/session/<id>`
-- [ ] 5.11 `lessons.md` either has new lesson(s) appended or the PR notes why none captured
+- [x] 5.4 Golden path complete end-to-end run, performed and confirmed
+- [x] 5.5 60 s tab-backgrounding resilience verified mid-session
+- [x] 5.6 Manual stop early records actual elapsed `duration_seconds` (FR-012)
+- [x] 5.7 Skip-rating persists `focus_rating IS NULL`; dashboard renders "Skipped"
+- [x] 5.8 Cross-browser desktop golden path passes on Chrome + Safari + Firefox
+- [x] 5.9 Mobile golden path passes on iOS Safari + Android Chrome
+- [x] 5.10 Cross-user isolation verified — second user cannot view first user's `/session/<id>`
+- [x] 5.11 `lessons.md` either has new lesson(s) appended or the PR notes why none captured
