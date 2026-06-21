@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-06-19
+updated: 2026-06-21
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -31,11 +31,12 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | ---- | ---------------------------------- | ------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | -------- |
 | S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                        | —             | — (US-01 acquisition surface)                         | done     |
 | F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                        | —             | NFR (privacy), Access Control                         | done     |
-| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history           | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | proposed |
+| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history           | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done     |
 | S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format           | S-01          | FR-007, FR-008, FR-017                                | proposed |
 | S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session     | S-01          | FR-004, FR-005, FR-010                                | proposed |
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time | S-01          | FR-014, FR-016                                        | proposed |
-| S-05 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01    | FR-018                                                | proposed |
+| S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button          | S-01          | FR-012 (extends stop-early to dashboard level)        | proposed |
+| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01    | FR-018                                                | proposed |
 
 ## Baseline
 
@@ -91,7 +92,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Timer-resilience strategy — server-stored `started_at` + reconcile-on-return from wall clock, OR client-side timestamp + `visibilitychange` listener? — Owner: implementer (decided at `/10x-plan` time). Block: no.
   - Audible-cue strategy — which sound, and how to handle browsers that block autoplay before user interaction? — Owner: implementer. Block: no.
 - **Risk:** This is the north star — the smallest end-to-end flow that proves the wedge. The riskiest sub-piece is timer resilience (NFR + Guardrail "timer survives short tab backgrounding"); if that breaks, the product breaks even with everything else working.
-- **Status:** proposed
+- **Status:** done
 
 ### S-02: Categorize sessions by topic and material format
 
@@ -132,7 +133,20 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Risk:** Lowest-risk slice. The chart needs enough sessions to be meaningful, so v1 value scales with log depth — PRD acknowledges this in the Secondary criterion phrasing ("leading indicator"). If the calendar tightens, this is the slice to thin (drop FR-014 — it's the only nice-to-have FR in v1) or Park.
 - **Status:** proposed
 
-### S-05: Tab title live timer
+### S-05: Explicit session abandonment
+
+- **Outcome:** User can abandon an in-progress session by tapping an "Abandon" button on the dashboard history row. Time-based auto-detection of "abandoned" sessions is removed; any session without an `ended_at` is shown as "In progress" regardless of age, and the `/session/[id]` page no longer redirects based on a fixed age threshold. Deep-work sessions longer than 50 minutes (the S-01 heuristic) are fully supported.
+- **Change ID:** `explicit-session-abandon`
+- **PRD refs:** FR-012 (extends the stop-early concept from the session page to a dashboard-level control for sessions the user navigated away from). No new PRD FR -- the gap was discovered in S-01 impl-review F3 (threshold inconsistency between page, dashboard, and API).
+- **Prerequisites:** S-01
+- **Parallel with:** S-02, S-03, S-04
+- **Blockers:** —
+- **Unknowns:**
+  - What happens to the API's 2-hour lower-bound plausibility check on `ended_at` once the 50-min threshold is removed? The plausibility window guards against stale-tab backdating, not session duration -- `ended_at = now()` always passes regardless of how long the session ran. Low risk; verify at plan time.
+  - Does the "Abandon" action call the existing PATCH `/api/sessions/[id]` with `focus_rating: null` (treating abandon as "skip rating"), or does it need a separate endpoint / a new `abandoned` column? Decide at plan time.
+- **Risk:** Small surface -- three files touched (dashboard.astro, session/[id].astro, possibly api/sessions/[id].ts). No schema change required. Primary risk is forgetting the abandoned-guard in `[id].astro` and breaking replay-protection behavior for already-ended sessions; keep that guard untouched.
+
+### S-06: Tab title live timer
 
 - **Outcome:** User sees the current timer value (countdown for preset sessions, count-up for open-ended sessions) reflected in the browser tab title while a session is active, so they can monitor time from the OS taskbar or a tab strip without switching focus to the app.
 - **Change ID:** `tab-title-timer`
@@ -156,7 +170,8 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Waits on S-01                       |
 | S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Waits on S-01                       |
 | S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                       |
-| S-05       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Waits on S-01                       |
+| S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Waits on S-01; parallel with S-02/3/4 |
+| S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Waits on S-01                       |
 
 ## Open Roadmap Questions
 
@@ -182,3 +197,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 
 - **F-01: (foundation) sessions data model with per-user RLS** — Archived 2026-06-02 → `context/archive/2026-05-29-sessions-data-foundation/`. Lesson: —.
 - **S-00: A first-time visitor to `/` sees a hero explaining the wedge (energy-gated focus sessions with contextual capture bound to each session) and taps a primary CTA that routes to `/auth/signup`. Replaces the placeholder `src/pages/index.astro`. Authenticated visitors are redirected to `/dashboard`.** — Archived 2026-06-19 → `context/archive/2026-06-18-landing-page/`. Lesson: —.
+- **S-01: User can sign in, tap "Start session" on the dashboard, pick an energy level (only required field), run a default 25 / 5 timer through focus → break with an audible cue, rate focus 1–5 or skip at the end, and see the saved session at the top of their history list.** — Archived 2026-06-21 → `context/archive/2026-06-19-first-session-capture-loop/`. Lesson: —.

@@ -33,3 +33,4 @@ pnpm-debug.log*
 
 # claude
 .claude/settings.local.json
+.claude/prompts/*
