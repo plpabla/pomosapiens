@@ -378,14 +378,14 @@ No data migration. No schema changes. No production runtime changes. The only en
 
 #### Automated
 
-- [x] 2.1 `npm test -- tests/integration/api/sessions.end.test.ts` exits 0 with five tests passing
-- [x] 2.2 `npm run lint` passes on the new files
-- [x] 2.3 Sabotage check: `.update({ ended_at, focus_rating })` -> `.update(parsed.data)` makes the column-scope test fail; revert -- NOTE: test did NOT fail because `endSessionSchema` strips unknown keys (Zod default); `.update(parsed.data)` == `.update({ ended_at, focus_rating })` today. Gate catches explicit column additions to `.update()` but not schema-permissive refactors.
+- [x] 2.1 `npm test -- tests/integration/api/sessions.end.test.ts` exits 0 with five tests passing — 148f95c
+- [x] 2.2 `npm run lint` passes on the new files — 148f95c
+- [x] 2.3 Sabotage check: `.update({ ended_at, focus_rating })` -> `.update(parsed.data)` makes the column-scope test fail; revert -- NOTE: test did NOT fail because `endSessionSchema` strips unknown keys (Zod default); `.update(parsed.data)` == `.update({ ended_at, focus_rating })` today. Gate catches explicit column additions to `.update()` but not schema-permissive refactors. — 148f95c
 
 #### Manual
 
-- [x] 2.4 Run the suite three times in a row; no orphaned users in Supabase Studio
-- [x] 2.5 Inspect plausibility window sub-cases; boundary values match the test plan's expected behavior
+- [x] 2.4 Run the suite three times in a row; no orphaned users in Supabase Studio — 148f95c
+- [x] 2.5 Inspect plausibility window sub-cases; boundary values match the test plan's expected behavior — 148f95c
 
 ### Phase 3: POST Contract + Cross-User Tests
 
