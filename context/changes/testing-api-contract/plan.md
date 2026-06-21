@@ -363,29 +363,29 @@ No data migration. No schema changes. No production runtime changes. The only en
 
 #### Automated
 
-- [x] 1.1 `npm install` completes cleanly; `package.json` has the three new dev deps
-- [x] 1.2 `npm test` exits 0 with the placeholder test passing
-- [x] 1.3 `npm run lint` passes (no errors in `vitest.config.ts`, `tests/_fixtures/auth.ts`, or the placeholder test)
-- [x] 1.4 `npm run build` still passes (no accidental coupling of test config into the build)
+- [x] 1.1 `npm install` completes cleanly; `package.json` has the three new dev deps -- 16d6e69
+- [x] 1.2 `npm test` exits 0 with the placeholder test passing -- 16d6e69
+- [x] 1.3 `npm run lint` passes (no errors in `vitest.config.ts`, `tests/_fixtures/auth.ts`, or the placeholder test) -- 16d6e69
+- [x] 1.4 `npm run build` still passes (no accidental coupling of test config into the build) -- 16d6e69
 
 #### Manual
 
-- [x] 1.5 `SUPABASE_SERVICE_ROLE_KEY` added to local `.dev.vars`; fixture creates two users in Supabase Studio and removes them after the run
-- [x] 1.6 `npm test -- --reporter=verbose` shows `[workers]` project name -- confirms the pool config is read
-- [x] 1.7 Supabase Studio shows no leftover `test-${uuid}@example.com` users after a clean run
+- [x] 1.5 `SUPABASE_SERVICE_ROLE_KEY` added to local `.dev.vars`; fixture creates two users in Supabase Studio and removes them after the run -- 16d6e69
+- [x] 1.6 `npm test -- --reporter=verbose` shows `[workers]` project name -- confirms the pool config is read -- 16d6e69
+- [x] 1.7 Supabase Studio shows no leftover `test-${uuid}@example.com` users after a clean run -- 16d6e69
 
 ### Phase 2: PATCH Contract Tests
 
 #### Automated
 
-- [ ] 2.1 `npm test -- tests/integration/api/sessions.end.test.ts` exits 0 with five tests passing
-- [ ] 2.2 `npm run lint` passes on the new files
-- [ ] 2.3 Sabotage check: `.update({ ended_at, focus_rating })` -> `.update(parsed.data)` makes the column-scope test fail; revert
+- [x] 2.1 `npm test -- tests/integration/api/sessions.end.test.ts` exits 0 with five tests passing
+- [x] 2.2 `npm run lint` passes on the new files
+- [x] 2.3 Sabotage check: `.update({ ended_at, focus_rating })` -> `.update(parsed.data)` makes the column-scope test fail; revert -- NOTE: test did NOT fail because `endSessionSchema` strips unknown keys (Zod default); `.update(parsed.data)` == `.update({ ended_at, focus_rating })` today. Gate catches explicit column additions to `.update()` but not schema-permissive refactors.
 
 #### Manual
 
-- [ ] 2.4 Run the suite three times in a row; no orphaned users in Supabase Studio
-- [ ] 2.5 Inspect plausibility window sub-cases; boundary values match the test plan's expected behavior
+- [x] 2.4 Run the suite three times in a row; no orphaned users in Supabase Studio
+- [x] 2.5 Inspect plausibility window sub-cases; boundary values match the test plan's expected behavior
 
 ### Phase 3: POST Contract + Cross-User Tests
 
