@@ -35,6 +35,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format           | S-01          | FR-007, FR-008, FR-017                                | proposed |
 | S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session     | S-01          | FR-004, FR-005, FR-010                                | proposed |
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time | S-01          | FR-014, FR-016                                        | proposed |
+| S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button          | S-01          | FR-012 (extends stop-early to dashboard level)        | proposed |
 
 ## Baseline
 
@@ -131,6 +132,20 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Risk:** Lowest-risk slice. The chart needs enough sessions to be meaningful, so v1 value scales with log depth — PRD acknowledges this in the Secondary criterion phrasing ("leading indicator"). If the calendar tightens, this is the slice to thin (drop FR-014 — it's the only nice-to-have FR in v1) or Park.
 - **Status:** proposed
 
+### S-05: Explicit session abandonment
+
+- **Outcome:** User can abandon an in-progress session by tapping an "Abandon" button on the dashboard history row. Time-based auto-detection of "abandoned" sessions is removed; any session without an `ended_at` is shown as "In progress" regardless of age, and the `/session/[id]` page no longer redirects based on a fixed age threshold. Deep-work sessions longer than 50 minutes (the S-01 heuristic) are fully supported.
+- **Change ID:** `explicit-session-abandon`
+- **PRD refs:** FR-012 (extends the stop-early concept from the session page to a dashboard-level control for sessions the user navigated away from). No new PRD FR -- the gap was discovered in S-01 impl-review F3 (threshold inconsistency between page, dashboard, and API).
+- **Prerequisites:** S-01
+- **Parallel with:** S-02, S-03, S-04
+- **Blockers:** —
+- **Unknowns:**
+  - What happens to the API's 2-hour lower-bound plausibility check on `ended_at` once the 50-min threshold is removed? The plausibility window guards against stale-tab backdating, not session duration -- `ended_at = now()` always passes regardless of how long the session ran. Low risk; verify at plan time.
+  - Does the "Abandon" action call the existing PATCH `/api/sessions/[id]` with `focus_rating: null` (treating abandon as "skip rating"), or does it need a separate endpoint / a new `abandoned` column? Decide at plan time.
+- **Risk:** Small surface -- three files touched (dashboard.astro, session/[id].astro, possibly api/sessions/[id].ts). No schema change required. Primary risk is forgetting the abandoned-guard in `[id].astro` and breaking replay-protection behavior for already-ended sessions; keep that guard untouched.
+- **Status:** proposed
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                          | Suggested issue title                                         | Ready for `/10x-plan` | Notes                               |
@@ -141,6 +156,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Waits on S-01                       |
 | S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Waits on S-01                       |
 | S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                       |
+| S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Waits on S-01; parallel with S-02/3/4 |
 
 ## Open Roadmap Questions
 

@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
 import type { Database } from "@/db/database.types";
+import { Card } from "@/components/ui/card";
 
 const { user } = Astro.locals;
 const supabase = createClient(Astro.request.headers, Astro.cookies);
@@ -87,9 +88,9 @@ const energyColorClass: Record<string, string> = {
 
       {
         !dbError && sessions.length === 0 && (
-          <div class="border-charred rounded-xl border p-6 text-center">
+          <Card className="border-charred bg-transparent p-6 shadow-none text-center">
             <p class="text-ash text-sm">No sessions yet. Start your first one above.</p>
-          </div>
+          </Card>
         )
       }
 
@@ -101,7 +102,7 @@ const energyColorClass: Record<string, string> = {
               const energyClass = energyColorClass[session.energy_level] ?? "text-ash";
               return (
                 <li>
-                  <div class="border-charred bg-ember text-off-white flex flex-col gap-2 rounded-xl border px-5 py-4">
+                  <Card className="border-charred bg-ember text-off-white gap-2 px-5 py-4 shadow-none">
                     <div class="flex items-center justify-between">
                       <span class="text-off-white/70 text-sm">{formatDate(session.started_at)}</span>
                       <span class:list={["text-xs font-semibold uppercase", energyClass]}>{session.energy_level}</span>
@@ -122,7 +123,7 @@ const energyColorClass: Record<string, string> = {
                           : ""}
                       </span>
                     </div>
-                  </div>
+                  </Card>
                 </li>
               );
             })}

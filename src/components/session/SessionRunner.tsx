@@ -42,6 +42,12 @@ export default function SessionRunner({ sessionId, startedAtMs, focusSeconds }: 
       .catch(() => {
         // Safari edge: chime may fail open at focus-end
       });
+    return () => {
+      audio.pause();
+      audio.src = "";
+      audio.load();
+      audioRef.current = null;
+    };
   }, []);
 
   // Wall-clock tick: setTimeout chain (never setInterval) so throttling is harmless.
@@ -71,7 +77,7 @@ export default function SessionRunner({ sessionId, startedAtMs, focusSeconds }: 
   // immediately flip to rating if the focus phase elapsed while hidden.
   useEffect(() => {
     function onVisibility() {
-      if (document.visibilityState === "visible" && phase === "running") {
+      if (document.visibilityState === "visible" && stoppedAtMs === null) {
         const next = Date.now();
         setNow(next);
         const remaining = focusSeconds - Math.floor((next - startedAtMs) / 1000);
@@ -88,7 +94,7 @@ export default function SessionRunner({ sessionId, startedAtMs, focusSeconds }: 
     return () => {
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [phase, startedAtMs, focusSeconds]);
+  }, [stoppedAtMs, startedAtMs, focusSeconds]);
 
   function handleStopEarly() {
     // Snapshot the actual stop wall-clock so duration_seconds = elapsed, not preset
