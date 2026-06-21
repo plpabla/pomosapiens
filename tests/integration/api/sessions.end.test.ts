@@ -169,4 +169,84 @@ describe("PATCH /api/sessions/[id]", () => {
     expect(res.status).toBe(401);
     expect(((await res.json()) as { error: string }).error).toBe("Unauthorized");
   });
+
+  describe("cross-user", () => {
+    it("returns 409 + no row mutation when user B PATCHes user A's session", async () => {
+      const session = await createSession(fixture.cookieFor(fixture.userA.id));
+
+      const res = await SELF.fetch(`${BASE}/api/sessions/${session.id}`, {
+        method: "PATCH",
+        headers: {
+          Cookie: fixture.cookieFor(fixture.userB.id),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          focus_rating: 4,
+          ended_at: new Date(Date.now() - 60_000).toISOString(),
+        }),
+      });
+
+      expect(res.status).toBe(409);
+      expect(((await res.json()) as { error: string }).error).toBe("Session already ended or not found");
+
+      const row = await readSession(session.id);
+      expect(row.ended_at).toBeNull();
+      expect(row.focus_rating).toBeNull();
+    });
+
+    it("returns byte-identical 409 body for cross-user vs already-ended (information-hiding contract)", async () => {
+      // Intentional information-hiding: src/pages/api/sessions/[id].ts:54-56 returns the same
+      // 409 body whether the caller is the wrong user or the session is already ended, so callers
+      // cannot determine which session IDs belong to other users. Breaking this (e.g. to return
+      // 403 for cross-user) is a security regression -- change this test intentionally.
+      const session = await createSession(fixture.cookieFor(fixture.userA.id));
+
+      // User A ends the session
+      const endRes = await SELF.fetch(`${BASE}/api/sessions/${session.id}`, {
+        method: "PATCH",
+        headers: {
+          Cookie: fixture.cookieFor(fixture.userA.id),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          focus_rating: 3,
+          ended_at: new Date(Date.now() - 60_000).toISOString(),
+        }),
+      });
+      expect(endRes.status).toBe(200);
+
+      // User B PATCHes user A's now-ended session (cross-user + already-ended)
+      const crossUserRes = await SELF.fetch(`${BASE}/api/sessions/${session.id}`, {
+        method: "PATCH",
+        headers: {
+          Cookie: fixture.cookieFor(fixture.userB.id),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          focus_rating: 4,
+          ended_at: new Date(Date.now() - 30_000).toISOString(),
+        }),
+      });
+
+      // User A PATCHes their own already-ended session
+      const alreadyEndedRes = await SELF.fetch(`${BASE}/api/sessions/${session.id}`, {
+        method: "PATCH",
+        headers: {
+          Cookie: fixture.cookieFor(fixture.userA.id),
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          focus_rating: 5,
+          ended_at: new Date(Date.now() - 15_000).toISOString(),
+        }),
+      });
+
+      expect(crossUserRes.status).toBe(409);
+      expect(alreadyEndedRes.status).toBe(409);
+
+      const crossUserBody = (await crossUserRes.json()) as { error: string };
+      const alreadyEndedBody = (await alreadyEndedRes.json()) as { error: string };
+      expect(JSON.stringify(crossUserBody)).toBe(JSON.stringify(alreadyEndedBody));
+    });
+  });
 });
