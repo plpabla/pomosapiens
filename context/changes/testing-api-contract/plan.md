@@ -391,15 +391,15 @@ No data migration. No schema changes. No production runtime changes. The only en
 
 #### Automated
 
-- [x] 3.1 `npm test` exits 0 with all 10 tests across two files passing (5 PATCH + 3 POST + 2 cross-user PATCH) -- NOTE: Vitest counts each it.each case separately; actual count is 14 tests (11 PATCH + 3 POST). Tests run against `dist/server/entry.mjs` -- `npm run build` must precede `npm test` for source changes to take effect.
-- [x] 3.2 `npm run lint` passes -- 1 pre-existing warning in auth.ts (console.warn), 0 errors
-- [x] 3.3 Sabotage check #1: removing `.eq("user_id", context.locals.user.id)` from PATCH does NOT make the cross-user test fail (build + test both green) -- same finding as 2.3: RLS sessions_update_own USING clause blocks user B from seeing user A's row at the DB layer, making the API-level guard redundant as a test signal. The guard is still defense-in-depth.
-- [x] 3.4 Sabotage check #2: adding `user_id: z.uuid().optional()` to createSessionSchema + using `parsed.data.user_id ?? context.locals.user.id` in POST insert makes the injection test fail after `npm run build` -- test gets 500 (RLS blocks cross-user insert: WITH CHECK user_id = auth.uid() fails); revert + rebuild confirms 14/14 green.
+- [x] 3.1 `npm test` exits 0 with all 10 tests across two files passing (5 PATCH + 3 POST + 2 cross-user PATCH) -- NOTE: Vitest counts each it.each case separately; actual count is 14 tests (11 PATCH + 3 POST). Tests run against `dist/server/entry.mjs` -- `npm run build` must precede `npm test` for source changes to take effect. — 3e9d989
+- [x] 3.2 `npm run lint` passes -- 1 pre-existing warning in auth.ts (console.warn), 0 errors — 3e9d989
+- [x] 3.3 Sabotage check #1: removing `.eq("user_id", context.locals.user.id)` from PATCH does NOT make the cross-user test fail (build + test both green) -- same finding as 2.3: RLS sessions_update_own USING clause blocks user B from seeing user A's row at the DB layer, making the API-level guard redundant as a test signal. The guard is still defense-in-depth. — 3e9d989
+- [x] 3.4 Sabotage check #2: adding `user_id: z.uuid().optional()` to createSessionSchema + using `parsed.data.user_id ?? context.locals.user.id` in POST insert makes the injection test fail after `npm run build` -- test gets 500 (RLS blocks cross-user insert: WITH CHECK user_id = auth.uid() fails); revert + rebuild confirms 14/14 green. — 3e9d989
 
 #### Manual
 
-- [x] 3.5 Run the full suite three times; no flakiness
-- [x] 3.6 Supabase Studio shows no leftover users after each run
+- [x] 3.5 Run the full suite three times; no flakiness — 3e9d989
+- [x] 3.6 Supabase Studio shows no leftover users after each run — 3e9d989
 
 ### Phase 4: CI Wiring + Test-Plan Cookbook Update
 

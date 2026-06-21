@@ -3,7 +3,7 @@ change_id: testing-api-contract
 title: Test runner bootstrap and session API contract
 status: implementing
 created: 2026-06-21
-updated: 2026-06-21 (Phase 2)
+updated: 2026-06-21 (Phase 3)
 archived_at: null
 ---
 
