@@ -27,16 +27,16 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 
 ## At a glance
 
-| ID   | Change ID                          | Outcome (user can …)                                                      | Prerequisites | PRD refs                                              | Status   |
-| ---- | ---------------------------------- | ------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | -------- |
-| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                        | —             | — (US-01 acquisition surface)                         | done     |
-| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                        | —             | NFR (privacy), Access Control                         | done     |
-| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history           | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done     |
-| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format           | S-01          | FR-007, FR-008, FR-017                                | proposed |
-| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session     | S-01          | FR-004, FR-005, FR-010                                | proposed |
-| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time | S-01          | FR-014, FR-016                                        | proposed |
-| S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button          | S-01          | FR-012 (extends stop-early to dashboard level)        | proposed |
-| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01    | FR-018                                                | proposed |
+| ID   | Change ID                          | Outcome (user can …)                                                             | Prerequisites | PRD refs                                              | Status   |
+| ---- | ---------------------------------- | -------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | -------- |
+| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                               | —             | — (US-01 acquisition surface)                         | done     |
+| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                               | —             | NFR (privacy), Access Control                         | done     |
+| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history                  | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done     |
+| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                  | S-01          | FR-007, FR-008, FR-017                                | proposed |
+| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session            | S-01          | FR-004, FR-005, FR-010                                | proposed |
+| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | proposed |
+| S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | proposed |
+| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | proposed |
 
 ## Baseline
 
@@ -162,16 +162,16 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                          | Suggested issue title                                         | Ready for `/10x-plan` | Notes                               |
-| ---------- | ---------------------------------- | ------------------------------------------------------------- | --------------------- | ----------------------------------- |
-| S-00       | `landing-page`                     | Landing page — hero + value prop + sign-up CTA                | yes                   | Independent of F-01; can ship first |
-| F-01       | `sessions-data-foundation`         | Sessions data foundation — table + per-user RLS               | yes                   | Implemented                         |
-| S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)            | no                    | Waits on F-01                       |
-| S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Waits on S-01                       |
-| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Waits on S-01                       |
-| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                       |
+| Roadmap ID | Change ID                          | Suggested issue title                                         | Ready for `/10x-plan` | Notes                                 |
+| ---------- | ---------------------------------- | ------------------------------------------------------------- | --------------------- | ------------------------------------- |
+| S-00       | `landing-page`                     | Landing page — hero + value prop + sign-up CTA                | yes                   | Independent of F-01; can ship first   |
+| F-01       | `sessions-data-foundation`         | Sessions data foundation — table + per-user RLS               | yes                   | Implemented                           |
+| S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)            | no                    | Waits on F-01                         |
+| S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Waits on S-01                         |
+| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Waits on S-01                         |
+| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                         |
 | S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Waits on S-01; parallel with S-02/3/4 |
-| S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Waits on S-01                       |
+| S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Waits on S-01                         |
 
 ## Open Roadmap Questions
 
@@ -192,6 +192,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Compliance certification beyond baseline privacy hygiene** — Why parked: PRD §Non-Goals — no HIPAA, no SOC 2, no formal accessibility certification in v1.
 - **Admin user-facing UI** — Why parked: Access Control describes the Admin role conceptually ("not exposed in normal user-facing UI"; "assigned out-of-band"). No FR demands v1 admin tooling — the project owner inspects user records via Supabase Studio.
 - **Account-merging UI** — Why parked: Open Roadmap Question #1; defer until real-user friction surfaces.
+- **Contiue timer** - when session is closed, user can click "I'm still working" and the counter continues - it helps to protect the flow state. Why parked: It is an extension of MVP
 
 ## Done
 
