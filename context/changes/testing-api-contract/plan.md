@@ -363,16 +363,16 @@ No data migration. No schema changes. No production runtime changes. The only en
 
 #### Automated
 
-- [ ] 1.1 `npm install` completes cleanly; `package.json` has the three new dev deps
-- [ ] 1.2 `npm test` exits 0 with the placeholder test passing
-- [ ] 1.3 `npm run lint` passes (no errors in `vitest.config.ts`, `tests/_fixtures/auth.ts`, or the placeholder test)
-- [ ] 1.4 `npm run build` still passes (no accidental coupling of test config into the build)
+- [x] 1.1 `npm install` completes cleanly; `package.json` has the three new dev deps
+- [x] 1.2 `npm test` exits 0 with the placeholder test passing
+- [x] 1.3 `npm run lint` passes (no errors in `vitest.config.ts`, `tests/_fixtures/auth.ts`, or the placeholder test)
+- [x] 1.4 `npm run build` still passes (no accidental coupling of test config into the build)
 
 #### Manual
 
-- [ ] 1.5 `SUPABASE_SERVICE_ROLE_KEY` added to local `.dev.vars`; fixture creates two users in Supabase Studio and removes them after the run
-- [ ] 1.6 `npm test -- --reporter=verbose` shows `[workers]` project name -- confirms the pool config is read
-- [ ] 1.7 Supabase Studio shows no leftover `test-${uuid}@example.com` users after a clean run
+- [x] 1.5 `SUPABASE_SERVICE_ROLE_KEY` added to local `.dev.vars`; fixture creates two users in Supabase Studio and removes them after the run
+- [x] 1.6 `npm test -- --reporter=verbose` shows `[workers]` project name -- confirms the pool config is read
+- [x] 1.7 Supabase Studio shows no leftover `test-${uuid}@example.com` users after a clean run
 
 ### Phase 2: PATCH Contract Tests
 
