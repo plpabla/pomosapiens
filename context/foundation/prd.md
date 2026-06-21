@@ -120,6 +120,11 @@ All four pre-session pickers (topic, material format, energy, timer mode) are pr
 - FR-017: User can manage their own set of topics / categories — add, rename, archive. Priority: must-have
   > Socratic: Counter-argument: full add / rename / archive functionality is more screen than a free-text field, and with 3 weeks every half-day matters. Resolution: kept; pre-managed topics are required by FR-007's "select from list" decision, and full management is roughly half a day of work — much less than the data-quality cost of unbounded free-text topic strings.
 
+### Browser integration
+
+- FR-018: While a session is running, the current timer value (countdown for preset sessions, count-up for open-ended sessions) is visible in the browser tab title, so the student can monitor progress from the OS taskbar or a tab strip without switching focus to the app. The tab title reverts to its default value when the session ends or is stopped early. Priority: nice-to-have
+  > Socratic: Counter-argument: tab title manipulation is cosmetic and easily broken by navigation. Resolution: kept as nice-to-have; the feature costs one useEffect cleanup and meaningfully reduces the need to switch back to the app during a focused work session. Fail-safe: if the effect is not cleaned up on unmount, the worst outcome is a stale time string in the title -- not a data loss or privacy risk.
+
 ## Non-Functional Requirements
 
 - **User-perceived responsiveness.** Acknowledgement of any user input is visible within 200 ms, and any operation that takes longer than two seconds provides continuous visible feedback rather than appearing to freeze. Routine in-app interactions (opening the pre-session screen, opening history, switching topics) feel instant.

@@ -36,6 +36,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session     | S-01          | FR-004, FR-005, FR-010                                | proposed |
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time | S-01          | FR-014, FR-016                                        | proposed |
 | S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button          | S-01          | FR-012 (extends stop-early to dashboard level)        | proposed |
+| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01    | FR-018                                                | proposed |
 
 ## Baseline
 
@@ -144,6 +145,19 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - What happens to the API's 2-hour lower-bound plausibility check on `ended_at` once the 50-min threshold is removed? The plausibility window guards against stale-tab backdating, not session duration -- `ended_at = now()` always passes regardless of how long the session ran. Low risk; verify at plan time.
   - Does the "Abandon" action call the existing PATCH `/api/sessions/[id]` with `focus_rating: null` (treating abandon as "skip rating"), or does it need a separate endpoint / a new `abandoned` column? Decide at plan time.
 - **Risk:** Small surface -- three files touched (dashboard.astro, session/[id].astro, possibly api/sessions/[id].ts). No schema change required. Primary risk is forgetting the abandoned-guard in `[id].astro` and breaking replay-protection behavior for already-ended sessions; keep that guard untouched.
+
+### S-06: Tab title live timer
+
+- **Outcome:** User sees the current timer value (countdown for preset sessions, count-up for open-ended sessions) reflected in the browser tab title while a session is active, so they can monitor time from the OS taskbar or a tab strip without switching focus to the app.
+- **Change ID:** `tab-title-timer`
+- **PRD refs:** FR-018 (tab title timer, nice-to-have), FR-011 (visible countdown -- parent timer capability this extends).
+- **Prerequisites:** S-01
+- **Parallel with:** S-02, S-03, S-04
+- **Blockers:** --
+- **Unknowns:**
+  - Title format while running -- e.g. `[25:00] PomoSapiens` vs `Focus 25:00 | PomoSapiens` -- and whether to show a distinct label during the break phase. -- Owner: project author. Block: no.
+  - Whether the title restores to its default value on session end, on early stop (FR-012), and on page navigation away from the timer. -- Owner: implementer. Block: no.
+- **Risk:** Pure client-side work (document.title updated in a React useEffect inside the running timer component). The only realistic failure mode is forgetting to clean up the effect on unmount, leaving a stale time string in the tab after the session ends. No backend changes; no new schema; no new routes.
 - **Status:** proposed
 
 ## Backlog Handoff
@@ -157,6 +171,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Waits on S-01                       |
 | S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                       |
 | S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Waits on S-01; parallel with S-02/3/4 |
+| S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Waits on S-01                       |
 
 ## Open Roadmap Questions
 
