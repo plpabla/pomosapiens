@@ -45,6 +45,7 @@ Full SSR (`output: "server"` in `astro.config.mjs`). All pages are server-render
 
 - Node.js v24.11.1 (`.nvmrc`).
 - `SUPABASE_URL` / `SUPABASE_KEY` — copy `.env.example` → `.env` for Node tooling, and copy to `.dev.vars` for Cloudflare local dev. Both are gitignored.
+- `SUPABASE_SERVICE_ROLE_KEY` — required for `npm test`; never read by app code or referenced in `astro.config.mjs` `env.schema`. Add to `.dev.vars` locally and to CI secrets for the test step.
 - Local Supabase Studio: `http://localhost:54323` after `npx supabase start`. Project uses only the built-in `auth.users` table — no migrations required for auth.
 - Production secrets: `npx wrangler secret put SUPABASE_URL` / `npx wrangler secret put SUPABASE_KEY`.
 

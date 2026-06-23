@@ -16,7 +16,8 @@
     "db:reset": "supabase db reset",
     "db:migrate:new": "supabase migration new",
     "db:types": "supabase gen types typescript --local > src/db/database.types.ts",
-    "db:test": "supabase test db"
+    "db:test": "supabase test db",
+    "test": "vitest run"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
@@ -42,8 +43,11 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/vitest-pool-workers": "^0.16.18",
+    "@cloudflare/workers-types": "^4.20260621.1",
     "@eslint/compat": "^2.0.3",
     "@eslint/js": "^9.29.0",
+    "@vitest/coverage-v8": "^4.1.9",
     "eslint": "^9.29.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-astro": "^1.7.0",
@@ -60,6 +64,7 @@
     "supabase": "^2.23.4",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.2",
+    "vitest": "^4.1.9",
     "wrangler": "^4.95.0"
   },
   "overrides": {

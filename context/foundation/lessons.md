@@ -8,6 +8,8 @@
 
 Wide UPDATE RLS policies (owner can mutate any column) must be narrowed by the API layer, not by the schema. RLS enforces row-level ownership; the endpoint enforces column-level immutability (e.g. only `focus_rating` and `ended_at` are writable on `PATCH /api/sessions/[id]`; all other columns are set server-side or are generated). An `.is("ended_at", null)` guard in the query makes the row writable exactly once.
 
+Column-scope is two-layer: (1) Zod's default-strip on `z.object(...)` discards unknown body keys before they reach `parsed.data`; (2) the hand-picked `.update({ ended_at, focus_rating })` pins the write set. Switching the schema to `.passthrough()` breaks layer 1; switching the endpoint to `.update(parsed.data)` after widening the schema breaks layer 2. Both layers must hold. A regression test should catch the combined failure (schema widened to include a protected column AND endpoint spreads `parsed.data`) -- it will not trip on a pure `.update(parsed.data)` swap alone while the schema only defines the intended write columns.
+
 **Source:** F-01 impl-review (`context/archive/2026-05-29-sessions-data-foundation/reviews/impl-review.md:36-43`); codified during S-01.
 
 ---

@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "include": [
+    "**/*.ts",
+    "../vitest.config.ts",
+    "../node_modules/@cloudflare/workers-types/index.d.ts",
+    "../node_modules/@cloudflare/vitest-pool-workers/types/cloudflare-test.d.ts"
+  ]
+}

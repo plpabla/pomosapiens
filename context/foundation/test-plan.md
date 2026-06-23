@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-06-21 (Phase 1 change opened)
+> Last updated: 2026-06-23 (Phase 1 complete)
 
 ## 1. Strategy
 
@@ -53,7 +53,7 @@ research's job, see §1 principle #3).
 | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | #1   | Timer displays correct remaining time after a 60-second tab background; session saves with accurate duration after visibility-change reconcile                                 | "Timer works in manual testing therefore backgrounding is handled"                     | How `visibilitychange` fires across Chrome/Safari/Firefox; how `started_at` is server-stamped vs client-read; what the wall-clock reconcile formula is    | Vitest jsdom: simulate `visibilitychange` + mock `Date.now`                                                                        | Testing with real timers only; mocking the tick loop without testing the reconcile formula               |
 | #2   | PATCH with extra columns returns 4xx; PATCH on an already-ended session returns 4xx; only the two expected fields mutate on a valid call                                       | "Happy-path PATCH works therefore edge cases are safe"                                 | How the end-session Zod schema is declared; whether `ended_at` is set server-side or client-supplied; how the once-only finalization guard is implemented | Integration via `@cloudflare/vitest-pool-workers`: POST session + PATCH with forbidden columns; POST + PATCH twice on same session | Testing only the successful rating path; asserting current output without an independent oracle          |
-| #3   | Fetching own sessions returns only owned rows; PATCH another user's session ID returns 403 or 404; SSR /session/[id] for another user's session redirects to /dashboard        | "RLS is on so cross-user access is impossible"                                         | How the SSR ownership check is implemented; whether PATCH relies on RLS alone or also has an explicit caller-owns-session check                           | pgTAP already covers DB read (rls_sessions.sql); integration test for cross-user PATCH; SSR redirect can be covered in e2e         | Treating pgTAP DB-layer coverage as full-stack coverage of the API boundary                              |
+| #3   | Fetching own sessions returns only owned rows; PATCH another user's session ID returns 409 (intentionally indistinguishable from already-ended); SSR /session/[id] for another user's session redirects to /dashboard        | "RLS is on so cross-user access is impossible"                                         | How the SSR ownership check is implemented; whether PATCH relies on RLS alone or also has an explicit caller-owns-session check                           | pgTAP (rls_sessions.sql) gates DB-layer access denial; API integration test (sessions.end.test.ts) pins 409 response shape and information-hiding at the API boundary -- not access-denial itself (RLS always fires at DB layer regardless of API guard); SSR redirect covered in e2e (Phase 4) | Treating pgTAP DB-layer coverage as full-stack coverage of the API boundary                              |
 | #4   | Post-deploy session write + read-back succeeds in the production environment; `db:types` diff is clean after every migration is applied                                        | "Migration history command shows all applied"                                          | Whether CI runs `db:test` after apply; whether `db:types` output is committed and compared; what columns a minimal session INSERT requires                | Smoke test post-deploy (write + read session row); CI `db:types` diff gate                                                         | Relying solely on local `npm run db:test` as proof that the production schema is correct                 |
 | #5   | GET /session/[id] for an already-ended session redirects to /dashboard; GET /session/[id] for a session with null `ended_at` older than the abandoned threshold also redirects | "The guard exists in code therefore replay is impossible"                              | What the abandoned-session threshold is; whether S-05 changed it; how the SSR redirect logic detects ended vs abandoned state                             | Integration: mock SSR session fetch, assert redirect for ended + abandoned cases                                                   | Testing only that a running session loads correctly without covering the ended and abandoned guard paths |
 | #6   | Audio `.play()` is called at the focus to break transition; no unhandled rejection from the call                                                                               | "It played in my browser during manual testing therefore autoplay handling is correct" | How the Audio ref is constructed; whether both Stage-1 and Stage-2 prime steps are in place; which browsers enforce the strictest autoplay policy         | Integration: mock the Audio API, assert `.play()` called at the correct transition; manual smoke on Safari                         | Asserting the audio file exists without verifying that `.play()` is actually invoked at the right moment |
@@ -66,7 +66,7 @@ orchestrator updates Status as artifacts appear on disk.
 
 | #   | Phase name                                   | Goal (one line)                                                                                    | Risks covered | Test types                                             | Status        | Change folder                         |
 | --- | -------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------ | ------------- | ------------------------------------- |
-| 1   | Test runner bootstrap + session API contract | Set up Vitest; prove PATCH column-scope and cross-user API access at cheapest layer                | #2, #3        | Vitest (`@cloudflare/vitest-pool-workers`) integration | change opened | context/changes/testing-api-contract/ |
+| 1   | Test runner bootstrap + session API contract | Set up Vitest; prove PATCH column-scope and cross-user API access at cheapest layer                | #2, #3        | Vitest (`@cloudflare/vitest-pool-workers`) integration | complete      | context/changes/testing-api-contract/ |
 | 2   | Timer state machine + finalization guards    | Prove timer reconcile, stuck-open guards, and audio trigger without a full browser                 | #1, #5, #6    | Vitest (jsdom) integration                             | not started   | --                                    |
 | 3   | Production schema validation gate            | Establish post-deploy smoke test + `db:types` CI diff so schema mismatch fails before users hit it | #4            | smoke + schema diff                                    | not started   | --                                    |
 | 4   | E2e on full session capture flow             | Lock the user-visible success criterion as a regression gate before each future slice              | cross-cutting | Playwright e2e                                         | not started   | --                                    |
@@ -114,8 +114,15 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.1 Adding a Vitest Workers integration test (API route)
 
-TBD -- see §3 Phase 1 for the PATCH column-scope and cross-user session
-access patterns.
+- **Location**: `tests/integration/api/<route>.test.ts` -- one file per route group (e.g. `sessions.create.test.ts` for POST `/api/sessions`, `sessions.end.test.ts` for PATCH `/api/sessions/[id]`).
+- **Pattern**:
+  1. Import `SELF` from `cloudflare:test`.
+  2. In `beforeAll`, call `setupTwoUsers()` from `tests/_fixtures/auth.ts` to provision two ephemeral Supabase users and obtain their session cookies. Store the returned `cookieFor` function and `cleanup`.
+  3. In `afterAll`, call `cleanup()` to delete both users (cascades session rows via FK).
+  4. Each test fires requests via `SELF.fetch(url, { method, headers: { Cookie: cookieFor(user.id), "Content-Type": "application/json" }, body: JSON.stringify({...}) })`.
+  5. For "no mutation" assertions (cross-user, column-scope), use `readSession(id)` from `tests/_fixtures/db.ts` -- it reads the row via the service-role client, bypassing RLS.
+- **Reference test**: `tests/integration/api/sessions.end.test.ts` -- specifically the `"column-scope: extra body keys stripped by Zod and only declared columns written (regression gate for L-01)"` test as the canonical template for column-scope regression gates.
+- **Run locally**: `npm test` (all files); `npm test -- tests/integration/api/<file>.test.ts` (single file); `npx vitest` (watch mode).
 
 ### 6.2 Adding a Vitest jsdom integration test (timer or component logic)
 
@@ -124,8 +131,15 @@ patterns.
 
 ### 6.3 Adding a test for a new session API endpoint
 
-TBD -- see §3 Phase 1 for the POST + PATCH session endpoint pattern (Zod
-schema validation, ownership check, once-only finalization guard).
+Any endpoint that writes to `public.sessions` (or any RLS-bearing table with a wide UPDATE policy) must follow the column-scope discipline from L-01:
+
+- **Endpoint rule**: hand-pick columns in `.update({...})` or `.insert({...})` -- never spread `parsed.data` into a write call.
+- **Test rule**: the test file MUST include a regression test that sends a request body containing forbidden columns (`user_id`, or any column outside the declared write set) and asserts via `readSession(id)` (service-role read-back) that those columns were not mutated on the stored row.
+- **Two-layer guarantee**: column-scope relies on two independent guards -- (1) Zod's default-strip (non-passthrough `z.object()`) discards unknown body keys before they reach `parsed.data`; (2) the hand-picked write set in `.update({...})` pins which columns are touched. A regression test catches the combined failure (schema widened to accept a protected column AND endpoint spreads `parsed.data`). It does NOT trip on a pure `.update(parsed.data)` refactor alone while the schema only defines the intended write columns -- because in that state `parsed.data` equals the hand-picked set. Document both layers in any new column-scope test comment.
+- **Reference tests**:
+  - POST column-scope: `tests/integration/api/sessions.create.test.ts` -- `"server-stamps user_id from the session, ignoring the request body (regression gate for L-01)"`.
+  - PATCH column-scope: `tests/integration/api/sessions.end.test.ts` -- `"column-scope: extra body keys stripped by Zod and only declared columns written (regression gate for L-01)"`.
+- **Schema validation pattern**: assert the field-named error prefix (`/^<field>:/`) from `parseJson` -- this catches schema-shape drift if a field's Zod path changes. Example: `expect(body).toMatch(/^focus_rating:/)` for a `focus_rating` validation failure.
 
 ### 6.4 Adding a pgTAP test for a new RLS-bearing table
 
