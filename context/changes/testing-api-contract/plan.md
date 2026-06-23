@@ -405,11 +405,11 @@ No data migration. No schema changes. No production runtime changes. The only en
 
 #### Automated
 
-- [x] 4.1 CI run on the PR branch passes: lint -> test (10 tests green) -> build
-- [x] 4.2 `git diff context/foundation/test-plan.md` shows only the §6.1, §6.3, §2 row #3, §3 row 1 status, and "Last updated" edits
+- [x] 4.1 CI run on the PR branch passes: lint -> test (10 tests green) -> build -- 920cf67
+- [x] 4.2 `git diff context/foundation/test-plan.md` shows only the §6.1, §6.3, §2 row #3, §3 row 1 status, and "Last updated" edits -- 920cf67
 
 #### Manual
 
-- [x] 4.3 User confirms `SUPABASE_SERVICE_ROLE_KEY` is added to the repo's GitHub Actions secrets
-- [x] 4.4 User confirms existing `SUPABASE_URL` / `SUPABASE_KEY` secrets point at a writable Supabase project
-- [x] 4.5 Re-read `test-plan.md` §6.1 + §6.3 cold; a contributor can add a new API test from these instructions alone
+- [x] 4.3 User confirms `SUPABASE_SERVICE_ROLE_KEY` is added to the repo's GitHub Actions secrets -- 920cf67
+- [x] 4.4 User confirms existing `SUPABASE_URL` / `SUPABASE_KEY` secrets point at a writable Supabase project -- 920cf67
+- [x] 4.5 Re-read `test-plan.md` §6.1 + §6.3 cold; a contributor can add a new API test from these instructions alone -- 920cf67
