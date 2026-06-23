@@ -37,7 +37,9 @@ export function stubAudioGlobal(): { instances: AudioMock[]; restore: () => void
   const instances: AudioMock[] = [];
   vi.stubGlobal(
     "Audio",
-    vi.fn().mockImplementation(() => {
+    // Must be a regular function (not arrow) so `new Audio()` works as a constructor.
+    // When a constructor returns a plain object, `new` uses that object as the result.
+    vi.fn().mockImplementation(function () {
       const mock = createAudioMock();
       instances.push(mock);
       return mock;

@@ -377,28 +377,28 @@ No data migration. No schema changes. No production runtime behavior changes -- 
 
 #### Automated
 
-- [x] 1.1 `npm install` completes cleanly; `package.json` has the four new dev deps
-- [x] 1.2 `npm test` exits 0 (existing 14 workers tests still pass; no new tests yet)
-- [x] 1.3 `npm run lint` passes on the two new files and the modified SessionRunner + [id].astro
-- [x] 1.4 `npm run build` still passes
+- [x] 1.1 `npm install` completes cleanly; `package.json` has the four new dev deps -- 06490d4
+- [x] 1.2 `npm test` exits 0 (existing 14 workers tests still pass; no new tests yet) -- 06490d4
+- [x] 1.3 `npm run lint` passes on the two new files and the modified SessionRunner + [id].astro -- 06490d4
+- [x] 1.4 `npm run build` still passes -- 06490d4
 
 #### Manual
 
-- [x] 1.5 Manual session run: timer counts down, visibility-switch reconciles, chime fires, rating submits -- refactor is invisible
-- [x] 1.6 Tab-background recovery: 30s background then return -- remaining time is correct
-- [x] 1.7 Already-ended session URL redirects to dashboard
+- [x] 1.5 Manual session run: timer counts down, visibility-switch reconciles, chime fires, rating submits -- refactor is invisible -- 06490d4
+- [x] 1.6 Tab-background recovery: 30s background then return -- remaining time is correct -- 06490d4
+- [x] 1.7 Already-ended session URL redirects to dashboard -- 06490d4
 
 ### Phase 2: Timer Tests (Risk #1)
 
 #### Automated
 
-- [ ] 2.1 `npm test -- tests/unit/timer/useFocusTimer.test.ts` exits 0 with five tests passing
-- [ ] 2.2 `npm run lint` passes on the new file
-- [ ] 2.3 `npm test` (both projects) exits 0 with 14 workers + 5 jsdom = 19 total tests passing
+- [x] 2.1 `npm test -- tests/unit/timer/useFocusTimer.test.ts` exits 0 with five tests passing
+- [x] 2.2 `npm run lint` passes on the new file
+- [x] 2.3 `npm test` (both projects) exits 0 with 14 workers + 5 jsdom = 19 total tests passing
 
 #### Manual
 
-- [ ] 2.4 Run the suite three times in a row; no flakiness from microtask races
+- [x] 2.4 Run the suite three times in a row; no flakiness from microtask races
 
 ### Phase 3: Stuck-Open SSR Guard Tests (Risk #5)
 
