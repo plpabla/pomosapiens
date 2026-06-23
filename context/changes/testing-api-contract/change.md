@@ -1,7 +1,7 @@
 ---
 change_id: testing-api-contract
 title: Test runner bootstrap and session API contract
-status: implemented
+status: impl_reviewed
 created: 2026-06-21
 updated: 2026-06-23
 archived_at: null

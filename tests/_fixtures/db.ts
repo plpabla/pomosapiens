@@ -10,7 +10,8 @@ export interface SessionRow {
   note: string | null;
 }
 
-// Module-level singleton -- process.env is available via nodejs_compat in the Workers test pool.
+// Per-file singleton (each test file gets its own Worker context under @cloudflare/vitest-pool-workers).
+// process.env is available via nodejs_compat in the Workers test pool.
 function buildServiceRoleClient() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;

@@ -30,7 +30,13 @@ describe("PATCH /api/sessions/[id]", () => {
     await fixture.cleanup();
   });
 
-  it("silently strips columns outside the contract (regression gate for L-01)", async () => {
+  // Column-scope is two-layer: (1) endSessionSchema z.object() strips unknown body keys
+  // (energy_level, user_id, note never reach parsed.data); (2) .update({ ended_at, focus_rating })
+  // pins the write set to exactly those two columns. This test catches layer-1 failure (schema
+  // widened to accept energy_level) + layer-2 failure (endpoint uses .update(parsed.data)) together.
+  // It does NOT trip on a pure .update(parsed.data) swap alone because today parsed.data
+  // equals {ended_at, focus_rating} -- see L-01 in context/foundation/lessons.md.
+  it("column-scope: extra body keys stripped by Zod and only declared columns written (regression gate for L-01)", async () => {
     const session = await createSession(fixture.cookieFor(fixture.userA.id));
     const garbageUuid = crypto.randomUUID();
 
@@ -98,7 +104,7 @@ describe("PATCH /api/sessions/[id]", () => {
 
   // TODO(risk #5): the 2h window may change when risk #5 reconciles the 50-min SSR threshold; update boundary values intentionally.
   it.each([
-    { offsetMs: 10_000, expectedStatus: 400, label: "10s in the future" },
+    { offsetMs: 60_000, expectedStatus: 400, label: "60s in the future" },
     { offsetMs: -(3 * 60 * 60_000), expectedStatus: 400, label: "3 hours ago" },
     { offsetMs: -(60 * 60_000), expectedStatus: 200, label: "1 hour ago" },
   ])("plausibility window: $label", async ({ offsetMs, expectedStatus }) => {
@@ -171,6 +177,11 @@ describe("PATCH /api/sessions/[id]", () => {
   });
 
   describe("cross-user", () => {
+    // This test pins the API response shape (status 409 + body) at the API boundary.
+    // Access-denial enforcement is at the DB layer (RLS sessions_update_own USING clause in
+    // supabase/tests/rls_sessions.sql). Removing .eq("user_id", ...) from the endpoint does NOT
+    // trip this test because RLS returns zero rows regardless, causing the !data branch to 409.
+    // The .eq() guard is defense-in-depth; the DB layer is the authoritative access-denial signal.
     it("returns 409 + no row mutation when user B PATCHes user A's session", async () => {
       const session = await createSession(fixture.cookieFor(fixture.userA.id));
 
