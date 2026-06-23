@@ -100,6 +100,7 @@ export async function setupTwoUsers(): Promise<TwoUserFixture> {
     ]);
     for (const result of results) {
       if (result.status === "rejected") {
+        // eslint-disable-next-line no-console
         console.warn("Fixture cleanup: failed to delete test user:", result.reason);
       }
     }
