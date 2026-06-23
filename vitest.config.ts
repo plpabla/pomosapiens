@@ -20,14 +20,14 @@ export default defineConfig({
           include: ["tests/integration/api/**/*.test.ts"],
         },
       },
-      // Phase 2 jsdom project -- append here when adding unit/component tests:
-      // {
-      //   test: {
-      //     name: "jsdom",
-      //     environment: "jsdom",
-      //     include: ["tests/unit/**/*.test.ts"],
-      //   },
-      // },
+      {
+        test: {
+          name: "jsdom",
+          environment: "jsdom",
+          include: ["tests/unit/**/*.test.ts"],
+          setupFiles: ["./tests/unit/_setup.ts"],
+        },
+      },
     ],
   },
 });
