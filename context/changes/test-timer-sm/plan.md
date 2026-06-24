@@ -392,25 +392,25 @@ No data migration. No schema changes. No production runtime behavior changes -- 
 
 #### Automated
 
-- [x] 2.1 `npm test -- tests/unit/timer/useFocusTimer.test.ts` exits 0 with five tests passing
-- [x] 2.2 `npm run lint` passes on the new file
-- [x] 2.3 `npm test` (both projects) exits 0 with 14 workers + 5 jsdom = 19 total tests passing
+- [x] 2.1 `npm test -- tests/unit/timer/useFocusTimer.test.ts` exits 0 with five tests passing -- 0a54eb6
+- [x] 2.2 `npm run lint` passes on the new file -- 0a54eb6
+- [x] 2.3 `npm test` (both projects) exits 0 with 14 workers + 5 jsdom = 19 total tests passing -- 0a54eb6
 
 #### Manual
 
-- [x] 2.4 Run the suite three times in a row; no flakiness from microtask races
+- [x] 2.4 Run the suite three times in a row; no flakiness from microtask races -- 0a54eb6
 
 ### Phase 3: Stuck-Open SSR Guard Tests (Risk #5)
 
 #### Automated
 
-- [ ] 3.1 `npm test -- tests/unit/session/resolveSessionPageAccess.test.ts` exits 0 with five tests passing
-- [ ] 3.2 `npm run lint` passes
-- [ ] 3.3 Required sabotage gate: threshold loosened to `Infinity` makes the abandoned-guard test fail; revert
+- [x] 3.1 `npm test -- tests/unit/session/resolveSessionPageAccess.test.ts` exits 0 with five tests passing
+- [x] 3.2 `npm run lint` passes
+- [x] 3.3 Required sabotage gate: threshold loosened to `Infinity` makes the abandoned-guard test fail; revert
 
 #### Manual
 
-- [ ] 3.4 Re-read boundary tests; confirm the formula (not a hardcoded constant) is what's being asserted
+- [x] 3.4 Re-read boundary tests; confirm the formula (not a hardcoded constant) is what's being asserted
 
 ### Phase 4: Audio Tests (Risk #6)
 
