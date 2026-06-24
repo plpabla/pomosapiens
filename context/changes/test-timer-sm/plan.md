@@ -416,13 +416,13 @@ No data migration. No schema changes. No production runtime behavior changes -- 
 
 #### Automated
 
-- [x] 4.1 `npm test -- tests/unit/timer/audio.test.ts` exits 0 with two tests passing
-- [x] 4.2 `npm run lint` passes
-- [x] 4.3 `npm test` (both projects) exits 0 with all ~24 tests passing
+- [x] 4.1 `npm test -- tests/unit/timer/audio.test.ts` exits 0 with two tests passing -- 75f6dc2
+- [x] 4.2 `npm run lint` passes -- 75f6dc2
+- [x] 4.3 `npm test` (both projects) exits 0 with all ~24 tests passing -- 75f6dc2
 
 #### Manual
 
-- [x] 4.4 Run suite three times; no `vi.stubGlobal` leak across files
+- [x] 4.4 Run suite three times; no `vi.stubGlobal` leak across files -- 75f6dc2
 - [-] 4.5 Safari smoke: chime fires (or fails open) at focus-end in real Safari
 
 ### Phase 5: Cookbook §6.2 + Test-Plan Status Bump
