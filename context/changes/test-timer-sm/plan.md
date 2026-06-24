@@ -429,9 +429,9 @@ No data migration. No schema changes. No production runtime behavior changes -- 
 
 #### Automated
 
-- [x] 5.1 `git diff context/foundation/test-plan.md` shows only the §6.2, §3 row 2 status, "Last updated", and §8 ledger edits
+- [x] 5.1 `git diff context/foundation/test-plan.md` shows only the §6.2, §3 row 2 status, "Last updated", and §8 ledger edits -- e76fd34
 
 #### Manual
 
-- [ ] 5.2 Re-read §6.2 cold; a contributor can add a new timer/hook test from the instructions alone
-- [ ] 5.3 Re-read §3; Phase 3 of the rollout (Production schema validation gate) is the next clear handoff
+- [x] 5.2 Re-read §6.2 cold; a contributor can add a new timer/hook test from the instructions alone -- e76fd34
+- [x] 5.3 Re-read §3; Phase 3 of the rollout (Production schema validation gate) is the next clear handoff -- e76fd34
