@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-06-23 (Phase 1 complete)
+> Last updated: 2026-06-24 (Phase 2 complete)
 
 ## 1. Strategy
 
@@ -67,7 +67,7 @@ orchestrator updates Status as artifacts appear on disk.
 | #   | Phase name                                   | Goal (one line)                                                                                    | Risks covered | Test types                                             | Status        | Change folder                         |
 | --- | -------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------ | ------------- | ------------------------------------- |
 | 1   | Test runner bootstrap + session API contract | Set up Vitest; prove PATCH column-scope and cross-user API access at cheapest layer                | #2, #3        | Vitest (`@cloudflare/vitest-pool-workers`) integration | complete      | context/changes/testing-api-contract/ |
-| 2   | Timer state machine + finalization guards    | Prove timer reconcile, stuck-open guards, and audio trigger without a full browser                 | #1, #5, #6    | Vitest (jsdom) integration                             | not started   | --                                    |
+| 2   | Timer state machine + finalization guards    | Prove timer reconcile, stuck-open guards, and audio trigger without a full browser                 | #1, #5, #6    | Vitest (jsdom) integration                             | complete      | context/changes/testing-timer-sm/     |
 | 3   | Production schema validation gate            | Establish post-deploy smoke test + `db:types` CI diff so schema mismatch fails before users hit it | #4            | smoke + schema diff                                    | not started   | --                                    |
 | 4   | E2e on full session capture flow             | Lock the user-visible success criterion as a regression gate before each future slice              | cross-cutting | Playwright e2e                                         | not started   | --                                    |
 
@@ -126,8 +126,16 @@ the relevant rollout phase ships; before that, the sub-section reads
 
 ### 6.2 Adding a Vitest jsdom integration test (timer or component logic)
 
-TBD -- see §3 Phase 2 for the visibilitychange reconcile and audio trigger
-patterns.
+- **Location**: `tests/unit/<concern>/<name>.test.ts` -- pure unit tests live alongside concern (e.g. `tests/unit/timer/useFocusTimer.test.ts`, `tests/unit/session/resolveSessionPageAccess.test.ts`). One file per hook or pure function.
+- **Pattern**:
+  1. Import `vi`, `describe`, `it`, `expect`, `beforeEach`, `afterEach` from `vitest`.
+  2. For hook tests: import `renderHook`, `act` from `@testing-library/react`.
+  3. For tests touching Date / setTimeout: `beforeEach(() => vi.useFakeTimers({ toFake: ['setTimeout','clearTimeout','Date','queueMicrotask'] }))`; `afterEach(() => vi.useRealTimers())`.
+  4. For visibilitychange: use `dispatchVisibilityChange('hidden')` / `dispatchVisibilityChange('visible')` from `tests/unit/_setup.ts`.
+  5. For audio: use `stubAudioGlobal()` from `tests/unit/_setup.ts`; access mock instances via the returned `instances` array; call `restore()` in `afterEach`.
+  6. Always wrap timer advances and event dispatches in `act(() => ...)` when testing hooks.
+- **Reference test**: `tests/unit/timer/useFocusTimer.test.ts` -- specifically the "reconciles after tab background" test as the canonical L-03 regression gate template.
+- **Run locally**: `npm test` (both projects); `npm test -- tests/unit/...` (jsdom only by include filter); `npx vitest --project jsdom` (jsdom project watch mode).
 
 ### 6.3 Adding a test for a new session API endpoint
 
@@ -168,8 +176,9 @@ should respect these unless the underlying assumption changes.
 
 ## 8. Freshness Ledger
 
-- Strategy (§1-§5) last reviewed: 2026-06-21
-- Stack versions last verified: 2026-06-21
+- Strategy (§1-§5) last reviewed: 2026-06-24
+- Stack versions last verified: 2026-06-24
+  - @testing-library/react, @testing-library/jest-dom, jsdom: 2026-06-24
 - AI-native tool references last verified: n/a (no AI-native layer in this rollout)
 
 Refresh (`/10x-test-plan --refresh`) when:

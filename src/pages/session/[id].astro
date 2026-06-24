@@ -2,6 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import SessionRunner from "@/components/session/SessionRunner";
 import { createClient } from "@/lib/supabase";
+import { resolveSessionPageAccess } from "@/lib/session/access";
 
 const { id } = Astro.params;
 
@@ -26,21 +27,21 @@ const { data, error } = await supabase
   .eq("user_id", user.id)
   .maybeSingle();
 
-if (error || !data) {
-  return Astro.redirect("/dashboard");
-}
-
-if (data.ended_at !== null) {
+if (error) {
   return Astro.redirect("/dashboard");
 }
 
 const FOCUS_PRESET_SECONDS = 25 * 60;
-const ageMs = Date.now() - new Date(data.started_at).getTime();
-if (ageMs > 2 * FOCUS_PRESET_SECONDS * 1000) {
-  return Astro.redirect("/dashboard");
+const access = resolveSessionPageAccess({ row: data, nowMs: Date.now(), focusPresetSeconds: FOCUS_PRESET_SECONDS });
+
+if (access.kind === "redirect") {
+  return Astro.redirect(access.to);
 }
 
-const startedAtMs = new Date(data.started_at).getTime();
+// Type narrowing only -- null is redirected above via resolveSessionPageAccess
+if (!data) return Astro.redirect("/dashboard");
+
+const { startedAtMs } = access;
 ---
 
 <Layout title="Session">
