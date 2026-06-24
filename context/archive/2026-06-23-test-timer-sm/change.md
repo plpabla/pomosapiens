@@ -1,10 +1,10 @@
 ---
 change_id: test-timer-sm
 title: Test timer sm
-status: impl_reviewed
+status: archived
 created: 2026-06-23
 updated: 2026-06-24
-archived_at: null
+archived_at: 2026-06-24T16:24:01Z
 ---
 
 ## Notes
