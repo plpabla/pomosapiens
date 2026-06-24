@@ -429,7 +429,7 @@ No data migration. No schema changes. No production runtime behavior changes -- 
 
 #### Automated
 
-- [ ] 5.1 `git diff context/foundation/test-plan.md` shows only the §6.2, §3 row 2 status, "Last updated", and §8 ledger edits
+- [x] 5.1 `git diff context/foundation/test-plan.md` shows only the §6.2, §3 row 2 status, "Last updated", and §8 ledger edits
 
 #### Manual
 
