@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { vi } from "vitest";
+import { vi, afterEach } from "vitest";
 
 export interface AudioMock {
   play: ReturnType<typeof vi.fn>;
@@ -32,6 +32,10 @@ export function dispatchVisibilityChange(state: "visible" | "hidden"): void {
   });
   document.dispatchEvent(new Event("visibilitychange"));
 }
+
+afterEach(() => {
+  dispatchVisibilityChange("visible");
+});
 
 export function stubAudioGlobal(): { instances: AudioMock[]; restore: () => void } {
   const instances: AudioMock[] = [];

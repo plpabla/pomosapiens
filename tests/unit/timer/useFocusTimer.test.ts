@@ -17,7 +17,6 @@ describe("useFocusTimer (risk #1: timer reconcile)", () => {
   });
 
   afterEach(() => {
-    dispatchVisibilityChange("visible");
     audioStub.restore();
     vi.useRealTimers();
   });

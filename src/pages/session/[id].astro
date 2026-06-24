@@ -27,7 +27,7 @@ const { data, error } = await supabase
   .eq("user_id", user.id)
   .maybeSingle();
 
-if (error || !data) {
+if (error) {
   return Astro.redirect("/dashboard");
 }
 
@@ -37,6 +37,9 @@ const access = resolveSessionPageAccess({ row: data, nowMs: Date.now(), focusPre
 if (access.kind === "redirect") {
   return Astro.redirect(access.to);
 }
+
+// Type narrowing only -- null is redirected above via resolveSessionPageAccess
+if (!data) return Astro.redirect("/dashboard");
 
 const { startedAtMs } = access;
 ---
