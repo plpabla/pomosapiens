@@ -404,26 +404,26 @@ No data migration. No schema changes. No production runtime behavior changes -- 
 
 #### Automated
 
-- [x] 3.1 `npm test -- tests/unit/session/resolveSessionPageAccess.test.ts` exits 0 with five tests passing
-- [x] 3.2 `npm run lint` passes
-- [x] 3.3 Required sabotage gate: threshold loosened to `Infinity` makes the abandoned-guard test fail; revert
+- [x] 3.1 `npm test -- tests/unit/session/resolveSessionPageAccess.test.ts` exits 0 with five tests passing -- 3c76485
+- [x] 3.2 `npm run lint` passes -- 3c76485
+- [x] 3.3 Required sabotage gate: threshold loosened to `Infinity` makes the abandoned-guard test fail; revert -- 3c76485
 
 #### Manual
 
-- [x] 3.4 Re-read boundary tests; confirm the formula (not a hardcoded constant) is what's being asserted
+- [x] 3.4 Re-read boundary tests; confirm the formula (not a hardcoded constant) is what's being asserted -- 3c76485
 
 ### Phase 4: Audio Tests (Risk #6)
 
 #### Automated
 
-- [ ] 4.1 `npm test -- tests/unit/timer/audio.test.ts` exits 0 with two tests passing
-- [ ] 4.2 `npm run lint` passes
-- [ ] 4.3 `npm test` (both projects) exits 0 with all ~24 tests passing
+- [x] 4.1 `npm test -- tests/unit/timer/audio.test.ts` exits 0 with two tests passing
+- [x] 4.2 `npm run lint` passes
+- [x] 4.3 `npm test` (both projects) exits 0 with all ~24 tests passing
 
 #### Manual
 
-- [ ] 4.4 Run suite three times; no `vi.stubGlobal` leak across files
-- [ ] 4.5 Safari smoke: chime fires (or fails open) at focus-end in real Safari
+- [x] 4.4 Run suite three times; no `vi.stubGlobal` leak across files
+- [-] 4.5 Safari smoke: chime fires (or fails open) at focus-end in real Safari
 
 ### Phase 5: Cookbook §6.2 + Test-Plan Status Bump
 
