@@ -320,8 +320,8 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Workflow YAML still parses (visible in Actions tab without errors)
+- [x] 3.1 Lint passes: `npm run lint` — 074b390
+- [x] 3.2 Workflow YAML still parses (visible in Actions tab without errors) — 074b390
 
 #### Manual
 
@@ -329,7 +329,7 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 - [ ] 3.4 Auto-triggered run completes green within ~6 min of the push
 - [ ] 3.5 Workflow run logs show both steps (db:types diff + smoke script) executed
 - [ ] 3.6 After the auto-run, production sessions filtered by `SMOKE_USER_ID` returns zero rows
-- [x] 3.7 Cloudflare webhook activation -- superseded: push-to-main + sleep 300 used instead (Cloudflare has no simple deploy webhook)
+- [x] 3.7 Cloudflare webhook activation -- superseded: push-to-main + sleep 300 used instead (Cloudflare has no simple deploy webhook) — 074b390
 
 ### Phase 4: Test-plan §5 status bump + cookbook §6.6
 
