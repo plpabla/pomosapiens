@@ -1,0 +1,28 @@
+name: Smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  schema-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Generate types from production
+        run: supabase gen types typescript --project-id "$SUPABASE_PROJECT_REF" > /tmp/types_from_prod.ts
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+      - name: Diff types against committed file
+        run: diff src/db/database.types.ts /tmp/types_from_prod.ts
+      - name: Run session smoke test
+        run: node scripts/smoke-session-write.mjs
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SMOKE_USER_ID: ${{ secrets.SMOKE_USER_ID }}

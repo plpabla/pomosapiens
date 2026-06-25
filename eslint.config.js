@@ -79,13 +79,29 @@ const astroConfig = tseslint.config({
   },
 });
 
+const nodeScriptsConfig = tseslint.config({
+  files: ["scripts/**"],
+  languageOptions: {
+    globals: {
+      process: "readonly",
+      console: "readonly",
+    },
+  },
+  rules: {
+    "no-console": "off",
+    "@typescript-eslint/no-unnecessary-condition": "off",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+  },
+});
+
 export default tseslint.config(
   includeIgnoreFile(gitignorePath),
-  { ignores: ["src/db/database.types.ts"] },
+  { ignores: ["src/db/database.types.ts", ".claude/**"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],
   ...eslintPluginAstro.configs["flat/jsx-a11y-recommended"],
   astroConfig,
+  nodeScriptsConfig,
   eslintPluginPrettier,
 );
