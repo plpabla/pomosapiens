@@ -76,11 +76,11 @@ The response body contains `"id": "<uuid>"` -- use that as `SMOKE_USER_ID`.
 
 ## 5. Auto-trigger via push to main
 
-**How it works:** The smoke workflow triggers automatically on every push to `main` (including PR merges). It waits 5 minutes (`sleep 300`) before running the gates, giving Cloudflare Workers Builds time to complete the deploy. No webhook or extra credentials are required.
+**How it works:** The smoke workflow triggers automatically on every push to `main` (including PR merges) and runs immediately. No webhook or extra credentials are required.
 
 **No action needed** -- this is wired in `.github/workflows/smoke.yml` and activates as soon as the file is merged to `main`.
 
-> **Note:** Cloudflare Workers Builds does not expose a simple dashboard webhook for deploy-success events. Their notification system requires a Cloudflare Queue + consumer Worker intermediary, which adds unnecessary infrastructure for this use case. The push-to-main + 5 min delay approach is equivalent in practice since deploys consistently finish well within that window.
+> **Note:** Cloudflare Workers Builds does not expose a simple dashboard webhook for deploy-success events. Their notification system requires a Cloudflare Queue + consumer Worker intermediary, which adds unnecessary infrastructure for this use case. The smoke gates (db:types diff and session write/read) talk directly to Supabase via the Management API and REST API -- they do not depend on the Cloudflare Worker being deployed, so no wait step is needed.
 
 ---
 

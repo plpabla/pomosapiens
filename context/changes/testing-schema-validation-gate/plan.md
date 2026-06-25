@@ -161,15 +161,15 @@ Flip the smoke workflow from manual-only to auto-triggered by Cloudflare deploy-
 
 ### Changes Required:
 
-#### 1. Switch to push-to-main trigger + 5 min wait
+#### 1. Switch to push-to-main trigger
 
 **File**: `.github/workflows/smoke.yml`
 
-**Intent**: Auto-trigger the smoke after every push to `main` (including PR merges). A 5-minute sleep gives Cloudflare Workers Builds time to finish the deploy before the gates run. Keep `workflow_dispatch` so manual runs remain possible.
+**Intent**: Auto-trigger the smoke after every push to `main` (including PR merges). Keep `workflow_dispatch` so manual runs remain possible.
 
-**Contract**: Replace `repository_dispatch` with `push: branches: [main]` in the `on:` block. Add a `sleep 300` step as the first step in the job. No Cloudflare dashboard action required -- Cloudflare Workers Builds does not support simple deploy-success webhooks without a Queue + consumer Worker intermediary.
+**Contract**: Replace `repository_dispatch` with `push: branches: [main]` in the `on:` block. No Cloudflare dashboard action required -- Cloudflare Workers Builds does not support simple deploy-success webhooks without a Queue + consumer Worker intermediary.
 
-> **Note:** The original plan used `repository_dispatch` triggered by a Cloudflare webhook. Cloudflare's actual notification system requires a Cloudflare Queue + consumer Worker intermediary, making it impractical. The push-to-main + delay approach is equivalent in practice.
+> **Note:** The original plan used `repository_dispatch` triggered by a Cloudflare webhook. Cloudflare's actual notification system requires a Cloudflare Queue + consumer Worker intermediary, making it impractical. The smoke gates talk directly to Supabase (Management API + REST), so they do not depend on the Cloudflare Worker deploy completing -- no wait step is needed.
 
 ### Success Criteria:
 
@@ -325,10 +325,10 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 #### Manual
 
-- [ ] 3.3 Merge of this change's PR triggers Cloudflare deploy + the smoke workflow appears in Actions as a `push` run (after ~5 min wait step)
-- [ ] 3.4 Auto-triggered run completes green within ~6 min of the push
+- [x] 3.3 Merge of this change's PR triggers Cloudflare deploy + the smoke workflow appears in Actions as a `push` run (after ~5 min wait step)
+- [x] 3.4 Auto-triggered run completes green within ~6 min of the push
 - [ ] 3.5 Workflow run logs show both steps (db:types diff + smoke script) executed
-- [ ] 3.6 After the auto-run, production sessions filtered by `SMOKE_USER_ID` returns zero rows
+- [x] 3.6 After the auto-run, production sessions filtered by `SMOKE_USER_ID` returns zero rows
 - [x] 3.7 Cloudflare webhook activation -- superseded: push-to-main + sleep 300 used instead (Cloudflare has no simple deploy webhook) — 074b390
 
 ### Phase 4: Test-plan §5 status bump + cookbook §6.6
