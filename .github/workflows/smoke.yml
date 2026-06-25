@@ -15,7 +15,7 @@ jobs:
       - run: npm ci
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.108.0
       - name: Generate types from production
         run: supabase gen types typescript --project-id "$SUPABASE_PROJECT_REF" > /tmp/types_from_prod.ts
         env:
