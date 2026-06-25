@@ -2,6 +2,8 @@ name: Smoke
 
 on:
   workflow_dispatch:
+  repository_dispatch:
+    types: [cloudflare-deploy-success]
 
 jobs:
   schema-validation:
