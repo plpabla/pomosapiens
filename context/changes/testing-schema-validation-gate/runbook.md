@@ -74,36 +74,13 @@ The response body contains `"id": "<uuid>"` -- use that as `SMOKE_USER_ID`.
 
 ---
 
-## 5. Cloudflare Deploy-Success Webhook
+## 5. Auto-trigger via push to main
 
-**What it is:** A Cloudflare notification that POSTs to the GitHub `repository_dispatch` API every time a Workers Builds deploy succeeds. This is what auto-triggers the smoke workflow after every production deploy.
+**How it works:** The smoke workflow triggers automatically on every push to `main` (including PR merges). It waits 5 minutes (`sleep 300`) before running the gates, giving Cloudflare Workers Builds time to complete the deploy. No webhook or extra credentials are required.
 
-**Prerequisites before this step:**
+**No action needed** -- this is wired in `.github/workflows/smoke.yml` and activates as soon as the file is merged to `main`.
 
-- Phase 3 of the implementation must be merged (the `smoke.yml` `on:` block must include `repository_dispatch: types: [cloudflare-deploy-success]`).
-- You need a GitHub Personal Access Token (classic) with `repo` scope to authenticate the POST. Create one at **GitHub** > **Settings** > **Developer settings** > **Personal access tokens** > **Tokens (classic)** > **Generate new token**. Name it `cloudflare-webhook-dispatch`. Copy the token.
-
-**Steps:**
-
-1. Log in to the [Cloudflare dashboard](https://dash.cloudflare.com).
-2. Navigate to **Workers & Pages** > select your Worker (the one deployed by Workers Builds for this repo).
-3. Go to **Settings** > **Notifications**.
-4. Click **Add notification** > select **Deployment Success**.
-5. Webhook URL:
-   ```
-   https://api.github.com/repos/<owner>/<repo>/dispatches
-   ```
-   Replace `<owner>` and `<repo>` with your GitHub username/org and repository name.
-6. HTTP method: **POST**.
-7. Headers (add each individually):
-   - `Authorization`: `token <GITHUB_PAT>` (the token from the prerequisite step)
-   - `Content-Type`: `application/json`
-   - `Accept`: `application/vnd.github+json`
-8. Body:
-   ```json
-   { "event_type": "cloudflare-deploy-success" }
-   ```
-9. Save the notification.
+> **Note:** Cloudflare Workers Builds does not expose a simple dashboard webhook for deploy-success events. Their notification system requires a Cloudflare Queue + consumer Worker intermediary, which adds unnecessary infrastructure for this use case. The push-to-main + 5 min delay approach is equivalent in practice since deploys consistently finish well within that window.
 
 ---
 
@@ -111,13 +88,12 @@ The response body contains `"id": "<uuid>"` -- use that as `SMOKE_USER_ID`.
 
 Confirm each item before proceeding to Phase 2.
 
-| Item                                   | How to verify                                                                                                                      |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `SUPABASE_ACCESS_TOKEN` secret         | GitHub repo > Settings > Secrets > Actions -- secret listed                                                                        |
-| `SUPABASE_PROJECT_REF` secret          | Same page -- secret listed                                                                                                         |
-| `SMOKE_USER_ID` secret                 | Same page -- secret listed                                                                                                         |
-| `SUPABASE_SERVICE_ROLE_KEY` secret     | Same page -- secret listed (may be pre-existing)                                                                                   |
-| Smoke user exists in prod `auth.users` | Supabase dashboard > Authentication > Users -- `smoke+schema-gate@<your-domain>` row visible                                       |
-| Cloudflare webhook configured          | Cloudflare dashboard > Workers > Settings > Notifications -- Deployment Success notification listed with the GitHub dispatches URL |
+| Item                                   | How to verify                                                                                        |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `SUPABASE_ACCESS_TOKEN` secret         | GitHub repo > Settings > Secrets > Actions -- secret listed                                          |
+| `SUPABASE_PROJECT_REF` secret          | Same page -- secret listed                                                                           |
+| `SMOKE_USER_ID` secret                 | Same page -- secret listed                                                                           |
+| `SUPABASE_SERVICE_ROLE_KEY` secret     | Same page -- secret listed (may be pre-existing)                                                     |
+| Smoke user exists in prod `auth.users` | Supabase dashboard > Authentication > Users -- `smoke+schema-gate@pomo-sapiens.com` row visible      |
 
-Once all six rows are checked, the operator prerequisites are complete. Proceed to Phase 2 manual verification (trigger `smoke.yml` via `workflow_dispatch` in GitHub Actions).
+Once all five rows are checked, the operator prerequisites are complete. Proceed to Phase 2 manual verification (trigger `smoke.yml` via `workflow_dispatch` in GitHub Actions).
