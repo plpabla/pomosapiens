@@ -161,21 +161,15 @@ Flip the smoke workflow from manual-only to auto-triggered by Cloudflare deploy-
 
 ### Changes Required:
 
-#### 1. Add repository_dispatch trigger
+#### 1. Switch to push-to-main trigger + 5 min wait
 
 **File**: `.github/workflows/smoke.yml`
 
-**Intent**: Add the auto-trigger that Cloudflare's deploy-success webhook will invoke. Keep `workflow_dispatch` so manual runs remain possible.
+**Intent**: Auto-trigger the smoke after every push to `main` (including PR merges). A 5-minute sleep gives Cloudflare Workers Builds time to finish the deploy before the gates run. Keep `workflow_dispatch` so manual runs remain possible.
 
-**Contract**: Extend the `on:` block to include `repository_dispatch: types: [cloudflare-deploy-success]`. No other change to the job.
+**Contract**: Replace `repository_dispatch` with `push: branches: [main]` in the `on:` block. Add a `sleep 300` step as the first step in the job. No Cloudflare dashboard action required -- Cloudflare Workers Builds does not support simple deploy-success webhooks without a Queue + consumer Worker intermediary.
 
-#### 2. Cloudflare webhook activation (operator action)
-
-**File**: (Cloudflare dashboard — no repo file)
-
-**Intent**: Wire the webhook the runbook documents.
-
-**Contract**: Cloudflare → Workers & Pages → (Worker) → Settings → Notifications → "Deployment Success" → POST `https://api.github.com/repos/<owner>/<repo>/dispatches` with `Authorization: token <GITHUB_PAT>`, `Content-Type: application/json`, `Accept: application/vnd.github+json`, body `{"event_type": "cloudflare-deploy-success"}`. GITHUB_PAT scope: `repo`. This step is performed by the operator per the runbook; nothing in the repo changes.
+> **Note:** The original plan used `repository_dispatch` triggered by a Cloudflare webhook. Cloudflare's actual notification system requires a Cloudflare Queue + consumer Worker intermediary, making it impractical. The push-to-main + delay approach is equivalent in practice.
 
 ### Success Criteria:
 
@@ -331,11 +325,11 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 #### Manual
 
-- [ ] 3.3 No-op commit (or merge of this change's PR) triggers Cloudflare deploy + the smoke workflow appears in Actions as a `repository_dispatch` run
-- [ ] 3.4 Auto-triggered run completes green within ~60s
+- [ ] 3.3 Merge of this change's PR triggers Cloudflare deploy + the smoke workflow appears in Actions as a `push` run (after ~5 min wait step)
+- [ ] 3.4 Auto-triggered run completes green within ~6 min of the push
 - [ ] 3.5 Workflow run logs show both steps (db:types diff + smoke script) executed
 - [ ] 3.6 After the auto-run, production sessions filtered by `SMOKE_USER_ID` returns zero rows
-- [ ] 3.7 Execute runbook step 5 -- configure Cloudflare deploy-success webhook per runbook.md §5 (pre-req: smoke.yml with `repository_dispatch` trigger must be merged first)
+- [x] 3.7 Cloudflare webhook activation -- superseded: push-to-main + sleep 300 used instead (Cloudflare has no simple deploy webhook)
 
 ### Phase 4: Test-plan §5 status bump + cookbook §6.6
 

@@ -2,13 +2,15 @@ name: Smoke
 
 on:
   workflow_dispatch:
-  repository_dispatch:
-    types: [cloudflare-deploy-success]
+  push:
+    branches: [main]
 
 jobs:
   schema-validation:
     runs-on: ubuntu-latest
     steps:
+      - name: Wait for Cloudflare deploy to finish
+        run: sleep 300
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
