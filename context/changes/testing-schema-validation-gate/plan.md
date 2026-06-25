@@ -51,7 +51,7 @@ Four phases, ordered so each is independently reviewable:
 
 ## Critical Implementation Details
 
-- **Cleanup ordering.** The smoke script must delete by `user_id = SMOKE_USER_ID` *before* the INSERT, not only after. A crashed previous run can leave a row owned by the smoke user; without the pre-INSERT cleanup, the same row could survive across runs and skew the read-back assertion. The `--id` column has a server default (`gen_random_uuid()`) — the smoke script must capture the returned `id` from the INSERT to delete the exact row, not rely on a fixed UUID.
+- **Cleanup ordering.** The smoke script must delete by `user_id = SMOKE_USER_ID` _before_ the INSERT, not only after. A crashed previous run can leave a row owned by the smoke user; without the pre-INSERT cleanup, the same row could survive across runs and skew the read-back assertion. The `--id` column has a server default (`gen_random_uuid()`) — the smoke script must capture the returned `id` from the INSERT to delete the exact row, not rely on a fixed UUID.
 - **`supabase gen types` from production needs `SUPABASE_ACCESS_TOKEN` env var**, not a CLI flag. The Supabase CLI reads it from the environment.
 - **Diff exit code.** Use `diff` (POSIX exit code 1 on mismatch fails the step) over `git diff` (which compares to working tree). The committed file is read from `src/db/database.types.ts` directly.
 - **Workflow runner env.** `node` (>=20) is on `ubuntu-latest` by default; the smoke script uses `@supabase/supabase-js` from `node_modules` so `npm ci` must run first.
@@ -249,7 +249,7 @@ Reflect the now-active Phase 3 gates in the canonical test plan and add the cook
 
 ### Unit Tests:
 
-- No new unit tests. The smoke script's only logic is sequencing Supabase REST calls; its assertion *is* the gate. Unit-testing it with mocked Supabase would test the mock.
+- No new unit tests. The smoke script's only logic is sequencing Supabase REST calls; its assertion _is_ the gate. Unit-testing it with mocked Supabase would test the mock.
 
 ### Integration Tests:
 
@@ -279,7 +279,7 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 - Change identity: [context/changes/testing-schema-validation-gate/change.md](context/changes/testing-schema-validation-gate/change.md)
 - Test plan (Phase 3 row + Risk #4 + §5 gates): [context/foundation/test-plan.md](context/foundation/test-plan.md)
 - Prior phase closeout pattern (cookbook + status bump): [context/archive/2026-06-23-test-timer-sm/plan.md](context/archive/2026-06-23-test-timer-sm/plan.md)
-- Service-role fixture (reference for smoke script shape): [tests/_fixtures/db.ts](tests/_fixtures/db.ts)
+- Service-role fixture (reference for smoke script shape): [tests/\_fixtures/db.ts](tests/_fixtures/db.ts)
 - Sessions schema: [supabase/migrations/20260531182506_sessions_data_foundation.sql](supabase/migrations/20260531182506_sessions_data_foundation.sql)
 - Current CI workflow: [.github/workflows/ci.yml](.github/workflows/ci.yml)
 
@@ -307,11 +307,11 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 TypeScript build still passes: `npm run build`
-- [ ] 2.3 Existing test suite passes (no regression): `npm test`
-- [ ] 2.4 New script can be executed locally with environment set: `npm run test:smoke` exits 0
-- [ ] 2.5 Workflow YAML is syntactically valid (GitHub renders it in the Actions tab without parse errors)
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 TypeScript build still passes: `npm run build`
+- [x] 2.3 Existing test suite passes (no regression): `npm test`
+- [x] 2.4 New script can be executed locally with environment set: `npm run test:smoke` exits 0
+- [x] 2.5 Workflow YAML is syntactically valid (GitHub renders it in the Actions tab without parse errors)
 
 #### Manual
 

@@ -17,7 +17,8 @@
     "db:migrate:new": "supabase migration new",
     "db:types": "supabase gen types typescript --local > src/db/database.types.ts",
     "db:test": "supabase test db",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:smoke": "node scripts/smoke-session-write.mjs"
   },
   "dependencies": {
     "@astrojs/check": "^0.9.8",
