@@ -3,7 +3,7 @@ change_id: testing-schema-validation-gate
 title: Production schema validation gate (test-plan Phase 3)
 status: implementing
 created: 2026-06-24
-updated: 2026-06-24
+updated: 2026-06-25
 archived_at: null
 ---
 

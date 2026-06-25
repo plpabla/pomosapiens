@@ -296,10 +296,10 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 #### Manual
 
-- [x] 1.3 Runbook is readable end-to-end with no unexplained jargon; an operator unfamiliar with the project can follow the steps
-- [x] 1.4 Each of the four required secrets is named exactly as it will appear in the workflow YAML
-- [x] 1.5 CLAUDE.md pointer renders correctly in VSCode preview
-- [x] 1.6 Operator has completed the manual steps (4 secrets present in GitHub, 1 smoke user in prod auth.users, 1 Cloudflare webhook configured)
+- [x] 1.3 Runbook is readable end-to-end with no unexplained jargon; an operator unfamiliar with the project can follow the steps — 2d4676c
+- [x] 1.4 Each of the four required secrets is named exactly as it will appear in the workflow YAML — 2d4676c
+- [x] 1.5 CLAUDE.md pointer renders correctly in VSCode preview — 2d4676c
+- [x] 1.6 Operator has completed the manual steps (4 secrets present in GitHub, 1 smoke user in prod auth.users, 1 Cloudflare webhook configured) — 2d4676c
 
 > **NOTE:** Runbook step 5 (Cloudflare deploy-success webhook) is deferred -- it requires `smoke.yml` with `repository_dispatch: types: [cloudflare-deploy-success]` (Phase 3) to be merged before it can be executed. Execution is tracked as item 3.7 below.
 
