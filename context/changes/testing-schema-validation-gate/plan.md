@@ -142,10 +142,12 @@ Implement the actual production checks: the standalone Node script that exercise
 
 #### Manual Verification:
 
-- `workflow_dispatch` button is visible on the Actions tab for the new `smoke.yml` workflow.
+> **Note**: GitHub's `workflow_dispatch` API requires the workflow file to be on the default branch (`main`). The "Run workflow" button and `gh workflow run` both return HTTP 404 until the file is merged. Merge this PR to `main` before performing the steps below.
+
+- `workflow_dispatch` button is visible on the Actions tab for `smoke.yml` after merging to `main`.
 - Manual trigger against the current production deploy completes green: both `diff` and the smoke script pass; total runtime under 60 seconds.
 - After a successful run, querying production sessions filtered by `user_id = SMOKE_USER_ID` returns zero rows (cleanup verified).
-- Intentional drift verification: temporarily edit `src/db/database.types.ts` (e.g. add a `// drift` comment line), commit, push, manual-trigger — the workflow fails on the `diff` step. Revert before merging.
+- Intentional drift verification: temporarily edit `src/db/database.types.ts` (e.g. add a `// drift` comment line), commit, push to `main`, manual-trigger — the workflow fails on the `diff` step. Revert before proceeding to Phase 3.
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation that the manual workflow_dispatch run completes green and the drift test fails as expected, before proceeding to Phase 3.
 
@@ -315,17 +317,17 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 #### Manual
 
-- [ ] 2.6 `workflow_dispatch` button is visible on the Actions tab for the new `smoke.yml` workflow
-- [ ] 2.7 Manual trigger against current production deploy completes green in under 60 seconds
-- [ ] 2.8 After a successful run, production sessions filtered by `SMOKE_USER_ID` returns zero rows
-- [ ] 2.9 Intentional drift verification: edited types file makes the workflow fail on the `diff` step; reverted before merging
+- [x] 2.6 `workflow_dispatch` button is visible on the Actions tab for `smoke.yml` after merging to `main`
+- [x] 2.7 Manual trigger against current production deploy completes green in under 60 seconds
+- [x] 2.8 After a successful run, production sessions filtered by `SMOKE_USER_ID` returns zero rows
+- [x] 2.9 Intentional drift verification: edited types file makes the workflow fail on the `diff` step; reverted before merging
 
 ### Phase 3: Webhook activation + first auto-run
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Workflow YAML still parses (visible in Actions tab without errors)
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 Workflow YAML still parses (visible in Actions tab without errors)
 
 #### Manual
 
