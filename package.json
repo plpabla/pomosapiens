@@ -19,6 +19,7 @@
     "db:types:prod": "node scripts/gen-types-prod.mjs",
     "db:test": "supabase test db",
     "test": "vitest run",
+    "test:e2e": "node --env-file-if-exists=.env --env-file-if-exists=.dev.vars node_modules/@playwright/test/cli.js test --pass-with-no-tests",
     "test:smoke": "node scripts/smoke-session-write.mjs"
   },
   "dependencies": {
@@ -71,6 +72,7 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.59.2",
     "vitest": "^4.1.9",
+    "@playwright/test": "^1.52.0",
     "wrangler": "^4.95.0"
   },
   "overrides": {

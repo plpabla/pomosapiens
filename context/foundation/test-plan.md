@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-06-26 (Phase 3 complete)
+> Last updated: 2026-06-26 (Phase 4 complete)
 
 ## 1. Strategy
 
@@ -69,7 +69,7 @@ orchestrator updates Status as artifacts appear on disk.
 | 1   | Test runner bootstrap + session API contract | Set up Vitest; prove PATCH column-scope and cross-user API access at cheapest layer                | #2, #3        | Vitest (`@cloudflare/vitest-pool-workers`) integration | complete    | context/changes/testing-api-contract/           |
 | 2   | Timer state machine + finalization guards    | Prove timer reconcile, stuck-open guards, and audio trigger without a full browser                 | #1, #5, #6    | Vitest (jsdom) integration                             | complete    | context/changes/testing-timer-sm/               |
 | 3   | Production schema validation gate            | Establish post-deploy smoke test + `db:types` CI diff so schema mismatch fails before users hit it | #4            | smoke + schema diff                                    | complete    | context/changes/testing-schema-validation-gate/ |
-| 4   | E2e on full session capture flow             | Lock the user-visible success criterion as a regression gate before each future slice              | cross-cutting | Playwright e2e                                         | not started | --                                              |
+| 4   | E2e on full session capture flow             | Lock the user-visible success criterion as a regression gate before each future slice              | cross-cutting | Playwright e2e                                         | complete    | context/changes/testing-e2e-session-capture-flow/ |
 
 ## 4. Stack
 
@@ -103,7 +103,7 @@ The full set of gates that must pass before a change reaches production.
 | Vitest jsdom integration                 | local + CI                      | required after §3 Phase 2    | timer reconcile regressions, finalization guard regressions |
 | post-deploy smoke (session write + read) | post-merge, before prod traffic | required (active)            | production schema mismatch                                  |
 | `db:types` diff                          | CI on PR                        | required (active)            | generated types out of sync with actual schema              |
-| Playwright e2e on session capture flow   | CI on PR                        | required after §3 Phase 4    | broken critical user path from dashboard to history         |
+| Playwright e2e on session capture flow   | CI on PR                        | required (active)            | broken critical user path from dashboard to history         |
 | post-edit hook                           | local (agent loop)              | recommended after §3 Phase 1 | regressions at edit time                                    |
 
 ## 6. Cookbook Patterns
@@ -159,8 +159,19 @@ Any endpoint that writes to `public.sessions` (or any RLS-bearing table with a w
 
 ### 6.5 Adding a Playwright e2e test (critical user flow)
 
-TBD -- see §3 Phase 4 for the full session capture flow pattern (dashboard
-to pre-session to timer to rate to history visible).
+- **Location**: `tests/e2e/<flow>.spec.ts` -- one spec per cross-cutting user flow. SSR-only redirect assertions can share a spec file when they cover the same resource (e.g. `session-access.spec.ts` for all `/session/[id]` redirect guards).
+- **Pattern**:
+  1. `import { setupTwoUsers } from "../../_fixtures/auth";` and `import { seedAuthCookie } from "./_fixtures/auth";` -- `setupTwoUsers` provisions two ephemeral Supabase users; `seedAuthCookie(context, cookieHeader)` loads the auth cookie into a Playwright `BrowserContext`.
+  2. For SSR redirect scenarios, also `import { insertSession } from "./_fixtures/sessions";` -- inserts a row via the service role, bypassing RLS, to seed pre-existing session state.
+  3. In `beforeAll`: `fixture = await setupTwoUsers();`. In `afterAll`: `await fixture.cleanup();` (cascades session rows via FK).
+  4. Create a fresh `BrowserContext` per test with `browser.newContext()`, call `seedAuthCookie(context, fixture.cookieFor(userId))`, then `page = await context.newPage()`.
+  5. Use semantic locators only: `getByRole`, `getByLabel`, `getByText`. Never CSS class selectors, XPath, or DOM structure selectors.
+  6. For happy-path flows, use `page.getByRole("button", { name: "Stop early" })` to exit the timer without waiting the full preset -- this exercises the same code path as a natural end-of-session.
+  7. Wait for state, never for time: `await page.waitForURL("**/dashboard")`, `await expect(el).toBeVisible()`. Never `page.waitForTimeout()`.
+- **Reference tests**:
+  - `tests/e2e/session-capture.spec.ts` -- happy path: dashboard -> start session -> energy pick -> timer -> stop early -> rate (4) -> back to dashboard with history entry visible.
+  - `tests/e2e/session-access.spec.ts` -- three SSR redirect guards: cross-user (Risk #3), ended session (Risk #5a), abandoned session (Risk #5b).
+- **Run locally**: `npm run test:e2e`. First time after checkout: `npx playwright install chromium` first.
 
 ### 6.6 Extending the production smoke gate (new critical RLS-bearing table)
 

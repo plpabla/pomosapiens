@@ -34,3 +34,11 @@ pnpm-debug.log*
 # claude
 .claude/settings.local.json
 .claude/prompts/*
+
+# playwright
+test-results/
+playwright-report/
+blob-report/
+/playwright/.cache/
+.playwright-cli/
+/playwright/.auth/*

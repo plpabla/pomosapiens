@@ -1,0 +1,69 @@
+// session-capture.spec.ts
+// Risk: full session capture flow -- a broken slice in auth, routing, POST/PATCH API,
+// or history rendering blocks the user from completing a session.
+// Covers: POST /api/sessions, SessionRunner mount + Stop early, PATCH /api/sessions/[id],
+// dashboard history card with energy level and rating.
+// Seed: tests/e2e/seed.spec.ts
+// test-plan.md: §2 cross-cutting risk (Phase 4 regression gate)
+import { test, expect } from "@playwright/test";
+
+import type { TwoUserFixture } from "./_fixtures/auth";
+import { setupTwoUsers, seedAuthCookie } from "./_fixtures/auth";
+
+let fixture: TwoUserFixture;
+
+test.beforeAll(async () => {
+  fixture = await setupTwoUsers();
+});
+
+test.afterAll(async () => {
+  await fixture.cleanup();
+});
+
+test("session capture flow: dashboard → energy pick → timer → stop early → rate → history", async ({ browser }) => {
+  const context = await browser.newContext();
+  try {
+    // Inject User A's auth cookie -- middleware reads this cookie on every SSR request.
+    await seedAuthCookie(context, fixture.cookieFor(fixture.userA.id));
+    const page = await context.newPage();
+
+    // Step 1: Land on dashboard, click "Start session" link.
+    await page.goto("/dashboard");
+    await page.getByRole("link", { name: "Start session" }).click();
+    // Wait for network idle so all Astro island scripts are loaded and React has hydrated.
+    await page.waitForURL(/\/session\/new/);
+    await page.waitForLoadState("networkidle");
+
+    // Step 2: Pick energy level and submit (POST /api/sessions).
+    await page.getByRole("button", { name: "Medium" }).click();
+    // Wait for React re-render to enable the Start button before clicking it.
+    await expect(page.getByRole("button", { name: "Start" })).toBeEnabled();
+    // Listen for the POST response before clicking so we don't miss it.
+    const postSessionResponse = page.waitForResponse(
+      (r) => r.url().includes("/api/sessions") && r.request().method() === "POST",
+    );
+    await page.getByRole("button", { name: "Start" }).click();
+    await postSessionResponse;
+    // Wait for navigation from /session/new to /session/<uuid>.
+    await page.waitForURL((url) => url.pathname.startsWith("/session/") && url.pathname !== "/session/new");
+
+    // Step 3: Timer view -- SessionRunner is in "running" phase.
+    await expect(page.getByRole("button", { name: "Stop early" })).toBeVisible();
+
+    // Step 4: Stop early -- transitions to rating phase without waiting 25 min.
+    await page.getByRole("button", { name: "Stop early" }).click();
+
+    // Step 5: Rating phase -- pick rating 4 (PATCH /api/sessions/[id]).
+    await expect(page.getByRole("heading", { name: "How was your focus?" })).toBeVisible();
+    await page.getByRole("button", { name: "4" }).click();
+
+    // Step 6: Redirected back to /dashboard.
+    await page.waitForURL("**/dashboard");
+
+    // Step 7: New session card is visible with correct energy level and rating.
+    await expect(page.getByText("medium", { exact: false }).first()).toBeVisible();
+    await expect(page.getByText("★ 4 / 5")).toBeVisible();
+  } finally {
+    await context.close();
+  }
+});
