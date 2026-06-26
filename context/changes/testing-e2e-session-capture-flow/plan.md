@@ -412,16 +412,16 @@ Wire the Playwright job into CI parallel to the existing `ci:` job, then update 
 
 #### Automated
 
-- [ ] 3.1 `npm run test:e2e` passes all four specs
-- [ ] 3.2 `npm run lint` passes
-- [ ] 3.3 `npx tsc --noEmit -p tests/tsconfig.json` passes
-- [ ] 3.4 Total e2e run under 60s locally
+- [x] 3.1 `npm run test:e2e` passes all four specs
+- [x] 3.2 `npm run lint` passes
+- [x] 3.3 `npx tsc --noEmit -p tests/tsconfig.json` passes
+- [x] 3.4 Total e2e run under 60s locally
 
 #### Manual
 
-- [ ] 3.5 Widening the SSR owner filter fails the Risk #3 spec
-- [ ] 3.6 Removing the ended-session redirect fails the Risk #5a spec
-- [ ] 3.7 Raising the abandoned threshold fails the Risk #5b spec
+- [x] 3.5 Widening the SSR owner filter fails the Risk #3 spec
+- [x] 3.6 Removing the ended-session redirect fails the Risk #5a spec
+- [x] 3.7 Raising the abandoned threshold fails the Risk #5b spec
 
 ### Phase 4: CI gate + docs update
 
