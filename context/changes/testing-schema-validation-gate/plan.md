@@ -55,6 +55,7 @@ Four phases, ordered so each is independently reviewable:
 - **`supabase gen types` from production needs `SUPABASE_ACCESS_TOKEN` env var**, not a CLI flag. The Supabase CLI reads it from the environment.
 - **Diff exit code.** Use `diff` (POSIX exit code 1 on mismatch fails the step) over `git diff` (which compares to working tree). The committed file is read from `src/db/database.types.ts` directly.
 - **Workflow runner env.** `node` (>=20) is on `ubuntu-latest` by default; the smoke script uses `@supabase/supabase-js` from `node_modules` so `npm ci` must run first.
+- **Committed types must be regenerated from prod with the pinned CLI.** Addendum (post-implementation): a helper script `scripts/gen-types-prod.mjs` and the `npm run db:types:prod` alias were added so the committed `src/db/database.types.ts` can be regenerated against production via the same `supabase` CLI version pinned in `package.json` and `smoke.yml`. The diff gate compares formatting-sensitive output, so local-only `npm run db:types` (against a local DB) is not sufficient before pushing — run `db:types:prod` after schema changes land in prod.
 
 ## Phase 1: Operator runbook & prerequisites
 
