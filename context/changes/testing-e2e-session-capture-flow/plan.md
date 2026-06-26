@@ -399,14 +399,14 @@ Wire the Playwright job into CI parallel to the existing `ci:` job, then update 
 
 #### Automated
 
-- [x] 2.1 `npm run test:e2e` passes the happy-path spec
-- [x] 2.2 `npm run lint` passes
-- [x] 2.3 `npx tsc --noEmit -p tests/tsconfig.json` passes
+- [x] 2.1 `npm run test:e2e` passes the happy-path spec — 026ec4a
+- [x] 2.2 `npm run lint` passes — 026ec4a
+- [x] 2.3 `npx tsc --noEmit -p tests/tsconfig.json` passes — 026ec4a
 
 #### Manual
 
-- [x] 2.4 Spec passes against `npm run dev` in a separate terminal (reuseExistingServer path)
-- [x] 2.5 Breaking PATCH /api/sessions/[id] fails the spec with a readable error
+- [x] 2.4 Spec passes against `npm run dev` in a separate terminal (reuseExistingServer path) — 026ec4a
+- [x] 2.5 Breaking PATCH /api/sessions/[id] fails the spec with a readable error — 026ec4a
 
 ### Phase 3: SSR redirect specs
 
