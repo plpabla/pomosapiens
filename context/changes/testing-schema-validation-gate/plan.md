@@ -327,7 +327,7 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 - [x] 3.3 Merge of this change's PR triggers Cloudflare deploy + the smoke workflow appears in Actions as a `push` run (after ~5 min wait step)
 - [x] 3.4 Auto-triggered run completes green within ~6 min of the push
-- [ ] 3.5 Workflow run logs show both steps (db:types diff + smoke script) executed
+- [x] 3.5 Workflow run logs show both steps (db:types diff + smoke script) executed
 - [x] 3.6 After the auto-run, production sessions filtered by `SMOKE_USER_ID` returns zero rows
 - [x] 3.7 Cloudflare webhook activation -- superseded: push-to-main + sleep 300 used instead (Cloudflare has no simple deploy webhook) — 074b390
 
@@ -335,13 +335,13 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 #### Automated
 
-- [ ] 4.1 Lint passes: `npm run lint`
-- [ ] 4.2 Prettier passes on the edited markdown files
-- [ ] 4.3 Markdown links resolve (no dead anchors introduced)
+- [x] 4.1 Lint passes: `npm run lint`
+- [x] 4.2 Prettier passes on the edited markdown files
+- [x] 4.3 Markdown links resolve (no dead anchors introduced)
 
 #### Manual
 
-- [ ] 4.4 `context/foundation/test-plan.md` §3 row 3 Status reads `complete`
-- [ ] 4.5 `context/foundation/test-plan.md` §5 shows both gates as `required (active)`
-- [ ] 4.6 §6.6 cookbook entry is consistent in style with §6.1-§6.5
-- [ ] 4.7 `change.md` reads `status: implemented` and is ready for `/10x-archive`
+- [x] 4.4 `context/foundation/test-plan.md` §3 row 3 Status reads `complete`
+- [x] 4.5 `context/foundation/test-plan.md` §5 shows both gates as `required (active)`
+- [x] 4.6 §6.6 cookbook entry is consistent in style with §6.1-§6.5
+- [x] 4.7 `change.md` reads `status: implemented` and is ready for `/10x-archive`
