@@ -335,13 +335,13 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 #### Automated
 
-- [x] 4.1 Lint passes: `npm run lint`
-- [x] 4.2 Prettier passes on the edited markdown files
-- [x] 4.3 Markdown links resolve (no dead anchors introduced)
+- [x] 4.1 Lint passes: `npm run lint` — a9d3e21
+- [x] 4.2 Prettier passes on the edited markdown files — a9d3e21
+- [x] 4.3 Markdown links resolve (no dead anchors introduced) — a9d3e21
 
 #### Manual
 
-- [x] 4.4 `context/foundation/test-plan.md` §3 row 3 Status reads `complete`
-- [x] 4.5 `context/foundation/test-plan.md` §5 shows both gates as `required (active)`
-- [x] 4.6 §6.6 cookbook entry is consistent in style with §6.1-§6.5
-- [x] 4.7 `change.md` reads `status: implemented` and is ready for `/10x-archive`
+- [x] 4.4 `context/foundation/test-plan.md` §3 row 3 Status reads `complete` — a9d3e21
+- [x] 4.5 `context/foundation/test-plan.md` §5 shows both gates as `required (active)` — a9d3e21
+- [x] 4.6 §6.6 cookbook entry is consistent in style with §6.1-§6.5 — a9d3e21
+- [x] 4.7 `change.md` reads `status: implemented` and is ready for `/10x-archive` — a9d3e21
