@@ -55,6 +55,7 @@ Four phases, ordered so each is independently reviewable:
 - **`supabase gen types` from production needs `SUPABASE_ACCESS_TOKEN` env var**, not a CLI flag. The Supabase CLI reads it from the environment.
 - **Diff exit code.** Use `diff` (POSIX exit code 1 on mismatch fails the step) over `git diff` (which compares to working tree). The committed file is read from `src/db/database.types.ts` directly.
 - **Workflow runner env.** `node` (>=20) is on `ubuntu-latest` by default; the smoke script uses `@supabase/supabase-js` from `node_modules` so `npm ci` must run first.
+- **Committed types must be regenerated from prod with the pinned CLI.** Addendum (post-implementation): a helper script `scripts/gen-types-prod.mjs` and the `npm run db:types:prod` alias were added so the committed `src/db/database.types.ts` can be regenerated against production via the same `supabase` CLI version pinned in `package.json` and `smoke.yml`. The diff gate compares formatting-sensitive output, so local-only `npm run db:types` (against a local DB) is not sufficient before pushing — run `db:types:prod` after schema changes land in prod.
 
 ## Phase 1: Operator runbook & prerequisites
 
@@ -327,7 +328,7 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 - [x] 3.3 Merge of this change's PR triggers Cloudflare deploy + the smoke workflow appears in Actions as a `push` run (after ~5 min wait step)
 - [x] 3.4 Auto-triggered run completes green within ~6 min of the push
-- [ ] 3.5 Workflow run logs show both steps (db:types diff + smoke script) executed
+- [x] 3.5 Workflow run logs show both steps (db:types diff + smoke script) executed
 - [x] 3.6 After the auto-run, production sessions filtered by `SMOKE_USER_ID` returns zero rows
 - [x] 3.7 Cloudflare webhook activation -- superseded: push-to-main + sleep 300 used instead (Cloudflare has no simple deploy webhook) — 074b390
 
@@ -335,13 +336,13 @@ No data migration. One persistent artifact in production: the dedicated smoke au
 
 #### Automated
 
-- [ ] 4.1 Lint passes: `npm run lint`
-- [ ] 4.2 Prettier passes on the edited markdown files
-- [ ] 4.3 Markdown links resolve (no dead anchors introduced)
+- [x] 4.1 Lint passes: `npm run lint` — a9d3e21
+- [x] 4.2 Prettier passes on the edited markdown files — a9d3e21
+- [x] 4.3 Markdown links resolve (no dead anchors introduced) — a9d3e21
 
 #### Manual
 
-- [ ] 4.4 `context/foundation/test-plan.md` §3 row 3 Status reads `complete`
-- [ ] 4.5 `context/foundation/test-plan.md` §5 shows both gates as `required (active)`
-- [ ] 4.6 §6.6 cookbook entry is consistent in style with §6.1-§6.5
-- [ ] 4.7 `change.md` reads `status: implemented` and is ready for `/10x-archive`
+- [x] 4.4 `context/foundation/test-plan.md` §3 row 3 Status reads `complete` — a9d3e21
+- [x] 4.5 `context/foundation/test-plan.md` §5 shows both gates as `required (active)` — a9d3e21
+- [x] 4.6 §6.6 cookbook entry is consistent in style with §6.1-§6.5 — a9d3e21
+- [x] 4.7 `change.md` reads `status: implemented` and is ready for `/10x-archive` — a9d3e21

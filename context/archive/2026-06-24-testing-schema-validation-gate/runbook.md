@@ -88,12 +88,22 @@ The response body contains `"id": "<uuid>"` -- use that as `SMOKE_USER_ID`.
 
 Confirm each item before proceeding to Phase 2.
 
-| Item                                   | How to verify                                                                                        |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `SUPABASE_ACCESS_TOKEN` secret         | GitHub repo > Settings > Secrets > Actions -- secret listed                                          |
-| `SUPABASE_PROJECT_REF` secret          | Same page -- secret listed                                                                           |
-| `SMOKE_USER_ID` secret                 | Same page -- secret listed                                                                           |
-| `SUPABASE_SERVICE_ROLE_KEY` secret     | Same page -- secret listed (may be pre-existing)                                                     |
-| Smoke user exists in prod `auth.users` | Supabase dashboard > Authentication > Users -- `smoke+schema-gate@pomo-sapiens.com` row visible      |
+| Item                                   | How to verify                                                                                   |
+| -------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `SUPABASE_ACCESS_TOKEN` secret         | GitHub repo > Settings > Secrets > Actions -- secret listed                                     |
+| `SUPABASE_PROJECT_REF` secret          | Same page -- secret listed                                                                      |
+| `SMOKE_USER_ID` secret                 | Same page -- secret listed                                                                      |
+| `SUPABASE_SERVICE_ROLE_KEY` secret     | Same page -- secret listed (may be pre-existing)                                                |
+| Smoke user exists in prod `auth.users` | Supabase dashboard > Authentication > Users -- `smoke+schema-gate@pomo-sapiens.com` row visible |
 
 Once all five rows are checked, the operator prerequisites are complete. Proceed to Phase 2 manual verification (trigger `smoke.yml` via `workflow_dispatch` in GitHub Actions).
+
+---
+
+## 7. Keep the Supabase CLI version in sync
+
+The diff gate compares `src/db/database.types.ts` (committed locally) against the file generated in CI by `supabase/setup-cli@v1`. Different CLI versions can emit different formatting and trip the gate on a no-op. Keep them in sync:
+
+- `package.json` pins `supabase` to a single version (currently `2.108.0`). Both `npm run db:types` (local) and `npm run db:types:prod` (regenerates from prod) use that pinned CLI.
+- `.github/workflows/smoke.yml` pins `supabase/setup-cli@v1` to the same version.
+- When bumping, change both in the same commit and run `npm run db:types:prod` to regenerate the committed types.
