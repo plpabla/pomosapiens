@@ -412,25 +412,25 @@ Wire the Playwright job into CI parallel to the existing `ci:` job, then update 
 
 #### Automated
 
-- [x] 3.1 `npm run test:e2e` passes all four specs
-- [x] 3.2 `npm run lint` passes
-- [x] 3.3 `npx tsc --noEmit -p tests/tsconfig.json` passes
-- [x] 3.4 Total e2e run under 60s locally
+- [x] 3.1 `npm run test:e2e` passes all four specs — 94d14c3
+- [x] 3.2 `npm run lint` passes — 94d14c3
+- [x] 3.3 `npx tsc --noEmit -p tests/tsconfig.json` passes — 94d14c3
+- [x] 3.4 Total e2e run under 60s locally — 94d14c3
 
 #### Manual
 
-- [x] 3.5 Widening the SSR owner filter fails the Risk #3 spec
-- [x] 3.6 Removing the ended-session redirect fails the Risk #5a spec
-- [x] 3.7 Raising the abandoned threshold fails the Risk #5b spec
+- [x] 3.5 Widening the SSR owner filter fails the Risk #3 spec — 94d14c3
+- [x] 3.6 Removing the ended-session redirect fails the Risk #5a spec — 94d14c3
+- [x] 3.7 Raising the abandoned threshold fails the Risk #5b spec — 94d14c3
 
 ### Phase 4: CI gate + docs update
 
 #### Automated
 
-- [ ] 4.1 CI workflow parses without error
-- [ ] 4.2 e2e job appears in PR checks on first feature-branch push
-- [ ] 4.3 Playwright HTML report uploads on a deliberate failure
-- [ ] 4.4 `npm run lint` and `npm run build` pass
+- [x] 4.1 CI workflow parses without error
+- [x] 4.2 e2e job appears in PR checks on first feature-branch push
+- [x] 4.3 Playwright HTML report uploads on a deliberate failure
+- [x] 4.4 `npm run lint` and `npm run build` pass
 
 #### Manual
 
