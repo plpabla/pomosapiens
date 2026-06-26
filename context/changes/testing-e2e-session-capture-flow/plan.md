@@ -383,30 +383,30 @@ Wire the Playwright job into CI parallel to the existing `ci:` job, then update 
 
 #### Automated
 
-- [x] 1.1 `npm install` runs clean
-- [x] 1.2 `npx playwright install chromium` succeeds
-- [x] 1.3 `npx playwright test --list` exits 0
-- [x] 1.4 `npm run lint` passes
-- [x] 1.5 `npm run build` passes
-- [x] 1.6 `npx tsc --noEmit -p tests/tsconfig.json` passes
+- [x] 1.1 `npm install` runs clean — 15ad259
+- [x] 1.2 `npx playwright install chromium` succeeds — 15ad259
+- [x] 1.3 `npx playwright test --list` exits 0 — 15ad259
+- [x] 1.4 `npm run lint` passes — 15ad259
+- [x] 1.5 `npm run build` passes — 15ad259
+- [x] 1.6 `npx tsc --noEmit -p tests/tsconfig.json` passes — 15ad259
 
 #### Manual
 
-- [x] 1.7 `npm run test:e2e` starts astro dev via webServer and exits cleanly with "0 tests run"
-- [x] 1.8 `npm run dev` in a separate terminal does not block a third-terminal `npm run test:e2e`
+- [x] 1.7 `npm run test:e2e` starts astro dev via webServer and exits cleanly with "0 tests run" — 15ad259
+- [x] 1.8 `npm run dev` in a separate terminal does not block a third-terminal `npm run test:e2e` — 15ad259
 
 ### Phase 2: Auth fixture + happy-path spec
 
 #### Automated
 
-- [ ] 2.1 `npm run test:e2e` passes the happy-path spec
-- [ ] 2.2 `npm run lint` passes
-- [ ] 2.3 `npx tsc --noEmit -p tests/tsconfig.json` passes
+- [x] 2.1 `npm run test:e2e` passes the happy-path spec
+- [x] 2.2 `npm run lint` passes
+- [x] 2.3 `npx tsc --noEmit -p tests/tsconfig.json` passes
 
 #### Manual
 
-- [ ] 2.4 Spec passes against `npm run dev` in a separate terminal (reuseExistingServer path)
-- [ ] 2.5 Breaking PATCH /api/sessions/[id] fails the spec with a readable error
+- [x] 2.4 Spec passes against `npm run dev` in a separate terminal (reuseExistingServer path)
+- [x] 2.5 Breaking PATCH /api/sessions/[id] fails the spec with a readable error
 
 ### Phase 3: SSR redirect specs
 
