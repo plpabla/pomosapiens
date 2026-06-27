@@ -161,7 +161,7 @@ Any endpoint that writes to `public.sessions` (or any RLS-bearing table with a w
 
 - **Location**: `tests/e2e/<flow>.spec.ts` -- one spec per cross-cutting user flow. SSR-only redirect assertions can share a spec file when they cover the same resource (e.g. `session-access.spec.ts` for all `/session/[id]` redirect guards).
 - **Pattern**:
-  1. `import { setupTwoUsers } from "../../_fixtures/auth";` and `import { seedAuthCookie } from "./_fixtures/auth";` -- `setupTwoUsers` provisions two ephemeral Supabase users; `seedAuthCookie(context, cookieHeader)` loads the auth cookie into a Playwright `BrowserContext`.
+  1. `import { setupTwoUsers, seedAuthCookie } from "./_fixtures/auth";` -- both symbols come from the e2e re-export at `tests/e2e/_fixtures/auth.ts`. `setupTwoUsers` provisions two ephemeral Supabase users; `seedAuthCookie(context, cookieHeader)` loads the auth cookie into a Playwright `BrowserContext`.
   2. For SSR redirect scenarios, also `import { insertSession } from "./_fixtures/sessions";` -- inserts a row via the service role, bypassing RLS, to seed pre-existing session state.
   3. In `beforeAll`: `fixture = await setupTwoUsers();`. In `afterAll`: `await fixture.cleanup();` (cascades session rows via FK).
   4. Create a fresh `BrowserContext` per test with `browser.newContext()`, call `seedAuthCookie(context, fixture.cookieFor(userId))`, then `page = await context.newPage()`.

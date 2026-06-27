@@ -1,7 +1,7 @@
 ---
 change_id: testing-e2e-session-capture-flow
 title: Playwright e2e regression for the full session capture flow
-status: implementing
+status: impl_reviewed
 created: 2026-06-26
 updated: 2026-06-26
 archived_at: null

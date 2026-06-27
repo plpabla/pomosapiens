@@ -194,6 +194,22 @@ Build the Playwright-side auth adapter that lifts cookie values from the existin
 
 **Contract**: File removed.
 
+#### 4. Quality-lever exemplar spec (addendum)
+
+**File**: `tests/e2e/seed.spec.ts` (new)
+
+**Intent**: Land the `/10x-e2e` seed pattern as a living exemplar that the
+capture + access specs reference via a `Seed:` header comment. Single test
+("authenticated user reaches /dashboard") demonstrates the canonical pattern:
+role-based locators, own `BrowserContext` per test, cookie seeding via
+`seedAuthCookie`, wait-for-state assertions, self-contained
+setup/action/assertion/cleanup. Future generated specs should be modelled on
+this file.
+
+**Contract**: Single `test()`, no `describe` wrapper. Calls `setupTwoUsers()`
+inside the test (per-test scope, not `beforeAll`) so the file stands alone as
+a copy-paste template. Cleans up `context` and `fixture` in a `finally` block.
+
 ### Success Criteria:
 
 #### Automated Verification:
