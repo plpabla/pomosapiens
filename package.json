@@ -19,7 +19,7 @@
     "db:types:prod": "node scripts/gen-types-prod.mjs",
     "db:test": "supabase test db",
     "test": "vitest run",
-    "test:e2e": "node --env-file-if-exists=.env --env-file-if-exists=.dev.vars node_modules/@playwright/test/cli.js test --pass-with-no-tests",
+    "test:e2e": "node --env-file-if-exists=.env --env-file-if-exists=.dev.vars node_modules/@playwright/test/cli.js test",
     "test:smoke": "node scripts/smoke-session-write.mjs"
   },
   "dependencies": {

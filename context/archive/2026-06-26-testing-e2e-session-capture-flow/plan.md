@@ -7,8 +7,8 @@ Add Playwright as the cross-cutting regression gate for the user-visible session
 ## Current State Analysis
 
 - **Playwright is named in the stack but not installed.** [context/foundation/test-plan.md:83](context/foundation/test-plan.md#L83) lists Playwright "latest stable" as the e2e tool, and §5 names the gate as required after Phase 4. `package.json` has no `@playwright/test` dependency.
-- **Reusable auth fixture already exists.** [tests/_fixtures/auth.ts](tests/_fixtures/auth.ts) is pure Node (no `cloudflare:test` imports, no Workers-specific APIs). `setupTwoUsers()` creates two ephemeral Supabase users via the service role, signs them in, and returns cookie values in the exact `sb-<projectref>-auth-token=base64-<...>` format that `@supabase/ssr` decodes server-side. Same fixture file can be imported from a Node-based Playwright runner.
-- **Service-role insert helper exists for reads.** [tests/_fixtures/db.ts](tests/_fixtures/db.ts) wraps `@supabase/supabase-js` with `SUPABASE_SERVICE_ROLE_KEY` and exposes `readSession`. No insert helper yet; Phase 3 needs one to set up ended and abandoned session rows.
+- **Reusable auth fixture already exists.** [tests/\_fixtures/auth.ts](tests/_fixtures/auth.ts) is pure Node (no `cloudflare:test` imports, no Workers-specific APIs). `setupTwoUsers()` creates two ephemeral Supabase users via the service role, signs them in, and returns cookie values in the exact `sb-<projectref>-auth-token=base64-<...>` format that `@supabase/ssr` decodes server-side. Same fixture file can be imported from a Node-based Playwright runner.
+- **Service-role insert helper exists for reads.** [tests/\_fixtures/db.ts](tests/_fixtures/db.ts) wraps `@supabase/supabase-js` with `SUPABASE_SERVICE_ROLE_KEY` and exposes `readSession`. No insert helper yet; Phase 3 needs one to set up ended and abandoned session rows.
 - **SSR redirect logic is centralized.** [src/pages/session/[id].astro:23-39](src/pages/session/%5Bid%5D.astro#L23-L39) does the owner filter (`.eq("user_id", user.id)`) and then delegates to [src/lib/session/access.ts](src/lib/session/access.ts) for ended/abandoned. Risk #3 redirect fires from the `.maybeSingle()` returning null when the row's user_id doesn't match; Risk #5a from `ended_at !== null`; Risk #5b from `nowMs - startedAtMs > 2 * focusPresetSeconds * 1000` (50 min for the 25-min preset).
 - **Happy path is reachable via "Stop early".** [src/components/session/SessionRunner.tsx:55-58](src/components/session/SessionRunner.tsx#L55-L58) exposes a real `Stop early` button that transitions the SessionRunner to the rating phase without waiting 25 minutes. The DB row gets `duration_seconds ≈ 1` and a real `focus_rating` — exercises POST /api/sessions, the SSR access guard, the timer hook mount, the state machine transition, PATCH /api/sessions/[id], and the post-rating dashboard navigation.
 - **CI already wires Supabase secrets.** [.github/workflows/ci.yml](.github/workflows/ci.yml) sets `SUPABASE_URL`, `SUPABASE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` for the build + npm test steps and writes them into `.dev.vars`. The e2e job can mirror this.
@@ -29,7 +29,7 @@ When this plan is complete:
 
 ### Key Discoveries:
 
-- `setupTwoUsers` from [tests/_fixtures/auth.ts](tests/_fixtures/auth.ts) returns cookie strings parseable as Playwright `Cookie` objects (name=value with name = `sb-<projectref>-auth-token`, value = `base64-<base64url-JSON>`) — minimal adapter needed.
+- `setupTwoUsers` from [tests/\_fixtures/auth.ts](tests/_fixtures/auth.ts) returns cookie strings parseable as Playwright `Cookie` objects (name=value with name = `sb-<projectref>-auth-token`, value = `base64-<base64url-JSON>`) — minimal adapter needed.
 - The Supabase `auth_token` cookie format must be set with `domain: "localhost"`, `path: "/"`, `httpOnly: false`, `sameSite: "Lax"`. The middleware reads cookies before any other gate, so seeding once per `BrowserContext` covers the whole spec.
 - "Stop early" emits `stoppedAtMs` from `useFocusTimer` ([src/lib/timer/useFocusTimer.ts]) and the rating-screen submit uses that value as `ended_at` — same code path that production hits when a user actually stops early. The DB plausibility window for `ended_at` (TWO_HOURS_MS before and CLOCK_SKEW_MS after now, [src/pages/api/sessions/[id].ts:10-11](src/pages/api/sessions/%5Bid%5D.ts#L10-L11)) easily passes for a stopped-immediately session.
 - The abandoned-threshold scenario must insert a row with `started_at = now - 51 minutes` (just over 2 × 25 min). The session row's `ended_at` stays null; the redirect triggers from the wall-clock threshold alone, not from any column transition.
@@ -91,6 +91,7 @@ Install `@playwright/test`, write `playwright.config.ts`, add the `npm run test:
 **Intent**: Single Chromium project, webServer launches `npm run dev`, tests live under `tests/e2e/`. Required-from-day-one means `retries: 0` and no `fullyParallel` shortcuts that mask order-dependence.
 
 **Contract**: Exports `defineConfig({ ... })` with these fields:
+
 - `testDir: "./tests/e2e"`
 - `timeout: 30_000`, `expect: { timeout: 5_000 }`
 - `fullyParallel: true`
@@ -116,6 +117,7 @@ Install `@playwright/test`, write `playwright.config.ts`, add the `npm run test:
 **Intent**: Ignore Playwright's default output directories so traces and HTML reports never get committed.
 
 **Contract**: Append a `# playwright` block adding:
+
 - `test-results/`
 - `playwright-report/`
 - `blob-report/`
@@ -162,6 +164,7 @@ Build the Playwright-side auth adapter that lifts cookie values from the existin
 **Intent**: Re-export `setupTwoUsers` and add `cookieToPlaywright(cookieHeader)` that parses a `sb-<ref>-auth-token=base64-<...>` string and returns a Playwright `Cookie` object with `domain: "localhost"`, `path: "/"`, `httpOnly: false`, `sameSite: "Lax"`, `expires: -1`. Also add `seedAuthCookie(context, cookieHeader)` that calls `context.addCookies([cookieToPlaywright(cookieHeader)])`.
 
 **Contract**:
+
 - `import { setupTwoUsers, type TwoUserFixture } from "../../_fixtures/auth";` and re-export.
 - Exported function signatures:
   - `cookieToPlaywright(cookieHeader: string): { name: string; value: string; domain: string; path: string; httpOnly: boolean; sameSite: "Lax"; expires: number }`
@@ -175,6 +178,7 @@ Build the Playwright-side auth adapter that lifts cookie values from the existin
 **Intent**: One `test.describe` block, one `test()` covering the full flow. Seeds User A's cookie, navigates `/dashboard`, clicks "Start session", picks "Medium", clicks "Start", waits for the timer view, clicks "Stop early", clicks rating "4", asserts redirect back to `/dashboard`, asserts the new session card is visible with energy "medium" and rating "★ 4 / 5".
 
 **Contract**:
+
 - `beforeAll`: `fixture = await setupTwoUsers();`
 - `afterAll`: `await fixture.cleanup();`
 - Inside the test: create a fresh `context` with `browser.newContext()`, call `seedAuthCookie(context, fixture.cookieFor(fixture.userA.id))`, then `page = await context.newPage()` and drive the flow.
@@ -189,6 +193,22 @@ Build the Playwright-side auth adapter that lifts cookie values from the existin
 **Intent**: Delete now that a real spec exists.
 
 **Contract**: File removed.
+
+#### 4. Quality-lever exemplar spec (addendum)
+
+**File**: `tests/e2e/seed.spec.ts` (new)
+
+**Intent**: Land the `/10x-e2e` seed pattern as a living exemplar that the
+capture + access specs reference via a `Seed:` header comment. Single test
+("authenticated user reaches /dashboard") demonstrates the canonical pattern:
+role-based locators, own `BrowserContext` per test, cookie seeding via
+`seedAuthCookie`, wait-for-state assertions, self-contained
+setup/action/assertion/cleanup. Future generated specs should be modelled on
+this file.
+
+**Contract**: Single `test()`, no `describe` wrapper. Calls `setupTwoUsers()`
+inside the test (per-test scope, not `beforeAll`) so the file stands alone as
+a copy-paste template. Cleans up `context` and `fixture` in a `finally` block.
 
 ### Success Criteria:
 
@@ -217,9 +237,10 @@ Add the service-role session-insert helper and three SSR-only assertions: Risk #
 
 **File**: `tests/e2e/_fixtures/sessions.ts` (new)
 
-**Intent**: Wrap `@supabase/supabase-js` with the service role and expose `insertSession({ userId, startedAt, endedAt, energyLevel })` returning the inserted row's `id`. Bypasses RLS (intentional — we are setting up SSR fixtures, not testing the API). Mirrors the read-side pattern in [tests/_fixtures/db.ts](tests/_fixtures/db.ts).
+**Intent**: Wrap `@supabase/supabase-js` with the service role and expose `insertSession({ userId, startedAt, endedAt, energyLevel })` returning the inserted row's `id`. Bypasses RLS (intentional — we are setting up SSR fixtures, not testing the API). Mirrors the read-side pattern in [tests/\_fixtures/db.ts](tests/_fixtures/db.ts).
 
 **Contract**:
+
 - Exported: `insertSession(args: { userId: string; startedAt: Date | string; endedAt?: Date | string | null; energyLevel?: "low"|"medium"|"high"; focusRating?: number | null }): Promise<{ id: string }>`.
 - Defaults: `endedAt = null`, `energyLevel = "medium"`, `focusRating = null`.
 - Reads `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` from `process.env`; throws if either is missing.
@@ -283,6 +304,7 @@ Wire the Playwright job into CI parallel to the existing `ci:` job, then update 
 **Intent**: Add an `e2e:` job parallel to the existing `ci:` job. Both must pass on every push and PR to `main`. Cache the Playwright browsers between runs to keep CI under 5 min.
 
 **Contract**: New job `e2e:` with:
+
 - `runs-on: ubuntu-latest`
 - Steps: checkout, setup-node (uses `.nvmrc`, `cache: npm`), `npm ci`.
 - Playwright browsers cache step using `actions/cache@v4`, key: `${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}`, path: `~/.cache/ms-playwright`.
@@ -306,6 +328,7 @@ Wire the Playwright job into CI parallel to the existing `ci:` job, then update 
 **Intent**: Replace the `TBD -- see §3 Phase 4` placeholder with the realized pattern — location convention, fixture composition, "Stop early" pattern for the happy path, service-role insert pattern for SSR scenarios, run command.
 
 **Contract**: §6.5 reads as a mirror of §6.1/§6.2: Location, Pattern (numbered steps), Reference test, Run locally. Specifically:
+
 - Location: `tests/e2e/<flow>.spec.ts` — one spec per cross-cutting flow.
 - Pattern: import `setupTwoUsers` + `seedAuthCookie` from `tests/e2e/_fixtures/auth.ts`; for SSR scenarios, import `insertSession` from `tests/e2e/_fixtures/sessions.ts`; new `BrowserContext` per test; use semantic locators only (no Tailwind class selectors).
 - Reference tests: `tests/e2e/session-capture.spec.ts` (happy path with "Stop early"), `tests/e2e/session-access.spec.ts` (three SSR redirects).
@@ -367,8 +390,8 @@ Wire the Playwright job into CI parallel to the existing `ci:` job, then update 
 
 - Change file: [context/changes/testing-e2e-session-capture-flow/change.md](context/changes/testing-e2e-session-capture-flow/change.md)
 - Test plan: [context/foundation/test-plan.md](context/foundation/test-plan.md) — Phase 4 row in §3; e2e gate in §5; §6.5 cookbook placeholder.
-- Existing auth fixture: [tests/_fixtures/auth.ts](tests/_fixtures/auth.ts)
-- Existing db read fixture: [tests/_fixtures/db.ts](tests/_fixtures/db.ts)
+- Existing auth fixture: [tests/\_fixtures/auth.ts](tests/_fixtures/auth.ts)
+- Existing db read fixture: [tests/\_fixtures/db.ts](tests/_fixtures/db.ts)
 - SSR access logic: [src/pages/session/[id].astro](src/pages/session/%5Bid%5D.astro), [src/lib/session/access.ts](src/lib/session/access.ts)
 - Session runner (Stop early): [src/components/session/SessionRunner.tsx:55-58](src/components/session/SessionRunner.tsx#L55-L58)
 - API endpoints: [src/pages/api/sessions/index.ts](src/pages/api/sessions/index.ts), [src/pages/api/sessions/[id].ts](src/pages/api/sessions/%5Bid%5D.ts)
@@ -427,13 +450,13 @@ Wire the Playwright job into CI parallel to the existing `ci:` job, then update 
 
 #### Automated
 
-- [x] 4.1 CI workflow parses without error
-- [x] 4.2 e2e job appears in PR checks on first feature-branch push
-- [x] 4.3 Playwright HTML report uploads on a deliberate failure
-- [x] 4.4 `npm run lint` and `npm run build` pass
+- [x] 4.1 CI workflow parses without error — b81ba26
+- [x] 4.2 e2e job appears in PR checks on first feature-branch push — b81ba26
+- [x] 4.3 Playwright HTML report uploads on a deliberate failure — b81ba26
+- [x] 4.4 `npm run lint` and `npm run build` pass — b81ba26
 
 #### Manual
 
-- [ ] 4.5 Both ci and e2e jobs are required and pass on a clean PR
-- [ ] 4.6 Branch-protection rule updated to require e2e check (one-time operator step)
-- [ ] 4.7 test-plan.md and CLAUDE.md changes render correctly
+- [x] 4.5 Both ci and e2e jobs are required and pass on a clean PR
+- [x] 4.6 Branch-protection rule updated to require e2e check (one-time operator step)
+- [x] 4.7 test-plan.md and CLAUDE.md changes render correctly
