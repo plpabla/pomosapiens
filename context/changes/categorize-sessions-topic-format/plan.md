@@ -189,6 +189,59 @@ Default-strip on `z.object` (L-01 layer 1) preserved.
 - POST with bogus topic_id (valid UUID, no row) returns 500 with FK-violation (acceptable -- the topics CRUD UI will only emit known IDs); confirm the error is reasonable.
 - POST with `topic_id` and `material_format_id` both omitted still returns 201 (back-compat with S-01 client).
 
+##### Commands
+
+**Prerequisites** (in order):
+
+1. `npm run dev` running
+2. Sign in at `http://localhost:4321/auth/signin`
+3. DevTools -> Application -> Cookies -> copy the full value of `sb-localhost-auth-token`
+4. In Studio (`http://localhost:54323`) run these two SQL queries and note the UUIDs:
+
+```sql
+-- get a seeded material_format id
+SELECT id, name FROM material_formats WHERE owner_id IS NULL LIMIT 1;
+
+-- create a topic for your user and get its id
+-- replace <YOUR_USER_ID> with your id from auth.users table
+INSERT INTO topics (owner_id, name)
+VALUES ('<YOUR_USER_ID>', 'Manual test topic')
+RETURNING id;
+```
+
+**Check 2.4** -- both FKs written to the row:
+
+```powershell
+# Replace the three <...> placeholders before running
+$cookie  = "sb-localhost-auth-token=<PASTE_COOKIE_VALUE>"
+$topicId = "<PASTE_TOPIC_UUID>"
+$fmtId   = "<PASTE_FORMAT_UUID>"
+
+# Pipe body via stdin (@-) -- avoids PowerShell 5.1 native-exe double-quote corruption.
+# Cookie header works fine with curl.exe; Invoke-RestMethod silently drops it (restricted header).
+$b24 = '{"energy_level":"medium","topic_id":"' + $topicId + '","material_format_id":"' + $fmtId + '"}'
+$b24 | curl.exe -s -X POST http://localhost:4321/api/sessions -H "Cookie: $cookie" -H "Content-Type: application/json" --data-binary "@-"
+# Expected: {"id":"...","started_at":"..."}  HTTP 201
+# Verify in Studio: sessions row has topic_id and material_format_id set to the UUIDs above
+```
+
+**Check 2.5** -- bogus topic_id triggers FK violation:
+
+```powershell
+$b25 = '{"energy_level":"low","topic_id":"00000000-0000-0000-0000-000000000000"}'
+$b25 | curl.exe -s -X POST http://localhost:4321/api/sessions -H "Cookie: $cookie" -H "Content-Type: application/json" --data-binary "@-"
+# Expected: {"error":"..."} HTTP 500 mentioning FK violation or foreign key constraint
+```
+
+**Check 2.6** -- omitting FKs still returns 201 (back-compat):
+
+```powershell
+$b26 = '{"energy_level":"high"}'
+$b26 | curl.exe -s -X POST http://localhost:4321/api/sessions -H "Cookie: $cookie" -H "Content-Type: application/json" --data-binary "@-"
+# Expected: {"id":"...","started_at":"..."}  HTTP 201
+# Verify in Studio: topic_id and material_format_id are NULL on this row
+```
+
 **Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation from the human before proceeding to the topic customization phase.
 
 ---
@@ -623,31 +676,31 @@ The smoke script itself is NOT updated -- the new columns are nullable, the exis
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npm run db:reset`
-- [x] 1.2 pgTAP suite passes: `npm run db:test`
-- [x] 1.3 Types regen produces no other unintended diff: `npm run db:types` followed by a clean `git diff` on unrelated files
-- [x] 1.4 Lint passes: `npm run lint`
-- [x] 1.5 Build passes: `npm run build`
+- [x] 1.1 Migration applies cleanly: `npm run db:reset` -- 4b1c3b0
+- [x] 1.2 pgTAP suite passes: `npm run db:test` -- 4b1c3b0
+- [x] 1.3 Types regen produces no other unintended diff: `npm run db:types` followed by a clean `git diff` on unrelated files -- 4b1c3b0
+- [x] 1.4 Lint passes: `npm run lint` -- 4b1c3b0
+- [x] 1.5 Build passes: `npm run build` -- 4b1c3b0
 
 #### Manual
 
-- [x] 1.6 In Supabase Studio, confirm `topics.archived_at` and `material_formats.archived_at` columns exist, are nullable, and have no default
-- [x] 1.7 Confirm the partial indexes exist via `\d+` or Studio's index UI
-- [x] 1.8 Spot-check that a manual UPDATE on a NULL-owner format from a logged-in user account fails or is filtered out by RLS
+- [x] 1.6 In Supabase Studio, confirm `topics.archived_at` and `material_formats.archived_at` columns exist, are nullable, and have no default -- 4b1c3b0
+- [x] 1.7 Confirm the partial indexes exist via `\d+` or Studio's index UI -- 4b1c3b0
+- [x] 1.8 Spot-check that a manual UPDATE on a NULL-owner format from a logged-in user account fails or is filtered out by RLS -- 4b1c3b0
 
 ### Phase 2: Widen POST `/api/sessions`
 
 #### Automated
 
-- [ ] 2.1 All session.create integration tests pass: `npm run test -- sessions.create`
-- [ ] 2.2 Lint passes: `npm run lint`
-- [ ] 2.3 Build passes: `npm run build`
+- [x] 2.1 All session.create integration tests pass: `npm run test -- sessions.create`
+- [x] 2.2 Lint passes: `npm run lint`
+- [x] 2.3 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 POST to `/api/sessions` with `{ energy_level, topic_id, material_format_id }` returns 201 and the row in Studio has the FKs set
-- [ ] 2.5 POST with bogus topic_id (valid UUID, no row) returns 500 with FK-violation; confirm the error is reasonable
-- [ ] 2.6 POST with `topic_id` and `material_format_id` both omitted still returns 201
+- [x] 2.4 POST to `/api/sessions` with `{ energy_level, topic_id, material_format_id }` returns 201 and the row in Studio has the FKs set
+- [x] 2.5 POST with bogus topic_id (valid UUID, no row) returns 500 with FK-violation; confirm the error is reasonable
+- [x] 2.6 POST with `topic_id` and `material_format_id` both omitted still returns 201
 
 ### Phase 3: Topic customization (API + `/topics` page)
 
