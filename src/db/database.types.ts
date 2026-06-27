@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -41,6 +36,7 @@ export type Database = {
     Tables: {
       material_formats: {
         Row: {
+          archived_at: string | null
           created_at: string
           id: string
           name: string
@@ -48,6 +44,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
           id?: string
           name: string
@@ -55,6 +52,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -128,6 +126,7 @@ export type Database = {
       }
       topics: {
         Row: {
+          archived_at: string | null
           created_at: string
           id: string
           name: string
@@ -135,6 +134,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          archived_at?: string | null
           created_at?: string
           id?: string
           name: string
@@ -142,6 +142,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          archived_at?: string | null
           created_at?: string
           id?: string
           name?: string
@@ -293,3 +294,4 @@ export const Constants = {
     },
   },
 } as const
+

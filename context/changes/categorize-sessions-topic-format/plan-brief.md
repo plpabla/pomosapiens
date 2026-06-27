@@ -28,6 +28,8 @@ A user can manage their own topic library at `/topics` (and custom material form
 | Seeded-format protection                          | RLS-only (no app-layer `owner_id IS NOT NULL` guard)              | RLS UPDATE policy already blocks NULL-owner writes; avoids divergence with how cross-user denial is handled.  | Plan   |
 | Pickers do not gate Start                         | Both default to "no selection"; only `energy_level` gates Start   | Required to preserve the 3-tap budget from PRD line 84.                                                       | Plan   |
 | PATCH `/api/sessions/[id]` widening               | Do not widen -- topic / format are POST-only                      | Preserves the L-01 column-scope contract on the most-tested endpoint.                                         | Plan   |
+| Prod deploy ordering                              | Push migration to prod BEFORE merging the PR                      | Smoke workflow auto-fires on push to `main` and runs `diff` against committed types; prod must match first.   | Plan   |
+| Smoke script update                               | Leave smoke script unchanged                                      | New columns are nullable; existing insert still passes; the `diff` gate already proves prod has the columns.  | Plan   |
 
 ## Scope
 
@@ -42,6 +44,7 @@ A user can manage their own topic library at `/topics` (and custom material form
 - Dashboard `.select` widened with PostgREST embeds + chip line rendering
 - Topbar links to `/topics` and `/formats`; `PROTECTED_ROUTES` entries for both
 - Column-scope integration tests for each new write endpoint
+- Prod migration push + committed types reconciled against prod before PR merge
 
 **Out of scope:**
 
@@ -69,6 +72,8 @@ Material Formats API + /formats page  (independently usable)
 Pre-session screen pickers  (now has data to pick from)
        ↓
 Dashboard chips  (read-side polish)
+       ↓
+Prod deploy  (db push + db:types:prod, BEFORE merging PR)
 ```
 
 Two write contracts get widened (POST `/api/sessions`) or created (POST + PATCH for topics and material_formats). All follow the L-01 column-scope two-layer rule: zod default-strip + hand-picked `.insert / .update`. Dashboard reads remain direct from Supabase in Astro frontmatter -- the PostgREST embed `topic:topics(name), material_format:material_formats(name)` keeps it to one round-trip. Seeded material formats are protected by RLS UPDATE policy alone; the app layer does not duplicate the check.
@@ -77,16 +82,17 @@ Two write contracts get widened (POST `/api/sessions`) or created (POST + PATCH 
 
 | Phase                                     | What it delivers                                                                | Key risk                                                                                              |
 | ----------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| 1. Schema + RLS tests + types             | `archived_at` columns, partial indexes, pgTAP coverage, regenerated types       | Forgetting `npm run db:types:prod` post-deploy breaks the smoke `diff` gate                           |
-| 2. Widen POST `/api/sessions`             | Endpoint accepts optional `topic_id` / `material_format_id`                     | Accidentally spreading `parsed.data` into `.insert` (L-01 layer 2 break) -- hand-pick                 |
-| 3. Topic customization end-to-end         | Topics CRUD API + `/topics` page with empty state + Topbar nav                  | Modal + Dialog primitives need `node_modules/.vite/` reset after shadcn install (L-04)                |
+| 1. Schema + RLS tests + types               | `archived_at` columns, partial indexes, pgTAP coverage, regenerated types     | Forgetting prod migration push in Phase 7 breaks the smoke `diff` gate on merge                       |
+| 2. Widen POST `/api/sessions`               | Endpoint accepts optional `topic_id` / `material_format_id`                   | Accidentally spreading `parsed.data` into `.insert` (L-01 layer 2 break) -- hand-pick                 |
+| 3. Topic customization end-to-end           | Topics CRUD API + `/topics` page with empty state + Topbar nav                | Modal + Dialog primitives need `node_modules/.vite/` reset after shadcn install (L-04)                |
 | 4. Material format customization end-to-end | Material formats CRUD API (seeded-row protection) + `/formats` page + nav     | Forgetting to omit Rename / Archive affordances on seeded rows in the UI -- RLS denies but UX is ugly |
-| 5. Pre-session pickers                    | Two `<Select>`s on `/session/new` wired to the widened POST                     | Accidentally gating Start on topic / format breaks the 3-tap budget                                   |
-| 6. Dashboard surface                      | PostgREST embeds + conditional chip line                                        | Long topic names breaking row layout -- truncation + `title` attr handles it                          |
+| 5. Pre-session pickers                      | Two `<Select>`s on `/session/new` wired to the widened POST                   | Accidentally gating Start on topic / format breaks the 3-tap budget                                   |
+| 6. Dashboard surface                        | PostgREST embeds + conditional chip line                                      | Long topic names breaking row layout -- truncation + `title` attr handles it                          |
+| 7. Production deploy                        | `supabase db push` to prod + `db:types:prod` reconciled, before PR merge      | Merging before pushing the migration turns the smoke workflow red on `main` -- order is load-bearing  |
 
-**Prerequisites:** S-01 (capture loop) shipped; local Supabase running; `.dev.vars` has `SUPABASE_SERVICE_ROLE_KEY` for integration tests.
+**Prerequisites:** S-01 (capture loop) shipped; local Supabase running; `.dev.vars` has `SUPABASE_SERVICE_ROLE_KEY` for integration tests. Operator has `SUPABASE_ACCESS_TOKEN` + `SUPABASE_PROJECT_REF` available locally for Phase 7.
 
-**Estimated effort:** ~3-4 sessions across 6 phases (Phase 1 is small; Phase 3 and Phase 4 are the heavy lifts -- each needs a management page with modal CRUD; Phases 2, 5, 6 are quick).
+**Estimated effort:** ~3-4 sessions across 7 phases (Phase 1 is small; Phase 3 and Phase 4 are the heavy lifts -- each needs a management page with modal CRUD; Phases 2, 5, 6, 7 are quick).
 
 ## Open Risks & Assumptions
 

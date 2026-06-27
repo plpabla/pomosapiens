@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(9);
+SELECT plan(12);
 
 -- -------------------------------------------------------------------------
 -- Setup: two test users, one topic each, one NULL-owner default topic
@@ -100,6 +100,50 @@ SET LOCAL ROLE anon;
 -- 9. anon sees nothing — including the NULL-owner default row
 SELECT is(count(*)::int, 0, 'anon sees 0 topics')
 FROM public.topics;
+
+-- -------------------------------------------------------------------------
+-- archived_at coverage (as User A)
+-- -------------------------------------------------------------------------
+
+RESET ROLE;
+SELECT set_config('request.jwt.claims',
+  json_build_object('sub', '00000000-0000-0000-0000-000000000001', 'role', 'authenticated')::text,
+  true);
+SET LOCAL ROLE authenticated;
+
+-- 10. User A can set archived_at on their own topic
+WITH upd AS (
+  UPDATE public.topics SET archived_at = now()
+  WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001'
+  RETURNING id
+)
+SELECT is(count(*)::int, 1, 'user A can archive their own topic')
+FROM upd;
+
+-- 11. User A cannot set archived_at on User B's topic (cross-user denial)
+WITH upd AS (
+  UPDATE public.topics SET archived_at = now()
+  WHERE id = 'bbbbbbbb-0000-0000-0000-000000000002'
+  RETURNING id
+)
+SELECT is(count(*)::int, 0, 'user A cannot archive user B topic')
+FROM upd;
+
+-- -------------------------------------------------------------------------
+-- As anon: cannot UPDATE archived_at
+-- -------------------------------------------------------------------------
+
+RESET ROLE;
+SET LOCAL ROLE anon;
+
+-- 12. anon cannot set archived_at on any topic
+WITH upd AS (
+  UPDATE public.topics SET archived_at = now()
+  WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001'
+  RETURNING id
+)
+SELECT is(count(*)::int, 0, 'anon cannot archive any topic')
+FROM upd;
 
 SELECT * FROM finish();
 ROLLBACK;

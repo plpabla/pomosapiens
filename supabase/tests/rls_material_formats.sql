@@ -1,5 +1,5 @@
 BEGIN;
-SELECT plan(9);
+SELECT plan(12);
 
 -- -------------------------------------------------------------------------
 -- Setup: two test users + one user-owned row each.
@@ -100,6 +100,43 @@ SET LOCAL ROLE anon;
 -- 9. anon sees nothing
 SELECT is(count(*)::int, 0, 'anon sees 0 material_formats')
 FROM public.material_formats;
+
+-- -------------------------------------------------------------------------
+-- archived_at coverage (as User A)
+-- -------------------------------------------------------------------------
+
+RESET ROLE;
+SELECT set_config('request.jwt.claims',
+  json_build_object('sub', '00000000-0000-0000-0000-000000000001', 'role', 'authenticated')::text,
+  true);
+SET LOCAL ROLE authenticated;
+
+-- 10. User A can set archived_at on their own format
+WITH upd AS (
+  UPDATE public.material_formats SET archived_at = now()
+  WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001'
+  RETURNING id
+)
+SELECT is(count(*)::int, 1, 'user A can archive their own material_format')
+FROM upd;
+
+-- 11. User A cannot set archived_at on User B's format (cross-user denial)
+WITH upd AS (
+  UPDATE public.material_formats SET archived_at = now()
+  WHERE id = 'bbbbbbbb-0000-0000-0000-000000000002'
+  RETURNING id
+)
+SELECT is(count(*)::int, 0, 'user A cannot archive user B material_format')
+FROM upd;
+
+-- 12. User A cannot set archived_at on a NULL-owner seeded row (regression: seeded-format protection)
+WITH upd AS (
+  UPDATE public.material_formats SET archived_at = now()
+  WHERE owner_id IS NULL
+  RETURNING id
+)
+SELECT is(count(*)::int, 0, 'user A cannot archive NULL-owner seeded material_format')
+FROM upd;
 
 SELECT * FROM finish();
 ROLLBACK;

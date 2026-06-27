@@ -55,7 +55,7 @@ After this plan lands and is deployed:
 
 ## Implementation Approach
 
-Six phases, each independently verifiable:
+Seven phases, each independently verifiable:
 
 1. Database first (migration + pgTAP + types).
 2. Widen the existing POST `/api/sessions` -- smallest API change, smallest blast radius.
@@ -63,8 +63,9 @@ Six phases, each independently verifiable:
 4. Material formats customization end-to-end (API with seeded-row protection + management page + nav).
 5. Pre-session pickers wired to the now-stable APIs.
 6. Dashboard chip surface.
+7. Production deploy -- push migration to prod and regenerate committed types from prod so the smoke `diff` gate stays green on merge.
 
-Topic + format customization come BEFORE pickers so a user testing manually has rows to pick from in phase 5. Dashboard comes last because it's a read-side polish that adds no behavior.
+Topic + format customization come BEFORE pickers so a user testing manually has rows to pick from in phase 5. Dashboard comes last because it's a read-side polish that adds no behavior. Production deploy is split into its own phase because it has a strict ordering requirement (push migration BEFORE merge) and runs on the operator's machine, not in CI -- treating it as a phase makes that boundary visible instead of buried in a manual-verification bullet.
 
 ## Critical Implementation Details
 
@@ -493,9 +494,75 @@ The aliases (`topic:`, `material_format:`) keep the embedded keys singular. RLS 
 - A session whose topic was later archived still shows the topic name on its history row.
 - Truncation works on a long topic name (test by manually inserting a 60-char topic via the management page and creating a session with it).
 - Mobile width: chips wrap to a second line or truncate gracefully (no horizontal scroll on the row).
-- After merge + deploy: `npm run db:types:prod` produces no diff (or commit the diff if any) so the smoke `diff` gate stays green ([testing-schema-validation-gate runbook](../../archive/2026-06-24-testing-schema-validation-gate/runbook.md)).
 
-**Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation. After human sign-off, merge the change, then complete the post-deploy `db:types:prod` step listed above.
+**Implementation Note**: After completing this phase and all automated verification passes, pause here for manual confirmation. After human sign-off, proceed to Phase 7 (production deploy) BEFORE merging the PR -- the prod migration must land first so the smoke `diff` gate stays green on the merge commit.
+
+---
+
+## Phase 7: Production deploy
+
+### Overview
+
+Apply the Phase 1 migration to the production Supabase project and reconcile the committed `src/db/database.types.ts` against prod's actual schema BEFORE merging the PR. This is operator work executed locally against prod, not CI. Order matters: the `.github/workflows/smoke.yml` workflow auto-fires on push to `main` and runs `diff src/db/database.types.ts /tmp/types_from_prod.ts`; if prod doesn't have `archived_at` yet, the merge commit goes red.
+
+The smoke script itself is NOT updated -- the new columns are nullable, the existing `{ user_id, energy_level, started_at }` insert keeps passing, and the `diff` gate already proves the columns exist on prod.
+
+### Prerequisites
+
+- Operator has the `SUPABASE_ACCESS_TOKEN` and `SUPABASE_PROJECT_REF` env vars available locally (the same values held by GitHub Actions secrets per the [testing-schema-validation-gate runbook](../../archive/2026-06-24-testing-schema-validation-gate/runbook.md) sections 1-2).
+- Operator is logged into the Supabase CLI (`npx supabase login`, or `SUPABASE_ACCESS_TOKEN` exported).
+- Local repo is on the feature branch with all six prior phases merged into the branch and pushed to the PR.
+
+### Changes Required:
+
+#### 1. Link the local CLI to the prod project (one-time per machine)
+
+**Command**: `npx supabase link --project-ref <prod-ref>`
+
+**Intent**: Tell the local CLI which remote project subsequent `db push` commands target. Idempotent -- safe to re-run.
+
+**Contract**: Operator-only step. No file changes. If a prior change already linked this machine, skip.
+
+#### 2. Push the migration to prod
+
+**Command**: `npx supabase db push`
+
+**Intent**: Apply `supabase/migrations/20260627140018_add_archived_at_to_topics_and_formats.sql` to the production database. Additive + nullable, so zero-downtime and safe to run while the existing app code is still live.
+
+**Contract**: The CLI prints the pending migration filename and asks for confirmation. Confirm. Operator-only step; no file changes in the repo.
+
+#### 3. Regenerate committed types from prod
+
+**Command**: `npm run db:types:prod`
+
+**Intent**: Rewrite `src/db/database.types.ts` against the now-migrated prod schema using the pinned CLI version, so the smoke `diff` gate has zero output on the merge commit.
+
+**Contract**: Most runs produce **no diff** versus the file Phase 1 already committed (local and prod schemas converge once the push completes). If there IS a diff -- e.g., differing index metadata, formatting drift from a CLI version mismatch -- inspect it. Drift in unrelated tables is a signal to investigate before merging, not to commit-and-hope. CLI-version drift is handled per the [runbook section 7](../../archive/2026-06-24-testing-schema-validation-gate/runbook.md).
+
+#### 4. Commit any regen diff and push the branch
+
+**Files**: `src/db/database.types.ts` (only if Phase 7.3 produced changes).
+
+**Intent**: Keep the branch state synchronized with prod before merge.
+
+**Contract**: One commit on the feature branch: `chore(db): sync types with prod after migration push`. If Phase 7.3 produced no diff, skip the commit.
+
+### Success Criteria:
+
+#### Automated Verification:
+
+- `npm run db:types:prod` exits 0
+- `git diff src/db/database.types.ts` is clean after regen + commit
+- After merging the PR, the `Smoke` workflow run on the merge commit succeeds (both the `Diff types against committed file` step and the `Run session smoke test` step go green)
+
+#### Manual Verification:
+
+- In Supabase Studio for the **production** project, confirm `topics.archived_at` and `material_formats.archived_at` columns exist, are nullable, and have no default
+- Confirm the partial indexes exist on prod (Studio's index UI or the SQL editor: `\d+ public.topics` / `\d+ public.material_formats`)
+- After merge, visit `https://pomo-sapiens.com/topics` and `/formats` as a real account and run one smoke loop: add a topic, pick it on `/session/new`, verify it appears as a chip on `/dashboard`. End-to-end prod smoke.
+- Confirm the smoke workflow's previous run (last green before this slice) and the post-merge run both show "smoke OK" in the `Run session smoke test` step
+
+**Implementation Note**: Phase 7.1-7.3 happen on the feature branch BEFORE the PR is merged. Only after `db:types:prod` produces a clean diff (or the resulting commit is pushed) should the PR be merged. If the merge-commit smoke run goes red on the `diff` step, do NOT roll back the migration -- prod schema is already ahead and additive; instead, regenerate types from prod again, commit, and push a follow-up to `main`.
 
 ---
 
@@ -535,8 +602,8 @@ The aliases (`topic:`, `material_format:`) keep the embedded keys singular. RLS 
 ## Migration Notes
 
 - Migration is additive and nullable -- zero-downtime, no backfill, safe to deploy without coordinating with the running S-01 traffic.
-- The S-01 smoke insert script ([scripts](../../../scripts/) under the testing-schema-validation-gate change) only writes `{ user_id, energy_level, started_at }` -- still works after this slice because the new columns are nullable.
-- Post-deploy: run `npm run db:types:prod` and commit the regenerated types so the smoke `diff` gate sees no drift.
+- The S-01 smoke insert script ([scripts/smoke-session-write.mjs](../../../scripts/smoke-session-write.mjs)) only writes `{ user_id, energy_level, started_at }` -- still works after this slice because the new columns are nullable. No smoke-script changes.
+- Prod deploy is Phase 7: `npx supabase db push` to prod, then `npm run db:types:prod` to reconcile committed types, BEFORE merging the PR. The smoke `diff` gate auto-runs on push to `main` and requires prod and the committed `database.types.ts` to match exactly.
 
 ## References
 
@@ -556,17 +623,17 @@ The aliases (`topic:`, `material_format:`) keep the embedded keys singular. RLS 
 
 #### Automated
 
-- [ ] 1.1 Migration applies cleanly: `npm run db:reset`
-- [ ] 1.2 pgTAP suite passes: `npm run db:test`
-- [ ] 1.3 Types regen produces no other unintended diff: `npm run db:types` followed by a clean `git diff` on unrelated files
-- [ ] 1.4 Lint passes: `npm run lint`
-- [ ] 1.5 Build passes: `npm run build`
+- [x] 1.1 Migration applies cleanly: `npm run db:reset`
+- [x] 1.2 pgTAP suite passes: `npm run db:test`
+- [x] 1.3 Types regen produces no other unintended diff: `npm run db:types` followed by a clean `git diff` on unrelated files
+- [x] 1.4 Lint passes: `npm run lint`
+- [x] 1.5 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 1.6 In Supabase Studio, confirm `topics.archived_at` and `material_formats.archived_at` columns exist, are nullable, and have no default
-- [ ] 1.7 Confirm the partial indexes exist via `\d+` or Studio's index UI
-- [ ] 1.8 Spot-check that a manual UPDATE on a NULL-owner format from a logged-in user account fails or is filtered out by RLS
+- [x] 1.6 In Supabase Studio, confirm `topics.archived_at` and `material_formats.archived_at` columns exist, are nullable, and have no default
+- [x] 1.7 Confirm the partial indexes exist via `\d+` or Studio's index UI
+- [x] 1.8 Spot-check that a manual UPDATE on a NULL-owner format from a logged-in user account fails or is filtered out by RLS
 
 ### Phase 2: Widen POST `/api/sessions`
 
@@ -647,4 +714,18 @@ The aliases (`topic:`, `material_format:`) keep the embedded keys singular. RLS 
 - [ ] 6.5 A session whose topic was later archived still shows the topic name on its history row
 - [ ] 6.6 Truncation works on a long topic name (test with a 60-char topic)
 - [ ] 6.7 Mobile width: chips wrap or truncate gracefully (no horizontal scroll)
-- [ ] 6.8 After merge + deploy: `npm run db:types:prod` produces no diff (or commit the diff if any)
+
+### Phase 7: Production deploy
+
+#### Automated
+
+- [ ] 7.1 `npm run db:types:prod` exits 0
+- [ ] 7.2 `git diff src/db/database.types.ts` is clean after regen + commit
+- [ ] 7.3 After merging the PR, the `Smoke` workflow run on the merge commit succeeds (both `Diff types against committed file` and `Run session smoke test` go green)
+
+#### Manual
+
+- [ ] 7.4 In Supabase Studio for the production project, confirm `topics.archived_at` and `material_formats.archived_at` columns exist, are nullable, and have no default
+- [ ] 7.5 Confirm the partial indexes exist on prod
+- [ ] 7.6 After merge, run an end-to-end prod loop on `https://pomo-sapiens.com`: add a topic on `/topics`, pick it on `/session/new`, verify the chip on `/dashboard`
+- [ ] 7.7 Confirm `Run session smoke test` step shows "smoke OK" on the post-merge run
