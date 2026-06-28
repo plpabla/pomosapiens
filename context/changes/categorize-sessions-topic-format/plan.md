@@ -692,32 +692,32 @@ The smoke script itself is NOT updated -- the new columns are nullable, the exis
 
 #### Automated
 
-- [x] 2.1 All session.create integration tests pass: `npm run test -- sessions.create`
-- [x] 2.2 Lint passes: `npm run lint`
-- [x] 2.3 Build passes: `npm run build`
+- [x] 2.1 All session.create integration tests pass: `npm run test -- sessions.create` -- 0fa2bea
+- [x] 2.2 Lint passes: `npm run lint` -- 0fa2bea
+- [x] 2.3 Build passes: `npm run build` -- 0fa2bea
 
 #### Manual
 
-- [x] 2.4 POST to `/api/sessions` with `{ energy_level, topic_id, material_format_id }` returns 201 and the row in Studio has the FKs set
-- [x] 2.5 POST with bogus topic_id (valid UUID, no row) returns 500 with FK-violation; confirm the error is reasonable
-- [x] 2.6 POST with `topic_id` and `material_format_id` both omitted still returns 201
+- [x] 2.4 POST to `/api/sessions` with `{ energy_level, topic_id, material_format_id }` returns 201 and the row in Studio has the FKs set -- 0fa2bea
+- [x] 2.5 POST with bogus topic_id (valid UUID, no row) returns 500 with FK-violation; confirm the error is reasonable -- 0fa2bea
+- [x] 2.6 POST with `topic_id` and `material_format_id` both omitted still returns 201 -- 0fa2bea
 
 ### Phase 3: Topic customization (API + `/topics` page)
 
 #### Automated
 
-- [ ] 3.1 All topic integration tests pass: `npm run test -- topics`
-- [ ] 3.2 Existing tests still pass: `npm run test`
-- [ ] 3.3 Lint passes: `npm run lint`
-- [ ] 3.4 Build passes: `npm run build`
+- [x] 3.1 All topic integration tests pass: `npm run test -- topics`
+- [x] 3.2 Existing tests still pass: `npm run test`
+- [x] 3.3 Lint passes: `npm run lint`
+- [x] 3.4 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 3.5 Logged-out visit to `/topics` redirects to signin
-- [ ] 3.6 Logged-in fresh-account visit to `/topics` shows empty state with Add CTA
-- [ ] 3.7 Add a topic, rename it, archive it, unarchive it -- full flow works
-- [ ] 3.8 Second account's `/topics` page is empty -- no leak from the first account
-- [ ] 3.9 Topbar shows the Topics link on every authed page
+- [x] 3.5 Logged-out visit to `/topics` redirects to signin
+- [x] 3.6 Logged-in fresh-account visit to `/topics` shows empty state with Add CTA
+- [x] 3.7 Add a topic, rename it, archive it, unarchive it -- full flow works
+- [x] 3.8 Second account's `/topics` page is empty -- no leak from the first account
+- [x] 3.9 Topbar shows the Topics link on every authed page
 
 ### Phase 4: Material format customization (API + `/formats` page)
 

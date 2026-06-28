@@ -59,3 +59,23 @@ export async function createTestMaterialFormat(userId: string, name: string): Pr
   }
   return data.id as string;
 }
+
+export interface TopicRow {
+  id: string;
+  owner_id: string | null;
+  name: string;
+  archived_at: string | null;
+}
+
+export async function readTopic(id: string): Promise<TopicRow | null> {
+  const { data, error } = await supabase
+    .from("topics")
+    .select("id, owner_id, name, archived_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`readTopic(${id}): ${error.message}`);
+  }
+  return data;
+}

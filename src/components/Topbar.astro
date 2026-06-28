@@ -20,6 +20,10 @@ const { user } = Astro.locals;
             {" "}
             Dashboard{" "}
           </a>
+          <a href="/topics" class="text-blaze hover:text-spark transition-colors hover:underline">
+            {" "}
+            Topics{" "}
+          </a>
           <form method="POST" action="/api/auth/signout">
             <button type="submit" class="text-blaze hover:text-spark transition-colors hover:underline">
               Sign out
