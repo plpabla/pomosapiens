@@ -51,7 +51,7 @@ amount of test infrastructure required to make those edits truthful.
   seeded-format-protection test (NULL-owner row PATCH 409) is a distinct
   invariant beyond cross-user, worth a body callout.
 - **`test-plan.md:9` "Last updated"** still reads `2026-06-26 (Phase 4
-  complete)`. §8 freshness ledger lists `2026-06-24` for Strategy and
+complete)`. §8 freshness ledger lists `2026-06-24` for Strategy and
   Stack reviews. Both need bumping as part of the refresh.
 
 ## Desired End State
@@ -418,19 +418,20 @@ table with a wide UPDATE policy)..." to "Any endpoint that writes
 to a user-owned, RLS-bearing table (e.g. `public.sessions`,
 `public.topics`, `public.material_formats`)...". Reference tests
 list grows from two bullets to six (existing two + four new):
+
 - POST column-scope: `tests/integration/api/topics.create.test.ts`
 - POST column-scope: `tests/integration/api/material-formats.create.test.ts`
 - PATCH column-scope: `tests/integration/api/topics.update.test.ts`
 - PATCH column-scope: `tests/integration/api/material-formats.update.test.ts`
-New paragraph after the "Two-layer guarantee" block:
-"**System-seeded default rows.** Some user-owned tables ship rows
-with `owner_id IS NULL` that every authenticated user can SELECT but
-nobody can mutate (see `material_formats` migration `20260531182506`).
-Endpoints serving these tables must enforce a NULL-owner protection:
-PATCH or DELETE on a seeded row returns 409 (byte-identical with
-the cross-user-conflict shape). Reference test:
-`tests/integration/api/material-formats.update.test.ts` --
-seeded-format-protection case."
+  New paragraph after the "Two-layer guarantee" block:
+  "**System-seeded default rows.** Some user-owned tables ship rows
+  with `owner_id IS NULL` that every authenticated user can SELECT but
+  nobody can mutate (see `material_formats` migration `20260531182506`).
+  Endpoints serving these tables must enforce a NULL-owner protection:
+  PATCH or DELETE on a seeded row returns 409 (byte-identical with
+  the cross-user-conflict shape). Reference test:
+  `tests/integration/api/material-formats.update.test.ts` --
+  seeded-format-protection case."
 
 #### 5. Bump freshness metadata
 
@@ -458,7 +459,7 @@ changes in this refresh — only the test-base capability grew).
   five regions: §2 (one new risk row + one new guidance row); §3 row 4
   Goal cell; §6.2 (one new bullet + one new pattern step); §6.3
   (heading + opening + reference list + new paragraph); top of file
-  + §8 (freshness)
+  - §8 (freshness)
 - Markdown table syntax stays valid: all new rows have the right
   pipe count; no broken alignment
 
@@ -552,29 +553,29 @@ None. No schema changes, no breaking API changes, no data backfill.
 
 #### Automated
 
-- [x] 2.1 `npm run test:e2e -- tests/e2e/session-capture.spec.ts` exits 0
-- [x] 2.2 `npm run test:e2e` full suite still exits 0
-- [x] 2.3 `npm run lint` passes
-- [x] 2.4 `npm run build` exits 0
+- [x] 2.1 `npm run test:e2e -- tests/e2e/session-capture.spec.ts` exits 0 -- cfbfec3
+- [x] 2.2 `npm run test:e2e` full suite still exits 0 -- cfbfec3
+- [x] 2.3 `npm run lint` passes -- cfbfec3
+- [x] 2.4 `npm run build` exits 0 -- cfbfec3
 
 #### Manual
 
-- [x] 2.5 Locator names match real `aria-label` values on the rendered Select triggers
-- [x] 2.6 Chip line on `/dashboard` shows both names during a manual headed run
-- [x] 2.7 Deliberate-removal check: e2e fails when `dashboard.astro:133-152` chip block is commented out
+- [x] 2.5 Locator names match real `aria-label` values on the rendered Select triggers -- cfbfec3
+- [x] 2.6 Chip line on `/dashboard` shows both names during a manual headed run -- cfbfec3
+- [x] 2.7 Deliberate-removal check: e2e fails when `dashboard.astro:133-152` chip block is commented out -- cfbfec3
 
 ### Phase 3: `test-plan.md` refresh
 
 #### Automated
 
-- [ ] 3.1 `npm run format` exits 0 with `test-plan.md` formatted
-- [ ] 3.2 `git diff context/foundation/test-plan.md` shows changes in exactly the five intended regions
-- [ ] 3.3 Markdown table syntax stays valid
+- [x] 3.1 `npm run format` exits 0 with `test-plan.md` formatted
+- [x] 3.2 `git diff context/foundation/test-plan.md` shows changes in exactly the five intended regions
+- [x] 3.3 Markdown table syntax stays valid
 
 #### Manual
 
-- [ ] 3.4 `test-plan.md` re-read top-to-bottom: five changes integrate coherently
-- [ ] 3.5 Risk #7 "Must challenge" cell names the cast-lie pattern
-- [ ] 3.6 §6.3 reference list cites all four new integration test files
-- [ ] 3.7 §3 Phase 4 Status column still reads `complete`
-- [ ] 3.8 Freshness line and §8 both show `2026-06-28`
+- [x] 3.4 `test-plan.md` re-read top-to-bottom: five changes integrate coherently
+- [x] 3.5 Risk #7 "Must challenge" cell names the cast-lie pattern
+- [x] 3.6 §6.3 reference list cites all four new integration test files
+- [x] 3.7 §3 Phase 4 Status column still reads `complete`
+- [x] 3.8 Freshness line and §8 both show `2026-06-28`
