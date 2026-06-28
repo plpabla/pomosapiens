@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-06-21
+updated: 2026-06-28
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -32,7 +32,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                               | —             | — (US-01 acquisition surface)                         | done     |
 | F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                               | —             | NFR (privacy), Access Control                         | done     |
 | S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history                  | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done     |
-| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                  | S-01          | FR-007, FR-008, FR-017                                | proposed |
+| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                  | S-01          | FR-007, FR-008, FR-017                                | done     |
 | S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session            | S-01          | FR-004, FR-005, FR-010                                | proposed |
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | proposed |
 | S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | proposed |
@@ -105,7 +105,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Unknowns:**
   - Topic archive semantics — does an archived topic stay attached to historical sessions but hide from the picker? Strongly implied by PRD but not explicit. — Owner: project author. Block: no.
 - **Risk:** Additive schema changes on `sessions` (`topic_id` FK, `material_format` column) plus a new `topics` table with its own RLS. If executed in parallel with S-03 or S-04, coordinate migration ordering — additive migrations on the same table from concurrent slices can conflict.
-- **Status:** proposed
+- **Status:** done
 
 ### S-03: Editable timer presets and count-up mode
 
@@ -200,3 +200,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **F-01: (foundation) sessions data model with per-user RLS** — Archived 2026-06-02 → `context/archive/2026-05-29-sessions-data-foundation/`. Lesson: —.
 - **S-00: A first-time visitor to `/` sees a hero explaining the wedge (energy-gated focus sessions with contextual capture bound to each session) and taps a primary CTA that routes to `/auth/signup`. Replaces the placeholder `src/pages/index.astro`. Authenticated visitors are redirected to `/dashboard`.** — Archived 2026-06-19 → `context/archive/2026-06-18-landing-page/`. Lesson: —.
 - **S-01: User can sign in, tap "Start session" on the dashboard, pick an energy level (only required field), run a default 25 / 5 timer through focus → break with an audible cue, rate focus 1–5 or skip at the end, and see the saved session at the top of their history list.** — Archived 2026-06-21 → `context/archive/2026-06-19-first-session-capture-loop/`. Lesson: —.
+- **S-02: manage topics and tag each session with topic + material format** — Archived 2026-06-28 → `context/archive/2026-06-27-categorize-sessions-topic-format/`. Lesson: —.

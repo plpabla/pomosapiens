@@ -4,7 +4,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ServerError } from "@/components/auth/ServerError";
-import { cn } from "@/lib/utils";
 
 interface MaterialFormat {
   id: string;
@@ -82,7 +81,7 @@ export function MaterialFormatManager() {
     setRenameError(null);
     setRenameSubmitting(true);
     const prev = formats;
-    setFormats((fs) => fs.map((f) => (f.id === renameId ? { ...f, name: renameName } : f)));
+    setFormats((fs) => fs.map((f) => (f.id === renameId ? { ...f, name: renameName.trim() } : f)));
     try {
       await apiFetch(`/api/material-formats/${renameId}`, "PATCH", { name: renameName });
       setRenameId(null);
@@ -272,9 +271,7 @@ export function MaterialFormatManager() {
               {archived.map((fmt) => (
                 <li
                   key={fmt.id}
-                  className={cn(
-                    "border-charred bg-ember/10 flex items-center justify-between rounded-lg border px-4 py-3 opacity-60",
-                  )}
+                  className="border-charred bg-ember/10 flex items-center justify-between rounded-lg border px-4 py-3 opacity-60"
                 >
                   <span className="text-ash line-through">{fmt.name}</span>
                   <Button variant="outline" size="sm" onClick={() => void handleUnarchive(fmt.id)}>

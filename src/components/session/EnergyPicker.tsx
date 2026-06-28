@@ -36,15 +36,20 @@ export default function EnergyPicker() {
   const [formats, setFormats] = useState<MaterialFormat[]>([]);
   const [topicId, setTopicId] = useState<string | null>(null);
   const [materialFormatId, setMaterialFormatId] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     void Promise.all([
       fetch("/api/topics").then((r) => r.json() as Promise<{ topics: Topic[] }>),
       fetch("/api/material-formats").then((r) => r.json() as Promise<{ formats: MaterialFormat[] }>),
-    ]).then(([topicsData, formatsData]) => {
-      setTopics(topicsData.topics.filter((t) => t.archived_at === null));
-      setFormats(formatsData.formats.filter((f) => f.archived_at === null));
-    });
+    ])
+      .then(([topicsData, formatsData]) => {
+        setTopics(topicsData.topics.filter((t) => t.archived_at === null));
+        setFormats(formatsData.formats.filter((f) => f.archived_at === null));
+      })
+      .catch(() => {
+        setLoadError("Could not load topics and formats.");
+      });
   }, []);
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
@@ -120,6 +125,7 @@ export default function EnergyPicker() {
           ))}
         </div>
 
+        {loadError && <ServerError message={loadError} />}
         <div className="mb-4 flex flex-col gap-3 text-left">
           <Select
             value={topicId ?? NONE}
