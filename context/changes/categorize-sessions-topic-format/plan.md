@@ -723,35 +723,35 @@ The smoke script itself is NOT updated -- the new columns are nullable, the exis
 
 #### Automated
 
-- [x] 4.1 All material-formats integration tests pass: `npm run test -- material-formats`
-- [x] 4.2 Existing tests still pass: `npm run test`
-- [x] 4.3 pgTAP still passes: `npm run db:test`
-- [x] 4.4 Lint passes: `npm run lint`
-- [x] 4.5 Build passes: `npm run build`
+- [x] 4.1 All material-formats integration tests pass: `npm run test -- material-formats` -- b24b508
+- [x] 4.2 Existing tests still pass: `npm run test` -- b24b508
+- [x] 4.3 pgTAP still passes: `npm run db:test` -- b24b508
+- [x] 4.4 Lint passes: `npm run lint` -- b24b508
+- [x] 4.5 Build passes: `npm run build` -- b24b508
 
 #### Manual
 
-- [x] 4.6 Logged-out visit to `/formats` redirects to signin
-- [x] 4.7 Logged-in visit shows 5 seeded rows as Built-in (no rename / archive affordance), empty Yours, Add CTA
-- [x] 4.8 Add a custom format, rename it, archive it, unarchive it -- full flow works
-- [x] 4.9 Forge a PATCH on a seeded row via DevTools -- response is 409, row unchanged in Studio
-- [x] 4.10 Second account does not see the first account's custom formats; both see the same 5 seeded rows
+- [x] 4.6 Logged-out visit to `/formats` redirects to signin -- b24b508
+- [x] 4.7 Logged-in visit shows 5 seeded rows as Built-in (no rename / archive affordance), empty Yours, Add CTA -- b24b508
+- [x] 4.8 Add a custom format, rename it, archive it, unarchive it -- full flow works -- b24b508
+- [x] 4.9 Forge a PATCH on a seeded row via DevTools -- response is 409, row unchanged in Studio -- b24b508
+- [x] 4.10 Second account does not see the first account's custom formats; both see the same 5 seeded rows -- b24b508
 
 ### Phase 5: Pre-session screen pickers
 
 #### Automated
 
-- [ ] 5.1 Build passes: `npm run build`
-- [ ] 5.2 Lint passes: `npm run lint`
-- [ ] 5.3 Existing session.create integration tests still pass
+- [x] 5.1 Build passes: `npm run build`
+- [x] 5.2 Lint passes: `npm run lint`
+- [x] 5.3 Existing session.create integration tests still pass
 
 #### Manual
 
-- [ ] 5.4 `/session/new` shows energy row, Topic select with "No topic" + user topics, Format select with "No format" + 5 seeded + user formats
-- [ ] 5.5 3-tap flow with both pickers ignored: tap link, tap energy, tap Start -- 3 taps total; session lands with NULL FKs
-- [ ] 5.6 Full flow with both pickers used: session lands with both FKs set
-- [ ] 5.7 Page refresh resets state (no stale selection)
-- [ ] 5.8 Archived topic is NOT in the Select
+- [x] 5.4 `/session/new` shows energy row, Topic select with "No topic" + user topics, Format select with "No format" + 5 seeded + user formats
+- [x] 5.5 3-tap flow with both pickers ignored: tap link, tap energy, tap Start -- 3 taps total; session lands with NULL FKs
+- [x] 5.6 Full flow with both pickers used: session lands with both FKs set
+- [x] 5.7 Page refresh resets state (no stale selection)
+- [x] 5.8 Archived topic is NOT in the Select
 
 ### Phase 6: Dashboard surface
 
