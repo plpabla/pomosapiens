@@ -35,7 +35,7 @@ All three refresh items are grounded by current source. Key findings:
 
 - **F2 is still live in source.** The S-02 impl-review marked F2 "Decision: FIXED" but [src/components/session/EnergyPicker.tsx:40-48](../../../src/components/session/EnergyPicker.tsx#L40-L48) shows no `.catch()`, no `loadError` state, no UI fallback. The change.md correctly anchors a new test-plan risk on the unmerged fix.
 - **Both /api/topics and /api/material-formats return 401/500 with `{ error: string }` on auth/RLS/Supabase failures.** The picker treats the JSON envelope as the success shape, so any non-200 response causes a runtime read of `topicsData.topics`/`formatsData.formats` against `undefined` — the `useEffect` rejects silently because there's no `.catch()`. Failure scenario is concrete, not hypothetical.
-- **Cheapest layer for risk #7 is jsdom integration on picker mount.** Infrastructure is wired ([vitest.config.ts](../../../vitest.config.ts) jsdom project, [tests/unit/_setup.ts](../../../tests/unit/_setup.ts) helpers), but **no precedent yet for component-mount tests or fetch-stubbing in jsdom**. This is a new pattern.
+- **Cheapest layer for risk #7 is jsdom integration on picker mount.** Infrastructure is wired ([vitest.config.ts](../../../vitest.config.ts) jsdom project, [tests/unit/\_setup.ts](../../../tests/unit/_setup.ts) helpers), but **no precedent yet for component-mount tests or fetch-stubbing in jsdom**. This is a new pattern.
 - **E2E gap is real and cheap to close.** [tests/e2e/session-capture.spec.ts](../../../tests/e2e/session-capture.spec.ts) never touches the topic/format selects, and [src/pages/dashboard.astro:133-152](../../../src/pages/dashboard.astro#L133-L152) gates the chip line on `session.topic !== null || session.material_format !== null` — a render path with no automated gate today. Five system-seeded `material_formats` rows (Video / Reading / Writing code / Drilling problems / Other) are visible to every user via NULL-owner RLS, so the e2e can pick one without any per-user fixture work; topics ship empty so the topic side needs a seeded row.
 - **§6.3 has four ready-to-cite reference files** for the generalization: `tests/integration/api/{topics,material-formats}.{create,update}.test.ts`. They already follow L-01 column-scope discipline (verified in the impl-review's "Notes on what passed").
 
@@ -75,7 +75,7 @@ The impl-review F2 ([context/archive/2026-06-27-categorize-sessions-topic-format
 
 **Cheapest layer — jsdom integration on picker mount:**
 
-- Vitest jsdom project is wired: [vitest.config.ts:28-32](../../../vitest.config.ts#L28-L32). `environment: "jsdom"`, `setupFiles` point at [tests/unit/_setup.ts](../../../tests/unit/_setup.ts), include glob covers `tests/unit/**/*.test.ts`.
+- Vitest jsdom project is wired: [vitest.config.ts:28-32](../../../vitest.config.ts#L28-L32). `environment: "jsdom"`, `setupFiles` point at [tests/unit/\_setup.ts](../../../tests/unit/_setup.ts), include glob covers `tests/unit/**/*.test.ts`.
 - Existing helpers in `_setup.ts`: `dispatchVisibilityChange`, `stubAudioGlobal`, `createAudioMock` — no fetch-stubbing helper yet.
 - Existing jsdom tests are hook/utility level only: `tests/unit/timer/{useFocusTimer,audio}.test.ts` and `tests/unit/session/resolveSessionPageAccess.test.ts`. **No precedent for a `.tsx` component-mount test.**
 - Grep for `vi.stubGlobal('fetch'`, `global.fetch`, `vi.spyOn(globalThis, 'fetch')`, `msw` across `tests/unit/` returned zero matches. The fetch-mocking pattern is a fresh decision (likely `vi.stubGlobal("fetch", vi.fn().mockResolvedValueOnce(...))` paired with `@testing-library/react`'s `render` + `findByText`).
@@ -101,26 +101,36 @@ The impl-review F2 ([context/archive/2026-06-27-categorize-sessions-topic-format
 [src/pages/dashboard.astro:133-152](../../../src/pages/dashboard.astro#L133-L152) — the chip line is gated:
 
 ```astro
-{(session.topic !== null || session.material_format !== null) && (
-  <div class="flex flex-wrap gap-1.5">
-    {session.topic !== null && (<span ... title={session.topic.name}>{session.topic.name}</span>)}
-    {session.material_format !== null && (<span ... title={session.material_format.name}>{session.material_format.name}</span>)}
-  </div>
-)}
+{
+  (session.topic !== null || session.material_format !== null) && (
+    <div class="flex flex-wrap gap-1.5">
+      {session.topic !== null && (
+        <span ... title={session.topic.name}>
+          {session.topic.name}
+        </span>
+      )}
+      {session.material_format !== null && (
+        <span ... title={session.material_format.name}>
+          {session.material_format.name}
+        </span>
+      )}
+    </div>
+  )
+}
 ```
 
 A regression that breaks the join (e.g. `topic:topics(name)` embed alias rename), the picker's POST payload (`topic_id` / `material_format_id` keys), or the chip render block would all silently produce a session card with no chip line. Nothing automated catches that today.
 
 **Fixture support for seeding:**
 
-- [tests/e2e/_fixtures/](../../../tests/e2e/_fixtures/) currently contains `auth.ts` (re-export of `setupTwoUsers` / `seedAuthCookie`) and `sessions.ts` (`insertSession` via service-role client). **No `insertTopic` or `insertMaterialFormat` helper exists yet.**
+- [tests/e2e/\_fixtures/](../../../tests/e2e/_fixtures/) currently contains `auth.ts` (re-export of `setupTwoUsers` / `seedAuthCookie`) and `sessions.ts` (`insertSession` via service-role client). **No `insertTopic` or `insertMaterialFormat` helper exists yet.**
 - Migration [supabase/migrations/20260531182506_sessions_data_foundation.sql:115-120](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L115-L120) seeds five `material_formats` rows with `owner_id = NULL`: Video, Reading, Writing code, Drilling problems, Other. They are visible to every authenticated user via the `material_formats_select_own_or_default` RLS policy.
 - `topics` table ships empty — see same migration's intent comment.
 
 **Cheapest path to coverage:**
 
 - Format: pick a system-seeded row (e.g. "Writing code") — zero fixture work.
-- Topic: insert one row via service role in `beforeAll` — requires a new `insertTopic(userId, name)` helper modeled on [tests/e2e/_fixtures/sessions.ts](../../../tests/e2e/_fixtures/sessions.ts)'s `insertSession`. Roughly 10 lines.
+- Topic: insert one row via service role in `beforeAll` — requires a new `insertTopic(userId, name)` helper modeled on [tests/e2e/\_fixtures/sessions.ts](../../../tests/e2e/_fixtures/sessions.ts)'s `insertSession`. Roughly 10 lines.
 
 **Playwright locators (no precedent in repo for shadcn Select):**
 
@@ -174,8 +184,8 @@ The picker-fetch risk and the e2e gap protect the same code surface against both
 - [src/pages/api/material-formats/index.ts:8-27](../../../src/pages/api/material-formats/index.ts#L8-L27) — GET handler; 401/500 response shapes
 - [src/pages/dashboard.astro:133-152](../../../src/pages/dashboard.astro#L133-L152) — chip render block
 - [tests/e2e/session-capture.spec.ts:23-69](../../../tests/e2e/session-capture.spec.ts#L23-L69) — current e2e, no chip assertion
-- [tests/e2e/_fixtures/sessions.ts](../../../tests/e2e/_fixtures/sessions.ts) — `insertSession` (pattern to copy for `insertTopic`)
-- [tests/unit/_setup.ts](../../../tests/unit/_setup.ts) — jsdom helpers (no fetch helper yet)
+- [tests/e2e/\_fixtures/sessions.ts](../../../tests/e2e/_fixtures/sessions.ts) — `insertSession` (pattern to copy for `insertTopic`)
+- [tests/unit/\_setup.ts](../../../tests/unit/_setup.ts) — jsdom helpers (no fetch helper yet)
 - [vitest.config.ts:28-32](../../../vitest.config.ts#L28-L32) — jsdom project config
 - [supabase/migrations/20260531182506_sessions_data_foundation.sql:115-120](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L115-L120) — five NULL-owner seeded material_formats
 - [tests/integration/api/topics.create.test.ts](../../../tests/integration/api/topics.create.test.ts), [tests/integration/api/topics.update.test.ts](../../../tests/integration/api/topics.update.test.ts), [tests/integration/api/material-formats.create.test.ts](../../../tests/integration/api/material-formats.create.test.ts), [tests/integration/api/material-formats.update.test.ts](../../../tests/integration/api/material-formats.update.test.ts) — reference patterns for §6.3 generalization

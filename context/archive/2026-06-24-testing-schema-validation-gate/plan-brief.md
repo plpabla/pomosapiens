@@ -17,19 +17,20 @@ After every successful production deploy, a dedicated `smoke.yml` workflow auto-
 
 ## Key Decisions Made
 
-| Decision                    | Choice                                                      | Why (1 sentence)                                                                                                              | Source   |
-| --------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | -------- |
-| `db:types` diff strategy    | Strategy C — production schema diff (`--project-id`)        | Only strategy that catches "migration committed but not applied to production," which is exactly Risk #4.                     | Research |
-| Smoke trigger mechanism     | Cloudflare webhook → GitHub `repository_dispatch`           | Deploy ownership stays with Cloudflare; no `CLOUDFLARE_API_TOKEN` needed in the repo.                                         | Research |
-| Both gates' location        | One workflow (`.github/workflows/smoke.yml`)                | Both must run post-deploy against the production schema; collapsing them avoids redundant secrets and runners.                | Research |
-| Smoke script runtime        | Standalone Node ESM (`scripts/smoke-session-write.mjs`)     | No Workers runtime needed for Supabase REST; no new dev dep; trivially runnable locally for debugging.                        | Plan     |
-| Smoke INSERT identity       | Pre-seeded dedicated `smoke@…` auth user (`SMOKE_USER_ID`)  | Sessions `user_id` has FK to `auth.users` — a sentinel UUID fails the FK; deterministic identity makes cleanup idempotent.    | Plan     |
-| Failure escalation          | Just red workflow (default GitHub notifications)            | Smallest viable scope; can layer auto-issue or rollback later if signal proves weak in practice.                              | Plan     |
-| Operator setup docs         | Phase 0 runbook + CLAUDE.md pointer                         | Survives `/10x-archive`; future schema-related changes have one stable place to reference.                                    | Plan     |
+| Decision                 | Choice                                                     | Why (1 sentence)                                                                                                           | Source   |
+| ------------------------ | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------- |
+| `db:types` diff strategy | Strategy C — production schema diff (`--project-id`)       | Only strategy that catches "migration committed but not applied to production," which is exactly Risk #4.                  | Research |
+| Smoke trigger mechanism  | Cloudflare webhook → GitHub `repository_dispatch`          | Deploy ownership stays with Cloudflare; no `CLOUDFLARE_API_TOKEN` needed in the repo.                                      | Research |
+| Both gates' location     | One workflow (`.github/workflows/smoke.yml`)               | Both must run post-deploy against the production schema; collapsing them avoids redundant secrets and runners.             | Research |
+| Smoke script runtime     | Standalone Node ESM (`scripts/smoke-session-write.mjs`)    | No Workers runtime needed for Supabase REST; no new dev dep; trivially runnable locally for debugging.                     | Plan     |
+| Smoke INSERT identity    | Pre-seeded dedicated `smoke@…` auth user (`SMOKE_USER_ID`) | Sessions `user_id` has FK to `auth.users` — a sentinel UUID fails the FK; deterministic identity makes cleanup idempotent. | Plan     |
+| Failure escalation       | Just red workflow (default GitHub notifications)           | Smallest viable scope; can layer auto-issue or rollback later if signal proves weak in practice.                           | Plan     |
+| Operator setup docs      | Phase 0 runbook + CLAUDE.md pointer                        | Survives `/10x-archive`; future schema-related changes have one stable place to reference.                                 | Plan     |
 
 ## Scope
 
 **In scope:**
+
 - `.github/workflows/smoke.yml` — new workflow, both schema gates, `workflow_dispatch` + `repository_dispatch` triggers
 - `scripts/smoke-session-write.mjs` — Node ESM smoke script, idempotent
 - `package.json` — new `test:smoke` script for local debugging
@@ -38,6 +39,7 @@ After every successful production deploy, a dedicated `smoke.yml` workflow auto-
 - `context/foundation/test-plan.md` — §3 status bump (Phase 3 complete), §5 gates to "active", new §6.6 cookbook entry
 
 **Out of scope:**
+
 - Adding `CLOUDFLARE_API_TOKEN` or moving deploy ownership to GitHub Actions
 - Automated `wrangler rollback` on smoke failure
 - Auto-opening GitHub issues on failure
@@ -62,12 +64,12 @@ The smoke script's sequence is idempotent: DELETE-by-user_id (cleanup leftovers)
 
 ## Phases at a Glance
 
-| Phase                                       | What it delivers                                                                       | Key risk                                                                                       |
-| ------------------------------------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| 1. Operator runbook & prerequisites         | `runbook.md` + CLAUDE.md pointer; all 4 secrets, smoke user, and Cloudflare webhook ready | Operator misses a manual step — caught at Phase 2 manual trigger before any auto-fire         |
-| 2. Smoke script + smoke.yml (manual-only)   | `scripts/smoke-session-write.mjs` + workflow with `workflow_dispatch` only             | Smoke script logic broken — caught by manual dry-run plus intentional drift test before Phase 3 |
-| 3. Webhook activation + first auto-run      | `repository_dispatch` trigger added; Cloudflare webhook fires real run end-to-end       | Webhook header / PAT scope misconfigured — caught immediately on first real deploy            |
-| 4. Test-plan §5 status bump + cookbook §6.6 | `test-plan.md` reflects active gates; cookbook entry for future RLS-bearing tables     | None significant — docs-only closeout mirroring `test-timer-sm` p5                            |
+| Phase                                       | What it delivers                                                                          | Key risk                                                                                        |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| 1. Operator runbook & prerequisites         | `runbook.md` + CLAUDE.md pointer; all 4 secrets, smoke user, and Cloudflare webhook ready | Operator misses a manual step — caught at Phase 2 manual trigger before any auto-fire           |
+| 2. Smoke script + smoke.yml (manual-only)   | `scripts/smoke-session-write.mjs` + workflow with `workflow_dispatch` only                | Smoke script logic broken — caught by manual dry-run plus intentional drift test before Phase 3 |
+| 3. Webhook activation + first auto-run      | `repository_dispatch` trigger added; Cloudflare webhook fires real run end-to-end         | Webhook header / PAT scope misconfigured — caught immediately on first real deploy              |
+| 4. Test-plan §5 status bump + cookbook §6.6 | `test-plan.md` reflects active gates; cookbook entry for future RLS-bearing tables        | None significant — docs-only closeout mirroring `test-timer-sm` p5                              |
 
 **Prerequisites:** Supabase Personal Access Token (operator-generated); production project ref (Supabase dashboard); dedicated smoke auth user in prod (service-role create); GitHub PAT with `repo` scope (for the Cloudflare → GitHub Dispatches webhook). All documented in Phase 1 runbook.
 

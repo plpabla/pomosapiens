@@ -47,24 +47,24 @@ cleanup. A minimal session INSERT requires exactly three columns: `user_id`, `en
 
 Current steps (35 lines total):
 
-| Step | Command | Notes |
-|------|---------|-------|
-| checkout | `actions/checkout@v4` | |
-| node setup | `actions/setup-node@v4` | reads `.nvmrc` |
-| install | `npm ci` | |
-| lint | `npm run lint` | |
-| build | `npm run build` | needs `SUPABASE_URL` + `SUPABASE_KEY` secrets |
-| write .dev.vars | `printf ...` | writes all 3 Supabase secrets for the Workers pool |
-| test | `npm test` | Vitest (Workers integration + jsdom); needs all 3 secrets |
+| Step            | Command                 | Notes                                                     |
+| --------------- | ----------------------- | --------------------------------------------------------- |
+| checkout        | `actions/checkout@v4`   |                                                           |
+| node setup      | `actions/setup-node@v4` | reads `.nvmrc`                                            |
+| install         | `npm ci`                |                                                           |
+| lint            | `npm run lint`          |                                                           |
+| build           | `npm run build`         | needs `SUPABASE_URL` + `SUPABASE_KEY` secrets             |
+| write .dev.vars | `printf ...`            | writes all 3 Supabase secrets for the Workers pool        |
+| test            | `npm test`              | Vitest (Workers integration + jsdom); needs all 3 secrets |
 
 **What is NOT in CI:**
 
-| Check | Status | Consequence |
-|-------|--------|-------------|
-| `npm run db:test` | **absent** | pgTAP RLS tests never run in CI |
-| `npm run db:types` | **absent** | no check that generated types stay in sync |
-| schema diff | **absent** | no gate catches `src/db/database.types.ts` drifting from production |
-| post-deploy smoke | **absent** | nothing verifies production schema after deploy |
+| Check              | Status     | Consequence                                                         |
+| ------------------ | ---------- | ------------------------------------------------------------------- |
+| `npm run db:test`  | **absent** | pgTAP RLS tests never run in CI                                     |
+| `npm run db:types` | **absent** | no check that generated types stay in sync                          |
+| schema diff        | **absent** | no gate catches `src/db/database.types.ts` drifting from production |
+| post-deploy smoke  | **absent** | nothing verifies production schema after deploy                     |
 
 The workflow triggers on push and PR to `main` ([.github/workflows/ci.yml:3-7](.github/workflows/ci.yml#L3-L7)).
 
@@ -75,6 +75,7 @@ The workflow triggers on push and PR to `main` ([.github/workflows/ci.yml:3-7](.
 Supabase client typed as `SupabaseClient<Database>` ([src/lib/supabase.ts](src/lib/supabase.ts)).
 
 **Generation script** ([package.json:18](package.json#L18)):
+
 ```
 supabase gen types typescript --local > src/db/database.types.ts
 ```
@@ -90,11 +91,11 @@ The only strategy that actually verifies the production database state. Strategi
 local consistency only; they cannot catch "migration written and committed but not applied to
 production," which is exactly Risk #4.
 
-| Strategy | How | Catches | CI cost | Extra secrets needed | Decision |
-|----------|-----|---------|---------|---------------------|----------|
-| A -- git-presence check | Fail CI if migration files changed but `database.types.ts` did not | Developer forgot to regenerate | ~0s | none | rejected -- local only |
-| B -- local Supabase in CI | `supabase start` (Docker), `db:types`, `git diff --exit-code` | Types out of sync with local migrations | ~60-90s | none | rejected -- local only |
-| **C -- production schema diff** | `supabase gen types --project-id <ref>` + diff against committed | **Types out of sync with production schema** | ~5s | `SUPABASE_ACCESS_TOKEN` | **chosen** |
+| Strategy                        | How                                                                | Catches                                      | CI cost | Extra secrets needed    | Decision               |
+| ------------------------------- | ------------------------------------------------------------------ | -------------------------------------------- | ------- | ----------------------- | ---------------------- |
+| A -- git-presence check         | Fail CI if migration files changed but `database.types.ts` did not | Developer forgot to regenerate               | ~0s     | none                    | rejected -- local only |
+| B -- local Supabase in CI       | `supabase start` (Docker), `db:types`, `git diff --exit-code`      | Types out of sync with local migrations      | ~60-90s | none                    | rejected -- local only |
+| **C -- production schema diff** | `supabase gen types --project-id <ref>` + diff against committed   | **Types out of sync with production schema** | ~5s     | `SUPABASE_ACCESS_TOKEN` | **chosen**             |
 
 **Timing constraint**: Strategy C must run **post-deploy** (after migrations have been applied to
 production). Running it pre-merge would fail every PR that includes a migration -- the production
@@ -102,12 +103,14 @@ schema hasn't been updated yet. This means both the smoke test and the `db:types
 the same post-deploy CI job.
 
 **Command skeleton** (for the plan phase):
+
 ```bash
 supabase gen types typescript --project-id <prod-ref> > /tmp/types_check.ts
 diff src/db/database.types.ts /tmp/types_check.ts
 ```
 
 **Prerequisites**:
+
 - `SUPABASE_ACCESS_TOKEN` -- new repository secret (Supabase personal access token)
 - Production project ref (20-char ID) -- available in Supabase dashboard under Project Settings;
   not currently stored in any tracked file
@@ -118,31 +121,33 @@ diff src/db/database.types.ts /tmp/types_check.ts
 ### 3. Sessions table schema -- minimal INSERT columns
 
 **Migrations**:
+
 - [supabase/migrations/20260531182506_sessions_data_foundation.sql](supabase/migrations/20260531182506_sessions_data_foundation.sql) -- creates table with RLS
 - [supabase/migrations/20260601120000_drop_sessions_delete_policy.sql](supabase/migrations/20260601120000_drop_sessions_delete_policy.sql) -- removes DELETE policy (sessions are immutable via RLS)
 
 **Full column inventory**:
 
-| Column | Type | NOT NULL | Source | Required in INSERT? |
-|--------|------|----------|--------|---------------------|
-| `id` | uuid | YES | `gen_random_uuid()` default | no |
-| `user_id` | uuid | YES | caller | **yes** |
-| `started_at` | timestamptz | YES | caller (API stamps `new Date()`) | **yes** |
-| `energy_level` | `public.energy_level` enum | YES | caller (Zod validates) | **yes** |
-| `ended_at` | timestamptz | NO | null default | no |
-| `duration_seconds` | integer | NO | STORED generated column | no (auto) |
-| `focus_rating` | smallint | NO | null default | no |
-| `topic_id` | uuid | NO | null default | no |
-| `material_format_id` | uuid | NO | null default | no |
-| `timer_mode` | text | NO | null default | no |
-| `note` | text | NO | null default | no |
-| `created_at` | timestamptz | YES | `now()` default | no |
-| `updated_at` | timestamptz | YES | `now()` default | no |
+| Column               | Type                       | NOT NULL | Source                           | Required in INSERT? |
+| -------------------- | -------------------------- | -------- | -------------------------------- | ------------------- |
+| `id`                 | uuid                       | YES      | `gen_random_uuid()` default      | no                  |
+| `user_id`            | uuid                       | YES      | caller                           | **yes**             |
+| `started_at`         | timestamptz                | YES      | caller (API stamps `new Date()`) | **yes**             |
+| `energy_level`       | `public.energy_level` enum | YES      | caller (Zod validates)           | **yes**             |
+| `ended_at`           | timestamptz                | NO       | null default                     | no                  |
+| `duration_seconds`   | integer                    | NO       | STORED generated column          | no (auto)           |
+| `focus_rating`       | smallint                   | NO       | null default                     | no                  |
+| `topic_id`           | uuid                       | NO       | null default                     | no                  |
+| `material_format_id` | uuid                       | NO       | null default                     | no                  |
+| `timer_mode`         | text                       | NO       | null default                     | no                  |
+| `note`               | text                       | NO       | null default                     | no                  |
+| `created_at`         | timestamptz                | YES      | `now()` default                  | no                  |
+| `updated_at`         | timestamptz                | YES      | `now()` default                  | no                  |
 
 **Enum values** for `energy_level`: `'low'`, `'medium'`, `'high'`
 
 **Minimal valid INSERT** (confirmed by pgTAP fixture at
 [supabase/tests/rls_sessions.sql:12-14](supabase/tests/rls_sessions.sql#L12-L14)):
+
 ```sql
 INSERT INTO public.sessions (id, user_id, started_at, energy_level)
 VALUES ('aaaaaaaa-0000-0000-0000-000000000001',
@@ -173,12 +178,12 @@ cannot run in the current CI job because the production Worker is not yet runnin
 
 **Options for triggering the smoke test** (decision for plan phase):
 
-| Option | How | Complexity | Notes |
-|--------|-----|------------|-------|
-| A -- add `wrangler deploy` to CI | CI runs deploy + smoke in one job (on merge to `main` only) | Low | Needs `CLOUDFLARE_API_TOKEN` secret; displaces Cloudflare Workers Builds for deploy |
-| B -- Cloudflare Workers Builds webhook | Cloudflare sends HTTP trigger after deploy; GitHub Actions `workflow_dispatch` or `repository_dispatch` runs smoke job | Medium | Needs webhook setup in Cloudflare dashboard |
-| C -- separate scheduled smoke workflow | GitHub Actions `schedule` cron; runs smoke against production on a cadence | Low-medium | Not instant; a bad deploy survives until the next run |
-| D -- smoke as part of CI test suite, targeting production endpoint | Add a `smoke` Vitest project that calls the production API | Low | Runs pre-deploy -- catches that the CURRENT production schema works, not the just-deployed one |
+| Option                                                             | How                                                                                                                    | Complexity | Notes                                                                                          |
+| ------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------- |
+| A -- add `wrangler deploy` to CI                                   | CI runs deploy + smoke in one job (on merge to `main` only)                                                            | Low        | Needs `CLOUDFLARE_API_TOKEN` secret; displaces Cloudflare Workers Builds for deploy            |
+| B -- Cloudflare Workers Builds webhook                             | Cloudflare sends HTTP trigger after deploy; GitHub Actions `workflow_dispatch` or `repository_dispatch` runs smoke job | Medium     | Needs webhook setup in Cloudflare dashboard                                                    |
+| C -- separate scheduled smoke workflow                             | GitHub Actions `schedule` cron; runs smoke against production on a cadence                                             | Low-medium | Not instant; a bad deploy survives until the next run                                          |
+| D -- smoke as part of CI test suite, targeting production endpoint | Add a `smoke` Vitest project that calls the production API                                                             | Low        | Runs pre-deploy -- catches that the CURRENT production schema works, not the just-deployed one |
 
 Option A is the cheapest path that gives true post-deploy coverage. It requires adding
 `CLOUDFLARE_API_TOKEN` as a repository secret and splitting CI: PR jobs run lint + build + test
@@ -196,7 +201,7 @@ Option A is the cheapest path that gives true post-deploy coverage. It requires 
   Vitest jsdom unit test suite. Also runs via `npm test`.
 
 For the smoke test, the relevant fixture is **service-role read-back** from Phase 1:
-`readSession(id)` in [tests/_fixtures/db.ts](tests/_fixtures/db.ts) reads a row via the service
+`readSession(id)` in [tests/\_fixtures/db.ts](tests/_fixtures/db.ts) reads a row via the service
 role client, bypassing RLS. The same pattern (service role INSERT + read-back + DELETE) applies to
 the smoke test.
 
@@ -220,7 +225,7 @@ schema mismatch risk.
 - [supabase/tests/rls_sessions.sql:12-14](supabase/tests/rls_sessions.sql#L12-L14) -- minimal INSERT fixture
 - [src/lib/schemas/session.ts](src/lib/schemas/session.ts) -- `createSessionSchema` (Zod) for POST
 - [src/pages/api/sessions/index.ts](src/pages/api/sessions/index.ts) -- POST /api/sessions endpoint
-- [tests/_fixtures/db.ts](tests/_fixtures/db.ts) -- `readSession()` service-role fixture from Phase 1
+- [tests/\_fixtures/db.ts](tests/_fixtures/db.ts) -- `readSession()` service-role fixture from Phase 1
 - [context/changes/deployment/platform-research.md](context/changes/deployment/platform-research.md) -- deploy architecture details
 
 ## Architecture Insights
@@ -230,10 +235,10 @@ schema mismatch risk.
 With Strategy C chosen for the `db:types` diff gate, both gates must run after production
 migrations are applied. They are not independent layers but two checks in the same post-deploy job:
 
-| Gate | Failure it catches | When to run | Key constraint |
-|------|-------------------|-------------|----------------|
-| `db:types` diff (Strategy C) | Migration NOT applied to production -- types file ahead of actual schema | Post-deploy | `SUPABASE_ACCESS_TOKEN` + production project ref |
-| Post-deploy smoke | Schema applied but structurally broken -- session INSERT fails at runtime | Post-deploy | Credentials to write + read a real row; cleanup via service role |
+| Gate                         | Failure it catches                                                        | When to run | Key constraint                                                   |
+| ---------------------------- | ------------------------------------------------------------------------- | ----------- | ---------------------------------------------------------------- |
+| `db:types` diff (Strategy C) | Migration NOT applied to production -- types file ahead of actual schema  | Post-deploy | `SUPABASE_ACCESS_TOKEN` + production project ref                 |
+| Post-deploy smoke            | Schema applied but structurally broken -- session INSERT fails at runtime | Post-deploy | Credentials to write + read a real row; cleanup via service role |
 
 This simplifies the architecture: one new CI job (triggered post-deploy) runs both checks in
 sequence. If either fails, the deploy is flagged immediately and `wrangler rollback` is the
@@ -283,6 +288,7 @@ push to main
 ```
 
 **One-time manual setup** (in the Cloudflare dashboard):
+
 - Workers & Pages -> Worker -> Settings -> Notifications -> "Deployment Success"
 - Webhook URL: `https://api.github.com/repos/<owner>/<repo>/dispatches`
 - Add header `Authorization: token <GITHUB_PAT>` and `Content-Type: application/json`
@@ -291,10 +297,10 @@ push to main
 
 **New repository secrets required** (one-time manual, in GitHub Settings -> Secrets):
 
-| Secret | Purpose |
-|--------|---------|
+| Secret                  | Purpose                                                                                                |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ |
 | `SUPABASE_ACCESS_TOKEN` | Supabase personal access token; lets Supabase CLI call the Management API for `gen types --project-id` |
-| `SUPABASE_PROJECT_REF` | Production project ref (20-char ID from Supabase dashboard -> Project Settings) |
+| `SUPABASE_PROJECT_REF`  | Production project ref (20-char ID from Supabase dashboard -> Project Settings)                        |
 
 `SUPABASE_URL`, `SUPABASE_KEY`, `SUPABASE_SERVICE_ROLE_KEY` are already present and reused by the
 smoke test.

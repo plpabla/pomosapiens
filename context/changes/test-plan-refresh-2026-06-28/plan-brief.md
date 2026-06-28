@@ -37,15 +37,15 @@ reference-test citations, and §8 freshness is bumped to 2026-06-28.
 
 ## Key Decisions Made
 
-| Decision | Choice | Why (1 sentence) | Source |
-| --- | --- | --- | --- |
-| Plan scope | Doc + tests (no F2 fix needed) | Research mis-reported F2 status; git history shows fix is already merged via `24c718b`, so Phase 1 is just the gate. | Plan |
-| F2 backport sourcing | Skipped -- already in HEAD | `git log --all -S "loadError"` surfaced the fix in `24c718b` six minutes before the research anchor commit. | Plan |
-| Risk #7 "Must challenge" wording | Name the cast-lie pattern explicitly | S-03 + S-04 will add more fetch sites; surfacing the typed-but-untrue pattern pays forward. | Plan |
-| §6.3 title | "RLS-bearing user-owned table endpoint" | Keeps title tight; seeded-default sub-pattern lives in the body with its own reference test. | Plan |
-| E2E placement | Extend `session-capture.spec.ts`, no new spec | Categorization is the next stage of the same wedge; new spec would re-do auth + navigation for zero isolation benefit. | Research |
-| Topic seeding strategy | New `insertTopic` helper; pick seeded `material_formats` row directly | Mirrors `insertSession` pattern at minimal cost; system-seeded format rows eliminate per-user format setup. | Research |
-| Test file extension | `EnergyPicker.test.tsx` + widen `vitest.config.ts` glob to `*.test.{ts,tsx}` | One-line config widening unblocks all future component tests; idiomatic over forcing `.ts` extension on JSX-heavy files. | Plan |
+| Decision                         | Choice                                                                       | Why (1 sentence)                                                                                                         | Source   |
+| -------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | -------- |
+| Plan scope                       | Doc + tests (no F2 fix needed)                                               | Research mis-reported F2 status; git history shows fix is already merged via `24c718b`, so Phase 1 is just the gate.     | Plan     |
+| F2 backport sourcing             | Skipped -- already in HEAD                                                   | `git log --all -S "loadError"` surfaced the fix in `24c718b` six minutes before the research anchor commit.              | Plan     |
+| Risk #7 "Must challenge" wording | Name the cast-lie pattern explicitly                                         | S-03 + S-04 will add more fetch sites; surfacing the typed-but-untrue pattern pays forward.                              | Plan     |
+| §6.3 title                       | "RLS-bearing user-owned table endpoint"                                      | Keeps title tight; seeded-default sub-pattern lives in the body with its own reference test.                             | Plan     |
+| E2E placement                    | Extend `session-capture.spec.ts`, no new spec                                | Categorization is the next stage of the same wedge; new spec would re-do auth + navigation for zero isolation benefit.   | Research |
+| Topic seeding strategy           | New `insertTopic` helper; pick seeded `material_formats` row directly        | Mirrors `insertSession` pattern at minimal cost; system-seeded format rows eliminate per-user format setup.              | Research |
+| Test file extension              | `EnergyPicker.test.tsx` + widen `vitest.config.ts` glob to `*.test.{ts,tsx}` | One-line config widening unblocks all future component tests; idiomatic over forcing `.ts` extension on JSX-heavy files. | Plan     |
 
 ## Scope
 
@@ -84,11 +84,11 @@ a new rule.
 
 ## Phases at a Glance
 
-| Phase | What it delivers | Key risk |
-| --- | --- | --- |
-| 1. jsdom EnergyPicker test | First `.tsx` component test in repo + glob widening + regression gate for Risk #7 | New pattern -- fetch-stub setup may need iteration; test could pass for the wrong reason (no degraded-mode assertion) |
+| Phase                           | What it delivers                                                                              | Key risk                                                                                                                                             |
+| ------------------------------- | --------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. jsdom EnergyPicker test      | First `.tsx` component test in repo + glob widening + regression gate for Risk #7             | New pattern -- fetch-stub setup may need iteration; test could pass for the wrong reason (no degraded-mode assertion)                                |
 | 2. E2E categorization extension | `insertTopic` helper + extended `session-capture.spec.ts` covering topic + format → chip line | shadcn Select locators are untested in this repo -- `combobox` role pattern may need adjustment if Radix wraps the trigger differently than expected |
-| 3. `test-plan.md` refresh | Five doc edits: §2 row #7, §3 Phase 4 Goal, §6.2 reference, §6.3 generalization, §8 freshness | Prose-only -- main risk is missing a downstream reference (e.g. §5 Quality Gates referencing §6 sections by their old titles) |
+| 3. `test-plan.md` refresh       | Five doc edits: §2 row #7, §3 Phase 4 Goal, §6.2 reference, §6.3 generalization, §8 freshness | Prose-only -- main risk is missing a downstream reference (e.g. §5 Quality Gates referencing §6 sections by their old titles)                        |
 
 **Prerequisites:** Local Supabase running (`npm run db:start`); Playwright
 chromium installed (`npx playwright install chromium`);
@@ -103,7 +103,7 @@ revert/removal manual check that gates progression to the next.
 - **Assumption:** shadcn `Select` exposes `role="combobox"` on the trigger
   per Radix defaults. If the actual rendered role differs, Phase 2's
   locators need adjustment (`getByLabel("Topic")` as fallback).
-- **Risk:** The jsdom test pins the *current* error message
+- **Risk:** The jsdom test pins the _current_ error message
   ("Could not load topics and formats.") -- a future copy-edit to that
   string would fail the test without there being a real regression.
   Mitigation: assert on a regex (`/Could not load topics and formats/i`),

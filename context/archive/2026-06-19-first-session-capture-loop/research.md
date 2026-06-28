@@ -30,10 +30,12 @@ Scope set by the user: data model gaps + existing surfaces. Explicitly **not** i
 **Data model: structurally zero gaps.** F-01 ([context/archive/2026-05-29-sessions-data-foundation/](../../archive/2026-05-29-sessions-data-foundation/)) shipped the `sessions` table with every column S-01 needs and every column S-02/S-03/S-04 will later non-null (`topic_id`, `material_format_id`, `timer_mode`, `note` are all nullable today). The S-01 insert path is fully provisioned: `user_id NOT NULL`, `started_at NOT NULL`, `energy_level NOT NULL` (enum `'low' | 'medium' | 'high'`). End-of-session is an UPDATE that may set `ended_at`, `focus_rating`, `note`. `duration_seconds` materialises automatically via a `GENERATED ALWAYS AS … STORED` column when `ended_at` is set ([supabase/migrations/20260531182506_sessions_data_foundation.sql:85-90](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L85)). The history-list query lands on `sessions_user_started_at_idx` cheaply.
 
 **Two non-structural data-layer constraints S-01 must respect:**
+
 1. **No user-facing DELETE.** Migration [20260601120000_drop_sessions_delete_policy.sql](../../../supabase/migrations/20260601120000_drop_sessions_delete_policy.sql) dropped `sessions_delete_own` after F-01 archived; pgTAP test #4 in [rls_sessions.sql:47-55](../../../supabase/tests/rls_sessions.sql#L47) locks this. S-01 must not surface a delete affordance.
 2. **UPDATE policy is wide.** RLS lets the owner mutate any column (only `WITH CHECK` on `user_id` is enforced — [migration:142-145](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L142)). S-01's API layer must self-discipline the column scope on end-of-session UPDATE (only `ended_at`, `focus_rating`, `note`). The impl-review noted this explicitly ([context/archive/2026-05-29-sessions-data-foundation/reviews/impl-review.md:40](../../archive/2026-05-29-sessions-data-foundation/reviews/impl-review.md)).
 
 **Surfaces: substantial gaps to fill.** The codebase has a complete auth+landing surface but the authed app is **bare-bones**:
+
 - `dashboard.astro` is a placeholder showing only the user email + sign-out link ([src/pages/dashboard.astro:1-6](../../../src/pages/dashboard.astro#L1)).
 - **No** `/session/*` or `/history` pages.
 - **No** timer / rating / history components — only auth components exist.
@@ -42,6 +44,7 @@ Scope set by the user: data model gaps + existing surfaces. Explicitly **not** i
 - `src/middleware.ts` `PROTECTED_ROUTES` is `["/dashboard"]`; any new authed routes S-01 adds must be appended.
 
 **Patterns S-01 must mirror are well-established:**
+
 - Supabase typed client factory at [src/lib/supabase.ts](../../../src/lib/supabase.ts) returns `null` on missing env; every caller null-checks.
 - Zod schemas live in [src/lib/schemas/](../../../src/lib/schemas/) (single file `auth.ts` today); add `session.ts`.
 - API route convention: `export const prerender = false;`, `APIRoute` handler reading `context.locals.user` / `context.request` / `context.cookies` / `context.redirect`. [src/pages/api/auth/oauth.ts](../../../src/pages/api/auth/oauth.ts) is the cleanest reference.
@@ -79,20 +82,20 @@ CREATE TABLE public.sessions (
 
 Per-column ownership and S-01's responsibility:
 
-| Column | Nullable? | S-01 writes? | Owner of first non-null |
-| --- | --- | --- | --- |
-| `id` | NO (default) | DB default | F-01 |
-| `user_id` | NO | **INSERT** (from `context.locals.user.id`) | **S-01** |
-| `started_at` | NO | **INSERT** (server-stored timestamp) | **S-01** |
-| `ended_at` | YES | **UPDATE at session end** | **S-01** |
-| `duration_seconds` | YES, **GENERATED** | **never** — DB materialises it | F-01 (auto) |
-| `energy_level` | NO (enum) | **INSERT** (only required pre-session field) | **S-01** |
-| `focus_rating` | YES (CHECK 1–5) | **UPDATE at session end** (or NULL = skip) | **S-01** |
-| `topic_id` | YES | leave NULL | S-02 |
-| `material_format_id` | YES | leave NULL | S-02 |
-| `timer_mode` | YES (CHECK) | leave NULL in v1 | S-03 |
-| `note` | YES | leave NULL (FR-014 = nice-to-have, mapped to S-04) | **S-01 may surface; S-04 owns chart** |
-| `created_at` / `updated_at` | NO (default + trigger) | DB default; trigger bumps on UPDATE | F-01 |
+| Column                      | Nullable?              | S-01 writes?                                       | Owner of first non-null               |
+| --------------------------- | ---------------------- | -------------------------------------------------- | ------------------------------------- |
+| `id`                        | NO (default)           | DB default                                         | F-01                                  |
+| `user_id`                   | NO                     | **INSERT** (from `context.locals.user.id`)         | **S-01**                              |
+| `started_at`                | NO                     | **INSERT** (server-stored timestamp)               | **S-01**                              |
+| `ended_at`                  | YES                    | **UPDATE at session end**                          | **S-01**                              |
+| `duration_seconds`          | YES, **GENERATED**     | **never** — DB materialises it                     | F-01 (auto)                           |
+| `energy_level`              | NO (enum)              | **INSERT** (only required pre-session field)       | **S-01**                              |
+| `focus_rating`              | YES (CHECK 1–5)        | **UPDATE at session end** (or NULL = skip)         | **S-01**                              |
+| `topic_id`                  | YES                    | leave NULL                                         | S-02                                  |
+| `material_format_id`        | YES                    | leave NULL                                         | S-02                                  |
+| `timer_mode`                | YES (CHECK)            | leave NULL in v1                                   | S-03                                  |
+| `note`                      | YES                    | leave NULL (FR-014 = nice-to-have, mapped to S-04) | **S-01 may surface; S-04 owns chart** |
+| `created_at` / `updated_at` | NO (default + trigger) | DB default; trigger bumps on UPDATE                | F-01                                  |
 
 Rationale and decisions sourced from [context/archive/2026-05-29-sessions-data-foundation/plan.md](../../archive/2026-05-29-sessions-data-foundation/plan.md) and [plan-brief.md](../../archive/2026-05-29-sessions-data-foundation/plan-brief.md):
 
@@ -114,10 +117,12 @@ Generated TS types ([src/db/database.types.ts:55-117](../../../src/db/database.t
 **UPDATE policy is wide** (no column scope at the DB layer). The impl-review explicitly accepted this ([context/archive/2026-05-29-sessions-data-foundation/reviews/impl-review.md:36-43](../../archive/2026-05-29-sessions-data-foundation/reviews/impl-review.md)): the UPDATE policy stays open; S-01's API/zod layer disciplines the column scope. The lesson the impl-review codified ("RLS policies must enforce business-rule immutability, not the UI") is referenced from the DELETE-drop migration ([20260601120000:4](../../../supabase/migrations/20260601120000_drop_sessions_delete_policy.sql#L4)) but **is not actually present in [context/foundation/lessons.md](../../foundation/lessons.md)** — a documentation drift worth knowing about but not blocking S-01.
 
 **Topics and material_formats — what S-01 reads but doesn't surface:**
+
 - `topics` ships **empty**; S-02 owns the first-row UX ([plan.md:42](../../archive/2026-05-29-sessions-data-foundation/plan.md)). S-01 does not surface a topic picker (FR-007 is mapped to S-02 per [roadmap:35](../../foundation/roadmap.md)).
 - `material_formats` ships with 5 NULL-owner seeded rows: `Video`, `Reading`, `Writing code`, `Drilling problems`, `Other` ([migration:115-120](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L115)). They are visible via the `owner_id IS NULL OR owner_id = auth.uid()` SELECT policy. S-01 does **not** surface the picker (FR-008 is mapped to S-02). The seeds are warm and waiting.
 
 **pgTAP coverage S-01 must not regress.** Three files at [supabase/tests/](../../../supabase/tests/), 27 assertions total. The critical S-01-adjacent ones:
+
 - `rls_sessions.sql` #1 (own-row SELECT isolation), #4 (own-session DELETE denial = immutability), #5 (INSERT cannot claim another user's id), #6–#9 (anon denied everything).
 - `rls_topics.sql` and `rls_material_formats.sql` cover default-row visibility and cross-user denial.
 
@@ -127,13 +132,13 @@ CI does **not** yet run `db:test` ([plan.md:422](../../archive/2026-05-29-sessio
 
 **Pages under [src/pages/](../../../src/pages/):**
 
-| Path | Purpose | Reuse for S-01? |
-| --- | --- | --- |
-| [src/pages/index.astro](../../../src/pages/index.astro) | Landing (S-00 done) — `Welcome.astro` hero + CTAs | No |
-| [src/pages/dashboard.astro](../../../src/pages/dashboard.astro) | Authed home — currently `{user.email}` + sign-out only ([src/pages/dashboard.astro:1-6](../../../src/pages/dashboard.astro#L1)) | **Yes — host the "Start session" CTA + history list here** |
-| [src/pages/auth/signin.astro](../../../src/pages/auth/signin.astro) | Sign-in | No |
-| [src/pages/auth/signup.astro](../../../src/pages/auth/signup.astro) | Sign-up | No |
-| [src/pages/auth/confirm-email.astro](../../../src/pages/auth/confirm-email.astro) | Email confirmation | No |
+| Path                                                                              | Purpose                                                                                                                         | Reuse for S-01?                                            |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| [src/pages/index.astro](../../../src/pages/index.astro)                           | Landing (S-00 done) — `Welcome.astro` hero + CTAs                                                                               | No                                                         |
+| [src/pages/dashboard.astro](../../../src/pages/dashboard.astro)                   | Authed home — currently `{user.email}` + sign-out only ([src/pages/dashboard.astro:1-6](../../../src/pages/dashboard.astro#L1)) | **Yes — host the "Start session" CTA + history list here** |
+| [src/pages/auth/signin.astro](../../../src/pages/auth/signin.astro)               | Sign-in                                                                                                                         | No                                                         |
+| [src/pages/auth/signup.astro](../../../src/pages/auth/signup.astro)               | Sign-up                                                                                                                         | No                                                         |
+| [src/pages/auth/confirm-email.astro](../../../src/pages/auth/confirm-email.astro) | Email confirmation                                                                                                              | No                                                         |
 
 No `/session/*`, `/history`, or `/timer` route exists. S-01 must add them.
 
@@ -173,7 +178,9 @@ Tailwind 4 with the "Focus Fuels Greatness" palette wired as theme tokens (`--co
 ```ts
 export function createClient(requestHeaders: Headers, cookies: AstroCookies) {
   if (!SUPABASE_URL || !SUPABASE_KEY) return null;
-  return createServerClient<Database>(SUPABASE_URL, SUPABASE_KEY, { /* cookies */ });
+  return createServerClient<Database>(SUPABASE_URL, SUPABASE_KEY, {
+    /* cookies */
+  });
 }
 ```
 
@@ -208,7 +215,9 @@ Error format is `"<field>: <message>"` (first issue only). **The auth routes don
 
 ```ts
 export const prerender = false;
-export const GET: APIRoute = async (context) => { /* ... */ };
+export const GET: APIRoute = async (context) => {
+  /* ... */
+};
 ```
 
 - `prerender = false` is mandatory for API routes under the Cloudflare adapter.
@@ -228,6 +237,7 @@ S-01's timer almost certainly wants `client:load` (the timer must run on first p
 ### 5. Surface and asset gaps S-01 will need to fill
 
 **Pages** (new, all under `PROTECTED_ROUTES`):
+
 - `/session/new` — pre-session pick screen (energy required; timer-mode/topic/format optional per PRD, but S-01 only surfaces energy + likely defaults timer to preset_1 25/5).
 - `/session/[id]` — active timer page (focus → audible cue → break) and post-session rating prompt.
 - Optionally `/history` — separate route or inline on dashboard. The roadmap is silent; planner call. The dashboard read of recent sessions is the cheaper option.
@@ -239,6 +249,7 @@ S-01's timer almost certainly wants `client:load` (the timer must run on first p
 Append new routes to `PROTECTED_ROUTES` in [src/middleware.ts](../../../src/middleware.ts).
 
 **API endpoints (new):**
+
 - `POST /api/sessions` — create a session (zod schema: `energy_level` required; `started_at` server-set). Returns the new session id.
 - `PATCH /api/sessions/[id]` — end a session (zod schema: `ended_at`, optional `focus_rating`, optional `note`). The endpoint must restrict the column scope itself; RLS does not.
 - `GET /api/sessions` — list (planner may instead read sessions server-side in `dashboard.astro`; both options are open since the index on `(user_id, started_at DESC)` makes it cheap either way).
@@ -247,11 +258,13 @@ Append new routes to `PROTECTED_ROUTES` in [src/middleware.ts](../../../src/midd
 [src/lib/schemas/session.ts](../../../src/lib/schemas/session.ts) — create + end payload schemas.
 
 **shadcn primitives to add** (via `npx shadcn@latest add <name>`):
+
 - `card` — pre-session, timer, rating, history rows.
 - `label` + `input` — note textarea, possibly the rating fallback.
 - (Optional) `dialog` — if the rating prompt overlays the timer; otherwise inline.
 
 **Components to build:**
+
 - A pre-session screen React island (energy picker; FR-009).
 - A timer React island (countdown + auto focus→break + audible cue + manual stop; FR-011, FR-012).
 - A post-session rating widget (1–5 + Skip; FR-013).
@@ -277,6 +290,7 @@ From F-01's data layer (each citation in earlier sections):
 ## Code References
 
 Data model:
+
 - [supabase/migrations/20260531182506_sessions_data_foundation.sql:80-102](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L80) — `sessions` table definition.
 - [supabase/migrations/20260531182506_sessions_data_foundation.sql:85-90](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L85) — `duration_seconds` generated column.
 - [supabase/migrations/20260531182506_sessions_data_foundation.sql:104-105](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L104) — `sessions_user_started_at_idx` (backs the history list).
@@ -288,6 +302,7 @@ Data model:
 - [src/db/database.types.ts:150](../../../src/db/database.types.ts#L150) — `energy_level` enum.
 
 Surfaces and patterns:
+
 - [src/pages/dashboard.astro:1-6](../../../src/pages/dashboard.astro#L1) — current dashboard placeholder S-01 will rewrite.
 - [src/middleware.ts:7-17](../../../src/middleware.ts#L7) — middleware that sets `context.locals.user`; `PROTECTED_ROUTES` array to extend.
 - [src/lib/supabase.ts](../../../src/lib/supabase.ts) — typed client factory; null-on-missing-env pattern.
@@ -315,11 +330,13 @@ Surfaces and patterns:
 ## Historical Context (from prior changes)
 
 **F-01 archive — [context/archive/2026-05-29-sessions-data-foundation/](../../archive/2026-05-29-sessions-data-foundation/):**
+
 - [plan-brief.md](../../archive/2026-05-29-sessions-data-foundation/plan-brief.md) — decision matrix: anticipating-but-nullable, server-stored `started_at`, closed `energy_level` enum, partial unique index on NULL-owner lookup rows, no admin policy, no Realtime.
 - [plan.md](../../archive/2026-05-29-sessions-data-foundation/plan.md) — 5-phase implementation including the rationale for `topic_id` / `material_format_id` / `timer_mode` / `note` nullability and `topics` shipping empty.
 - [reviews/impl-review.md](../../archive/2026-05-29-sessions-data-foundation/reviews/impl-review.md) — F2 finding led to the post-archive DELETE-policy drop migration; F1 was the eslint-ignore for generated types. Both resolved.
 
 **Landing page archive — [context/archive/2026-06-18-landing-page/](../../archive/2026-06-18-landing-page/):**
+
 - Not directly load-bearing for S-01, but it established the "Focus Fuels Greatness" palette in [global.css](../../../src/styles/global.css) and the `Welcome.astro` / `Topbar.astro` precedent. S-01 inherits the visual system.
 
 **Documentation drift to flag:** [context/foundation/lessons.md](../../foundation/lessons.md) is currently empty even though F-01's impl-review and the DELETE-drop migration both reference the lesson "RLS policies must enforce business-rule immutability, not the UI". Not blocking for S-01 — the rule is encoded in the DB and tests — but worth surfacing during S-01's own lesson harvest.

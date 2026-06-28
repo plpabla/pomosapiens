@@ -1,4 +1,5 @@
 <!-- PLAN-REVIEW-REPORT -->
+
 # Plan Review: S-01 First Session Capture Loop
 
 - **Plan**: context/changes/first-session-capture-loop/plan.md
@@ -9,13 +10,13 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| End-State Alignment | WARNING |
-| Lean Execution | PASS |
-| Architectural Fitness | PASS |
-| Blind Spots | FAIL |
-| Plan Completeness | WARNING |
+| Dimension             | Verdict |
+| --------------------- | ------- |
+| End-State Alignment   | WARNING |
+| Lean Execution        | PASS    |
+| Architectural Fitness | PASS    |
+| Blind Spots           | FAIL    |
+| Plan Completeness     | WARNING |
 
 ## Grounding
 
@@ -29,7 +30,7 @@
 - **Impact**: 🔬 HIGH — architectural stakes; think carefully before deciding
 - **Dimension**: Blind Spots
 - **Location**: Phase 3 (EnergyPicker) + Phase 4 (SessionRunner) + "Critical Implementation Details" → "Audio autoplay policy"
-- **Detail**: The plan primes Audio on `/session/new` (click handler creates an `HTMLAudioElement`, runs muted `.play()/.pause()`), then `window.location.assign('/session/<id>')`. A full navigation creates a new Document — user activation state does NOT reliably persist across cross-document navigation; Safari is strict and Chrome's behavior depends on Media Engagement Index. In Phase 4, `SessionRunner` constructs a *fresh* `Audio` at focus-end and calls `.play().catch(() => {})` — the catch swallows `NotAllowedError` silently, the rating view appears, and the audible-cue NFR ("clearly audible chime at focus→break") is quietly violated for any user whose browser didn't carry activation across the navigation. `plan-brief.md:109` acknowledges this exact risk and names the mitigation ("fall back to priming again at the top of `SessionRunner`'s first render with a muted `play()/pause()`"), but Phase 4's spec does not include it. The load-bearing NFR is left to chance.
+- **Detail**: The plan primes Audio on `/session/new` (click handler creates an `HTMLAudioElement`, runs muted `.play()/.pause()`), then `window.location.assign('/session/<id>')`. A full navigation creates a new Document — user activation state does NOT reliably persist across cross-document navigation; Safari is strict and Chrome's behavior depends on Media Engagement Index. In Phase 4, `SessionRunner` constructs a _fresh_ `Audio` at focus-end and calls `.play().catch(() => {})` — the catch swallows `NotAllowedError` silently, the rating view appears, and the audible-cue NFR ("clearly audible chime at focus→break") is quietly violated for any user whose browser didn't carry activation across the navigation. `plan-brief.md:109` acknowledges this exact risk and names the mitigation ("fall back to priming again at the top of `SessionRunner`'s first render with a muted `play()/pause()`"), but Phase 4's spec does not include it. The load-bearing NFR is left to chance.
 - **Fix A ⭐ Recommended**: Re-prime in `SessionRunner` on mount
   - Strength: Codifies the brief's named mitigation; degrades gracefully on browsers that carried activation (no-op extra warm) and rescues those that didn't. The page itself loaded in response to a click, which most browsers count.
   - Tradeoff: One extra `Audio()` instance per session-start; trivial.
@@ -62,7 +63,7 @@
 - **Impact**: 🔎 MEDIUM — real tradeoff; pause to reason through it
 - **Dimension**: End-State Alignment
 - **Location**: Phase 4 — `SessionRunner` stop-early + PATCH; "Critical Implementation Details" → "Column-scope discipline on PATCH"
-- **Detail**: Plan says `ended_at` is server-set on the rating PATCH (good for column discipline). Consequence: `ended_at = now()` at rating-commit time, not at the Stop-early click or focus-end transition. The user may sit on the rating screen for 10-60 s deciding. `duration_seconds` therefore includes the rating-decision window, not the focus phase. PRD FR-012: "the partial elapsed time is recorded as the session's actual duration." Phase 4 manual-verification 4.7 even asserts `duration_seconds ≈ 25*60 - 5*60 = 1200` after Stop-early at 5:00 — only true if the user rates instantly. Worse, the same drift inflates *every* completed session's `duration_seconds` by the rating delay. Future S-04 focus-rating chart will see noisy durations.
+- **Detail**: Plan says `ended_at` is server-set on the rating PATCH (good for column discipline). Consequence: `ended_at = now()` at rating-commit time, not at the Stop-early click or focus-end transition. The user may sit on the rating screen for 10-60 s deciding. `duration_seconds` therefore includes the rating-decision window, not the focus phase. PRD FR-012: "the partial elapsed time is recorded as the session's actual duration." Phase 4 manual-verification 4.7 even asserts `duration_seconds ≈ 25*60 - 5*60 = 1200` after Stop-early at 5:00 — only true if the user rates instantly. Worse, the same drift inflates _every_ completed session's `duration_seconds` by the rating delay. Future S-04 focus-rating chart will see noisy durations.
 - **Fix A ⭐ Recommended**: Two-step PATCH — first marks `ended_at` on phase transition (focus-end auto OR Stop-early click); second PATCH carries `focus_rating` only.
   - Strength: `duration_seconds` reflects actual focus elapsed (FR-012 honored); rating delay no longer pollutes the metric; column-scope rule extends naturally (each PATCH carries exactly one column).
   - Tradeoff: Two network calls instead of one; `SessionRunner` state machine grows a `phase: 'ended-pending-rating'` state.
@@ -99,7 +100,7 @@
 - **Fix**: Use `"/session/"` (trailing slash) so only nested paths match.
 - **Decision**: FIXED — Phase 1 §4 now writes `"/session/"`.
 
-### F6 — Layout-auto-mount makes Topbar appear on /auth/* for already-signed-in users
+### F6 — Layout-auto-mount makes Topbar appear on /auth/\* for already-signed-in users
 
 - **Severity**: 💡 OBSERVATION
 - **Impact**: 🏃 LOW — quick decision; fix is obvious and narrowly scoped

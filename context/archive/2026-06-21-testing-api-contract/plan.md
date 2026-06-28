@@ -37,7 +37,7 @@ Verification: a CI run on a branch with `.eq("user_id", ...)` removed from the P
 - **`createSessionSchema` is also permissive** ([src/lib/schemas/session.ts:3-7](src/lib/schemas/session.ts#L3-L7)) -- same column-scope discipline applies to POST. A test that posts `{ energy_level: "medium", user_id: "<userB-id>" }` and asserts the created row's `user_id` is the caller's pins the server-stamping intent.
 - **Once-only guard is SQL-level**, via `.is("ended_at", null).maybeSingle()` ([id].ts:41-48) -- `!data` returns 409. The literal implementation of L-01.
 - **Cross-user and already-ended share one 409 body** -- intentional information-hiding ([id].ts:54-56). Tests assert byte-identical responses to lock the security contract.
-- **No middleware gating on `/api/sessions/**`** -- [src/middleware.ts:4](src/middleware.ts#L4) `PROTECTED_ROUTES` excludes API paths; endpoints self-gate via `if (!context.locals.user) return 401`. The middleware still populates `context.locals.user` via `supabase.auth.getUser()`, so the cookie-driven `@supabase/ssr` client is the authoritative auth path under test.
+- **No middleware gating on `/api/sessions/**`** -- [src/middleware.ts:4](src/middleware.ts#L4) `PROTECTED_ROUTES`excludes API paths; endpoints self-gate via`if (!context.locals.user) return 401`. The middleware still populates `context.locals.user`via`supabase.auth.getUser()`, so the cookie-driven `@supabase/ssr` client is the authoritative auth path under test.
 - **`@cloudflare/vitest-pool-workers` canonical pattern** -- `cloudflareTest({ wrangler: { configPath: "./wrangler.jsonc" } })` Vite plugin; `SELF.fetch()` from `cloudflare:test` for full integration tests against the worker entrypoint; `env`, `fetchMock` also from `cloudflare:test`. Requires Vitest >= 4.1.
 - **50-min SSR vs 2-hour API threshold inconsistency** is a known issue tracked as risk #5 (test-plan §2 row 5); Phase 1 pins the **current** 2-hour boundary as a regression gate so Phase 2's risk-#5 fix will deliberately update this test.
 
@@ -267,6 +267,7 @@ Add `npm test` to CI with the `SUPABASE_SERVICE_ROLE_KEY` secret, fill in `test-
 **Intent**: Replace the `§6.1 Adding a Vitest Workers integration test (API route)` placeholder with a canonical pattern derived from this PR's actual test files.
 
 **Contract**: §6.1 section becomes:
+
 - **Location**: `tests/integration/api/<route>.test.ts` (one file per route group, e.g. `sessions.create.test.ts` for POST, `sessions.end.test.ts` for PATCH).
 - **Pattern**: import `SELF` from `cloudflare:test`; use `setupTwoUsers()` from `tests/_fixtures/auth.ts` in `beforeAll`; cleanup in `afterAll`; each test sends `SELF.fetch(url, { method, headers: { Cookie: cookieFor(user.id), "Content-Type": "application/json" }, body: JSON.stringify(...) })`; use `readSession(id)` from `tests/_fixtures/db.ts` for service-role read-back when asserting "no mutation".
 - **Reference test**: `tests/integration/api/sessions.end.test.ts` -- particularly the "silently strips columns outside the contract" test as the L-01 regression gate template.
@@ -279,6 +280,7 @@ Add `npm test` to CI with the `SUPABASE_SERVICE_ROLE_KEY` secret, fill in `test-
 **Intent**: Replace the `§6.3 Adding a test for a new session API endpoint` placeholder. This section captures the project-specific column-scope discipline pattern.
 
 **Contract**: §6.3 section becomes:
+
 - When adding a new endpoint that writes to `public.sessions` (or any RLS-bearing table with a wide UPDATE policy), the endpoint MUST hand-pick columns in `.update({...})` or `.insert({...})` (per L-01); the test file MUST include a regression test that POSTs / PATCHes with the body containing forbidden columns (`user_id`, columns from the schema not in the write set) and asserts via service-role read-back that those columns were not mutated.
 - Reference: `tests/integration/api/sessions.create.test.ts` "server-stamps user_id" test and `tests/integration/api/sessions.end.test.ts` "silently strips columns" test.
 - Schema validation tests should assert the field-named error message (`/^<field>:/`) from `parseJson` -- this catches schema-shape drift if the field's path changes.

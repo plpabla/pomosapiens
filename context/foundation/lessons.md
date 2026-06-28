@@ -17,6 +17,7 @@ Column-scope is two-layer: (1) Zod's default-strip on `z.object(...)` discards u
 ## L-02: Audio autoplay requires a same-document user-gesture prime
 
 Browsers (especially Safari) do not carry user-activation across navigations. To reliably play audio on page B after a click on page A:
+
 - **On page A's click handler** -- construct `new Audio(src)`, set `muted = true`, call `.play().then(() => { a.pause(); a.muted = false; }).catch(() => {})`. This warms the asset cache and raises Chrome's MEI for the origin.
 - **On page B's first `useEffect`** -- repeat the muted `.play()/.pause()` warm-up immediately on mount. Most browsers count a same-origin navigation initiated by a user gesture as a "user-gesture-initiated load" and grant activation for this step. Store the warmed `Audio` in a ref; call `.play()` on that ref later (never construct a new element at fire time).
 

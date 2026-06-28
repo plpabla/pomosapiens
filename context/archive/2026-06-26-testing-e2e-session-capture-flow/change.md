@@ -18,6 +18,7 @@ for the user-visible end-to-end path that lower layers cannot cover together).
 Test types planned: Playwright e2e.
 
 Risk response intent:
+
 - Cross-cutting / happy path: Prove the full session capture flow completes
   end-to-end -- authenticated user loads /dashboard, navigates to a new
   session, timer runs, focus rating is submitted, and a history entry appears.

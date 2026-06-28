@@ -1,4 +1,5 @@
 <!-- IMPL-REVIEW-REPORT -->
+
 # Implementation Review: S-01 First Session Capture Loop
 
 - **Plan**: context/changes/first-session-capture-loop/plan.md
@@ -9,18 +10,19 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| Plan Adherence | PASS |
-| Scope Discipline | PASS |
-| Safety & Quality | WARNING |
-| Architecture | PASS |
-| Pattern Consistency | PASS |
-| Success Criteria | PASS |
+| Dimension           | Verdict |
+| ------------------- | ------- |
+| Plan Adherence      | PASS    |
+| Scope Discipline    | PASS    |
+| Safety & Quality    | WARNING |
+| Architecture        | PASS    |
+| Pattern Consistency | PASS    |
+| Success Criteria    | PASS    |
 
 Lessons honored: L-01 (column-scope), L-02 (two-stage audio prime), L-03 (server-anchor timer). No deviations.
 
 Automated verification re-run on this branch:
+
 - `npm run lint` — PASS (HEAD)
 - `npm run build` — PASS (HEAD)
 - `npm run db:test` — trusted from commit 8a7b90e (Docker stack not running at review time)

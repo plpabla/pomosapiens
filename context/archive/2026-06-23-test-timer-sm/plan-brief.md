@@ -16,20 +16,21 @@ A second `jsdom` Vitest project runs ~10 new tests alongside the existing 14. Th
 
 ## Key Decisions Made
 
-| Decision | Choice | Why (1 sentence) | Source |
-| --- | --- | --- | --- |
-| Test target | Extract a `useFocusTimer` hook from SessionRunner | Pure-testable surface beats full-component render; pays the refactor cost once for cheap tests forever. | Plan |
-| SSR redirect coverage | Extract `resolveSessionPageAccess` from .astro into a pure decider | `.astro` frontmatter is uneconomical to unit-test; the decider is. | Plan |
-| Threshold inconsistency | Lock current behavior with TODO(S-05) | This is a test phase; S-05 owns the actual reconciliation. | Plan |
-| Time mocking | `vi.useFakeTimers` faking setTimeout + Date + queueMicrotask | Deterministic and matches L-03's wall-clock-derive pattern. | Plan |
-| Audio mocking | Stub global `Audio` constructor with a factory + instance array | jsdom's HTMLAudioElement is hollow; constructor stub gives access to per-instance mocks. | Plan |
-| Hook extraction shape | `useFocusTimer` React hook (not pure reducer) | Keeps the visibilitychange / audio effects co-located with their state. | Plan |
-| Audio coverage scope | Both Stage-2 prime AND focus-end fire | Locks the full L-02 contract; single-side coverage leaves silent regressions. | Plan |
-| Required sabotage gate | Only the abandoned-threshold one (loosen to Infinity -> fails) | User-confirmed minimal gate; positive assertions catch the reconcile + audio regressions inline. | Plan |
+| Decision                | Choice                                                             | Why (1 sentence)                                                                                        | Source |
+| ----------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- | ------ |
+| Test target             | Extract a `useFocusTimer` hook from SessionRunner                  | Pure-testable surface beats full-component render; pays the refactor cost once for cheap tests forever. | Plan   |
+| SSR redirect coverage   | Extract `resolveSessionPageAccess` from .astro into a pure decider | `.astro` frontmatter is uneconomical to unit-test; the decider is.                                      | Plan   |
+| Threshold inconsistency | Lock current behavior with TODO(S-05)                              | This is a test phase; S-05 owns the actual reconciliation.                                              | Plan   |
+| Time mocking            | `vi.useFakeTimers` faking setTimeout + Date + queueMicrotask       | Deterministic and matches L-03's wall-clock-derive pattern.                                             | Plan   |
+| Audio mocking           | Stub global `Audio` constructor with a factory + instance array    | jsdom's HTMLAudioElement is hollow; constructor stub gives access to per-instance mocks.                | Plan   |
+| Hook extraction shape   | `useFocusTimer` React hook (not pure reducer)                      | Keeps the visibilitychange / audio effects co-located with their state.                                 | Plan   |
+| Audio coverage scope    | Both Stage-2 prime AND focus-end fire                              | Locks the full L-02 contract; single-side coverage leaves silent regressions.                           | Plan   |
+| Required sabotage gate  | Only the abandoned-threshold one (loosen to Infinity -> fails)     | User-confirmed minimal gate; positive assertions catch the reconcile + audio regressions inline.        | Plan   |
 
 ## Scope
 
 **In scope:**
+
 - Add jsdom Vitest project + setup file + `@testing-library/react` + `@testing-library/jest-dom` + `jsdom` dev deps
 - Extract `useFocusTimer` hook from SessionRunner.tsx (behavior-preserving refactor)
 - Extract `resolveSessionPageAccess` from session/[id].astro into `src/lib/session/access.ts`
@@ -38,6 +39,7 @@ A second `jsdom` Vitest project runs ~10 new tests alongside the existing 14. Th
 - Fill cookbook §6.2 in test-plan.md; bump §3 row 2 to `complete`; update §8 freshness ledger
 
 **Out of scope:**
+
 - Reconciling the 50-min SSR vs 2-hour API threshold (S-05's job)
 - Playwright / e2e (test-plan §3 Phase 4)
 - Testing through `session/[id].astro` itself (covered by Phase 4 e2e)
@@ -51,13 +53,13 @@ Refactor first, test second. Phase 1 lifts the timer state machine into `useFocu
 
 ## Phases at a Glance
 
-| Phase | What it delivers | Key risk |
-| --- | --- | --- |
-| 1. Vitest jsdom project + production refactors | jsdom project wired; `useFocusTimer` + `resolveSessionPageAccess` extracted | Refactor changes observable behavior (caught by manual smoke) |
-| 2. Timer tests (risk #1) | 5 tests pinning tick, reconcile, hidden-elapsed flip, stop-early | Microtask + fake-timer race conditions on React 19 + RTL |
-| 3. Stuck-open SSR guard tests (risk #5) | 5 pure-function tests + required sabotage gate | Boundary semantics (`>` vs `>=`) drift from source |
-| 4. Audio tests (risk #6) | 2 tests pinning L-02 prime + fire | `vi.stubGlobal` leak across files; React `act()` warnings |
-| 5. Cookbook §6.2 + status bump | Canonical jsdom pattern documented; rollout phase closed | §6.2 doesn't transfer to a contributor reading cold (test in Phase 5 manual) |
+| Phase                                          | What it delivers                                                            | Key risk                                                                     |
+| ---------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| 1. Vitest jsdom project + production refactors | jsdom project wired; `useFocusTimer` + `resolveSessionPageAccess` extracted | Refactor changes observable behavior (caught by manual smoke)                |
+| 2. Timer tests (risk #1)                       | 5 tests pinning tick, reconcile, hidden-elapsed flip, stop-early            | Microtask + fake-timer race conditions on React 19 + RTL                     |
+| 3. Stuck-open SSR guard tests (risk #5)        | 5 pure-function tests + required sabotage gate                              | Boundary semantics (`>` vs `>=`) drift from source                           |
+| 4. Audio tests (risk #6)                       | 2 tests pinning L-02 prime + fire                                           | `vi.stubGlobal` leak across files; React `act()` warnings                    |
+| 5. Cookbook §6.2 + status bump                 | Canonical jsdom pattern documented; rollout phase closed                    | §6.2 doesn't transfer to a contributor reading cold (test in Phase 5 manual) |
 
 **Prerequisites:** Phase 1 of the rollout (testing-api-contract) is complete and merged. `npm test` works locally against the workers project.
 **Estimated effort:** ~3-4 sessions across 5 phases. Bulk is in Phase 1 (refactor + tooling) and Phase 2 (first real jsdom test asserting a fake-timer + visibilitychange interaction).

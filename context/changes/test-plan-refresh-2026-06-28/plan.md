@@ -568,14 +568,14 @@ None. No schema changes, no breaking API changes, no data backfill.
 
 #### Automated
 
-- [x] 3.1 `npm run format` exits 0 with `test-plan.md` formatted
-- [x] 3.2 `git diff context/foundation/test-plan.md` shows changes in exactly the five intended regions
-- [x] 3.3 Markdown table syntax stays valid
+- [x] 3.1 `npm run format` exits 0 with `test-plan.md` formatted -- 4229aa3
+- [x] 3.2 `git diff context/foundation/test-plan.md` shows changes in exactly the five intended regions -- 4229aa3
+- [x] 3.3 Markdown table syntax stays valid -- 4229aa3
 
 #### Manual
 
-- [x] 3.4 `test-plan.md` re-read top-to-bottom: five changes integrate coherently
-- [x] 3.5 Risk #7 "Must challenge" cell names the cast-lie pattern
-- [x] 3.6 §6.3 reference list cites all four new integration test files
-- [x] 3.7 §3 Phase 4 Status column still reads `complete`
-- [x] 3.8 Freshness line and §8 both show `2026-06-28`
+- [x] 3.4 `test-plan.md` re-read top-to-bottom: five changes integrate coherently -- 4229aa3
+- [x] 3.5 Risk #7 "Must challenge" cell names the cast-lie pattern -- 4229aa3
+- [x] 3.6 §6.3 reference list cites all four new integration test files -- 4229aa3
+- [x] 3.7 §3 Phase 4 Status column still reads `complete` -- 4229aa3
+- [x] 3.8 Freshness line and §8 both show `2026-06-28` -- 4229aa3

@@ -1,4 +1,5 @@
 <!-- IMPL-REVIEW-REPORT -->
+
 # Implementation Review: Production schema validation gate (test-plan Phase 3)
 
 - **Plan**: context/changes/testing-schema-validation-gate/plan.md
