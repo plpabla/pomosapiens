@@ -18,7 +18,7 @@ test.beforeAll(async () => {
   fixture = await setupTwoUsers();
   // material_formats rows are system-seeded (NULL owner_id, visible via RLS) -- no per-user seeding needed.
   // topics ship empty by design; seed one per run to avoid (owner_id, name) unique-constraint collisions.
-  topicName = `e2e-topic-${Date.now()}`;
+  topicName = `e2e-topic-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   await insertTopic({ userId: fixture.userA.id, name: topicName });
 });
 
@@ -74,8 +74,8 @@ test("session capture flow: dashboard → energy pick → timer → stop early �
 
     // Step 7: New session card is visible with correct energy level, rating, and category chips.
     await expect(page.getByText("medium", { exact: false }).first()).toBeVisible();
-    await expect(page.getByText(topicName)).toBeVisible();
-    await expect(page.getByText("Writing code")).toBeVisible();
+    await expect(page.getByText(topicName).first()).toBeVisible();
+    await expect(page.getByText("Writing code").first()).toBeVisible();
     await expect(page.getByText("★ 4 / 5")).toBeVisible();
   } finally {
     await context.close();

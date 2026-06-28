@@ -1,7 +1,7 @@
 ---
 change_id: test-plan-refresh-2026-06-28
 title: Test plan refresh 2026 06 28
-status: implemented
+status: impl_reviewed
 created: 2026-06-28
 updated: 2026-06-28
 archived_at: null
@@ -60,3 +60,20 @@ Explicit non-goals for this refresh:
   cheaper.
 - Do NOT rewrite §1 (Strategy) or §5 (Quality Gates).
 - Do NOT touch the §3 statuses of phases 1-4 (they remain complete).
+
+## Epilogue addendum (commit 2bb4a6c -- discovered scope)
+
+The epilogue commit ("close out plan") bundled several changes outside
+the plan's "Changes Required" scope. All are non-breaking and
+documentation/tooling only:
+
+- `context/foundation/arch.md` (new, 496 lines) -- full system architecture
+  document authored alongside the plan close-out. Substantive; bypassed
+  the plan/research/review pipeline but adds real value. Treat as a
+  foundation artifact going forward, not as part of this change's scope.
+- `src/db/database.types.ts` -- minor reformatting (semicolons, line joins).
+- `context/foundation/lessons.md` -- incidental edits.
+- `.github/workflows/ci.yml` -- EOF newline normalisation.
+- ~10 archive-folder doc touches.
+
+Code and test behaviour is unaffected by all of the above.
