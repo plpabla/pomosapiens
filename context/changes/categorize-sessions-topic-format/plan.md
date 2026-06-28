@@ -741,32 +741,32 @@ The smoke script itself is NOT updated -- the new columns are nullable, the exis
 
 #### Automated
 
-- [x] 5.1 Build passes: `npm run build`
-- [x] 5.2 Lint passes: `npm run lint`
-- [x] 5.3 Existing session.create integration tests still pass
+- [x] 5.1 Build passes: `npm run build` -- f9344be
+- [x] 5.2 Lint passes: `npm run lint` -- f9344be
+- [x] 5.3 Existing session.create integration tests still pass -- f9344be
 
 #### Manual
 
-- [x] 5.4 `/session/new` shows energy row, Topic select with "No topic" + user topics, Format select with "No format" + 5 seeded + user formats
-- [x] 5.5 3-tap flow with both pickers ignored: tap link, tap energy, tap Start -- 3 taps total; session lands with NULL FKs
-- [x] 5.6 Full flow with both pickers used: session lands with both FKs set
-- [x] 5.7 Page refresh resets state (no stale selection)
-- [x] 5.8 Archived topic is NOT in the Select
+- [x] 5.4 `/session/new` shows energy row, Topic select with "No topic" + user topics, Format select with "No format" + 5 seeded + user formats -- f9344be
+- [x] 5.5 3-tap flow with both pickers ignored: tap link, tap energy, tap Start -- 3 taps total; session lands with NULL FKs -- f9344be
+- [x] 5.6 Full flow with both pickers used: session lands with both FKs set -- f9344be
+- [x] 5.7 Page refresh resets state (no stale selection) -- f9344be
+- [x] 5.8 Archived topic is NOT in the Select -- f9344be
 
 ### Phase 6: Dashboard surface
 
 #### Automated
 
-- [ ] 6.1 Build passes: `npm run build`
-- [ ] 6.2 Lint passes: `npm run lint`
+- [x] 6.1 Build passes: `npm run build`
+- [x] 6.2 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 6.3 Dashboard renders sessions with topic + format chips on rows where they're set
-- [ ] 6.4 Sessions with no topic / format render the original two lines (no extra empty chip row)
-- [ ] 6.5 A session whose topic was later archived still shows the topic name on its history row
-- [ ] 6.6 Truncation works on a long topic name (test with a 60-char topic)
-- [ ] 6.7 Mobile width: chips wrap or truncate gracefully (no horizontal scroll)
+- [x] 6.3 Dashboard renders sessions with topic + format chips on rows where they're set
+- [x] 6.4 Sessions with no topic / format render the original two lines (no extra empty chip row)
+- [x] 6.5 A session whose topic was later archived still shows the topic name on its history row
+- [x] 6.6 Truncation works on a long topic name (test with a 60-char topic)
+- [x] 6.7 Mobile width: chips wrap or truncate gracefully (no horizontal scroll)
 
 ### Phase 7: Production deploy
 

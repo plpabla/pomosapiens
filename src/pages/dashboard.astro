@@ -9,13 +9,18 @@ const supabase = createClient(Astro.request.headers, Astro.cookies);
 
 type SessionRow = Database["public"]["Tables"]["sessions"]["Row"];
 
+type SessionListItem = Pick<
+  SessionRow,
+  "id" | "started_at" | "energy_level" | "duration_seconds" | "focus_rating" | "ended_at"
+> & {
+  topic: { name: string } | null;
+  material_format: { name: string } | null;
+};
+
 const FOCUS_PRESET_SECONDS = 25 * 60;
 const ABANDONED_THRESHOLD_MS = 2 * FOCUS_PRESET_SECONDS * 1000;
 
-let sessions: Pick<
-  SessionRow,
-  "id" | "started_at" | "energy_level" | "duration_seconds" | "focus_rating" | "ended_at"
->[] = [];
+let sessions: SessionListItem[] = [];
 let dbError: string | null = null;
 
 if (!supabase) {
@@ -25,7 +30,9 @@ if (!supabase) {
 } else {
   const { data, error } = await supabase
     .from("sessions")
-    .select("id, started_at, energy_level, duration_seconds, focus_rating, ended_at")
+    .select(
+      "id, started_at, energy_level, duration_seconds, focus_rating, ended_at, topic:topics(name), material_format:material_formats(name)",
+    )
     .eq("user_id", user.id)
     .order("started_at", { ascending: false })
     .limit(50);
@@ -123,6 +130,26 @@ const energyColorClass: Record<string, string> = {
                           : ""}
                       </span>
                     </div>
+                    {(session.topic !== null || session.material_format !== null) && (
+                      <div class="flex flex-wrap gap-1.5">
+                        {session.topic !== null && (
+                          <span
+                            class="bg-charred text-off-white/80 max-w-[10rem] truncate rounded px-2 py-0.5 text-xs"
+                            title={session.topic.name}
+                          >
+                            {session.topic.name}
+                          </span>
+                        )}
+                        {session.material_format !== null && (
+                          <span
+                            class="bg-charred text-off-white/80 max-w-[10rem] truncate rounded px-2 py-0.5 text-xs"
+                            title={session.material_format.name}
+                          >
+                            {session.material_format.name}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </Card>
                 </li>
               );
