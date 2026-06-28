@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ServerError } from "@/components/auth/ServerError";
 import { cn } from "@/lib/utils";
 
@@ -11,10 +12,40 @@ const LEVELS: { value: EnergyLevel; label: string }[] = [
   { value: "high", label: "High" },
 ];
 
+const NONE = "__none__";
+
+interface Topic {
+  id: string;
+  name: string;
+  archived_at: string | null;
+}
+
+interface MaterialFormat {
+  id: string;
+  name: string;
+  owner_id: string | null;
+  archived_at: string | null;
+}
+
 export default function EnergyPicker() {
   const [energy, setEnergy] = useState<EnergyLevel | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [topics, setTopics] = useState<Topic[]>([]);
+  const [formats, setFormats] = useState<MaterialFormat[]>([]);
+  const [topicId, setTopicId] = useState<string | null>(null);
+  const [materialFormatId, setMaterialFormatId] = useState<string | null>(null);
+
+  useEffect(() => {
+    void Promise.all([
+      fetch("/api/topics").then((r) => r.json() as Promise<{ topics: Topic[] }>),
+      fetch("/api/material-formats").then((r) => r.json() as Promise<{ formats: MaterialFormat[] }>),
+    ]).then(([topicsData, formatsData]) => {
+      setTopics(topicsData.topics.filter((t) => t.archived_at === null));
+      setFormats(formatsData.formats.filter((f) => f.archived_at === null));
+    });
+  }, []);
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -40,7 +71,11 @@ export default function EnergyPicker() {
       const res = await fetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ energy_level: energy }),
+        body: JSON.stringify({
+          energy_level: energy,
+          topic_id: topicId ?? null,
+          material_format_id: materialFormatId ?? null,
+        }),
       });
 
       if (!res.ok) {
@@ -55,6 +90,8 @@ export default function EnergyPicker() {
       setSubmitting(false);
     }
   }
+
+  const triggerClass = "w-full border-charred bg-ember text-off-white hover:bg-ember focus:ring-0";
 
   return (
     <div className="mx-auto max-w-sm pt-16 text-center">
@@ -82,6 +119,47 @@ export default function EnergyPicker() {
             </Button>
           ))}
         </div>
+
+        <div className="mb-4 flex flex-col gap-3 text-left">
+          <Select
+            value={topicId ?? NONE}
+            onValueChange={(v) => {
+              setTopicId(v === NONE ? null : v);
+            }}
+          >
+            <SelectTrigger aria-label="Topic" className={triggerClass}>
+              <SelectValue placeholder="No topic" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>No topic</SelectItem>
+              {topics.map((t) => (
+                <SelectItem key={t.id} value={t.id}>
+                  {t.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={materialFormatId ?? NONE}
+            onValueChange={(v) => {
+              setMaterialFormatId(v === NONE ? null : v);
+            }}
+          >
+            <SelectTrigger aria-label="Material format" className={triggerClass}>
+              <SelectValue placeholder="No format" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={NONE}>No format</SelectItem>
+              {formats.map((f) => (
+                <SelectItem key={f.id} value={f.id}>
+                  {f.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
         <ServerError message={error} />
         <Button
           type="submit"

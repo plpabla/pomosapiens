@@ -4,6 +4,8 @@ export const createSessionSchema = z.object({
   energy_level: z.enum(["low", "medium", "high"], {
     message: "energy_level must be low, medium, or high",
   }),
+  topic_id: z.uuid({ message: "topic_id must be a valid UUID" }).nullable().optional(),
+  material_format_id: z.uuid({ message: "material_format_id must be a valid UUID" }).nullable().optional(),
 });
 
 export const endSessionSchema = z.object({

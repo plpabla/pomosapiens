@@ -1,0 +1,10 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { TopicManager } from "@/components/topics/TopicManager";
+---
+
+<Layout title="Topics -- PomoSapiens">
+  <main class="mx-auto max-w-xl px-4 py-8">
+    <TopicManager client:load />
+  </main>
+</Layout>

@@ -1,0 +1,56 @@
+import type { APIRoute } from "astro";
+import { createClient } from "@/lib/supabase";
+import { parseJson } from "@/lib/parse-request";
+import { createTopicSchema } from "@/lib/schemas/topic";
+
+export const prerender = false;
+
+export const GET: APIRoute = async (context) => {
+  if (!context.locals.user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const supabase = createClient(context.request.headers, context.cookies);
+  if (!supabase) {
+    return Response.json({ error: "Supabase is not configured" }, { status: 500 });
+  }
+
+  const { data, error } = await supabase.from("topics").select("id, name, archived_at").order("name");
+
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  return Response.json({ topics: data }, { status: 200 });
+};
+
+export const POST: APIRoute = async (context) => {
+  if (!context.locals.user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const supabase = createClient(context.request.headers, context.cookies);
+  if (!supabase) {
+    return Response.json({ error: "Supabase is not configured" }, { status: 500 });
+  }
+
+  const parsed = await parseJson(context.request, createTopicSchema);
+  if (!parsed.data) {
+    return Response.json({ error: parsed.error }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from("topics")
+    .insert({ owner_id: context.locals.user.id, name: parsed.data.name })
+    .select("id, name, archived_at")
+    .single();
+
+  if (error) {
+    if (error.code === "23505") {
+      return Response.json({ error: "A topic with that name already exists" }, { status: 409 });
+    }
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  return Response.json({ id: data.id, name: data.name, archived_at: data.archived_at }, { status: 201 });
+};

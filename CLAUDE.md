@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Non-negotiable rules
+
+- do not try to read any passwords from .env files and similar. Request setting them as env variables and use those varaibles instead.
+
 ## Commands
 
 - `npm run dev` — start dev server (Astro dev, Cloudflare workerd runtime via `@astrojs/cloudflare`)
@@ -55,7 +59,7 @@ Full SSR (`output: "server"` in `astro.config.mjs`). All pages are server-render
 
 ### Database workflow
 
-- `npm run db:start` / `npm run db:stop` — local Supabase stack (Docker required).
+- `npm run db:start` / `npm run db:stop` — local Supabase stack (Docker required). Note: if Docker is not runnig, request starting it and only after getting confirmation from the user, continue.
 - `npm run db:reset` — drop and re-apply all migrations from `supabase/migrations/`.
 - `npm run db:migrate:new <name>` — scaffold a new timestamped migration file. Filename format: `YYYYMMDDHHmmss_short_description.sql`. Always enable RLS on new tables in the same migration (see "Supabase migrations" under Key conventions).
 - `npm run db:types` — regenerate `src/db/database.types.ts` from the local DB schema. Re-run after every schema change and commit the output so CI's `lint + build` doesn't need a running Supabase to typecheck. The Supabase client in `src/lib/supabase.ts` is typed as `SupabaseClient<Database>` — the generated file is the source of that type.

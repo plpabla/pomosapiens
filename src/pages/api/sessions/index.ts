@@ -26,6 +26,8 @@ export const POST: APIRoute = async (context) => {
       user_id: context.locals.user.id,
       energy_level: parsed.data.energy_level,
       started_at: new Date().toISOString(),
+      topic_id: parsed.data.topic_id ?? null,
+      material_format_id: parsed.data.material_format_id ?? null,
     })
     .select("id, started_at")
     .single();

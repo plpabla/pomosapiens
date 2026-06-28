@@ -193,6 +193,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Admin user-facing UI** — Why parked: Access Control describes the Admin role conceptually ("not exposed in normal user-facing UI"; "assigned out-of-band"). No FR demands v1 admin tooling — the project owner inspects user records via Supabase Studio.
 - **Account-merging UI** — Why parked: Open Roadmap Question #1; defer until real-user friction surfaces.
 - **Contiue timer** - when session is closed, user can click "I'm still working" and the counter continues - it helps to protect the flow state. Why parked: It is an extension of MVP
+- **Auto-resume running session on app open** — when a signed-in user opens the app and has an in-progress session (no `ended_at`), redirect them straight to that session's page so they can interact with it (rate, stop early, abandon), instead of only seeing it listed on the dashboard. Pairs with a single-active-session guarantee: starting a new session must be blocked while one is already running, so it is not possible to run multiple sessions in parallel for the same user. Motivation: today, if the user closes the tab mid-session there is no way to reopen and finish that exact session from the dashboard. Why parked: outside MVP scope; revisit after S-01..S-04 land.
 
 ## Done
 
