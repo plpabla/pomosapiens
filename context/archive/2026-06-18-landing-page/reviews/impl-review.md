@@ -1,4 +1,5 @@
 <!-- IMPL-REVIEW-REPORT -->
+
 # Implementation Review: Landing Page (S-00)
 
 - **Plan**: context/changes/landing-page/plan.md
@@ -9,14 +10,14 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| Plan Adherence | PASS |
-| Scope Discipline | WARNING |
-| Safety & Quality | PASS |
-| Architecture | PASS |
-| Pattern Consistency | PASS |
-| Success Criteria | PASS |
+| Dimension           | Verdict |
+| ------------------- | ------- |
+| Plan Adherence      | PASS    |
+| Scope Discipline    | WARNING |
+| Safety & Quality    | PASS    |
+| Architecture        | PASS    |
+| Pattern Consistency | PASS    |
+| Success Criteria    | PASS    |
 
 ## Evidence verified
 
@@ -56,5 +57,5 @@
 - **Dimension**: Pattern Consistency
 - **Location**: `src/styles/global.css:55-87`
 - **Detail**: The `.dark` variant block still held the original shadcn neutral OKLCH defaults. Matches plan §3.1 explicitly ("Leave the .dark variant block intact"), but if a future slice ever toggles `.dark` on `<html>`, the palette-relevant shadcn vars would revert to greys.
-- **Fix**: Mirror the `:root` palette values into `.dark` so the brand palette persists across any future class toggle. Leave chart-* and sidebar-* unchanged (currently unused).
+- **Fix**: Mirror the `:root` palette values into `.dark` so the brand palette persists across any future class toggle. Leave chart-_ and sidebar-_ unchanged (currently unused).
 - **Decision**: FIXED — palette mirrored into `.dark` block; chart/sidebar vars untouched. Lint + format re-ran clean.

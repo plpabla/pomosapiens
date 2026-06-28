@@ -17,19 +17,19 @@ A user can manage their own topic library at `/topics` (and custom material form
 
 ## Key Decisions Made
 
-| Decision                                          | Choice                                                            | Why (1 sentence)                                                                                              | Source |
-| ------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ |
-| Archive semantics                                 | Hide from picker, keep on dashboard rows                          | Standard archive pattern -- preserves historical analytics without losing retrospective context.              | Plan   |
-| Material formats: closed vocabulary or extensible | Extensible -- users can create / rename / archive their own       | F-01 already built the table for it; lets power users tag specialized work without bloating the closed list.  | Plan   |
-| Material formats: archive surface                 | Add `archived_at` to `material_formats` symmetric with topics     | Asymmetric model (one archive, one delete) would be confusing; analytics on retired formats must stay intact. | Plan   |
-| Topic picker UI                                   | shadcn `<Select>` dropdown                                        | Scales past the energy-style button group; cheaper install than combobox; sufficient for sub-30-item lists.   | Plan   |
-| Management routes                                 | Two sibling pages: `/topics` and `/formats`                       | Clean separation, no tabs primitive to install, two Topbar entries is acceptable.                             | Plan   |
-| Dashboard surface                                 | Small chip line below the date; hidden when both fields are null  | Visually consistent with the minimal row template; mobile-friendly; doesn't enlarge rows for older sessions.  | Plan   |
-| Seeded-format protection                          | RLS-only (no app-layer `owner_id IS NOT NULL` guard)              | RLS UPDATE policy already blocks NULL-owner writes; avoids divergence with how cross-user denial is handled.  | Plan   |
-| Pickers do not gate Start                         | Both default to "no selection"; only `energy_level` gates Start   | Required to preserve the 3-tap budget from PRD line 84.                                                       | Plan   |
-| PATCH `/api/sessions/[id]` widening               | Do not widen -- topic / format are POST-only                      | Preserves the L-01 column-scope contract on the most-tested endpoint.                                         | Plan   |
-| Prod deploy ordering                              | Push migration to prod BEFORE merging the PR                      | Smoke workflow auto-fires on push to `main` and runs `diff` against committed types; prod must match first.   | Plan   |
-| Smoke script update                               | Leave smoke script unchanged                                      | New columns are nullable; existing insert still passes; the `diff` gate already proves prod has the columns.  | Plan   |
+| Decision                                          | Choice                                                           | Why (1 sentence)                                                                                              | Source |
+| ------------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ |
+| Archive semantics                                 | Hide from picker, keep on dashboard rows                         | Standard archive pattern -- preserves historical analytics without losing retrospective context.              | Plan   |
+| Material formats: closed vocabulary or extensible | Extensible -- users can create / rename / archive their own      | F-01 already built the table for it; lets power users tag specialized work without bloating the closed list.  | Plan   |
+| Material formats: archive surface                 | Add `archived_at` to `material_formats` symmetric with topics    | Asymmetric model (one archive, one delete) would be confusing; analytics on retired formats must stay intact. | Plan   |
+| Topic picker UI                                   | shadcn `<Select>` dropdown                                       | Scales past the energy-style button group; cheaper install than combobox; sufficient for sub-30-item lists.   | Plan   |
+| Management routes                                 | Two sibling pages: `/topics` and `/formats`                      | Clean separation, no tabs primitive to install, two Topbar entries is acceptable.                             | Plan   |
+| Dashboard surface                                 | Small chip line below the date; hidden when both fields are null | Visually consistent with the minimal row template; mobile-friendly; doesn't enlarge rows for older sessions.  | Plan   |
+| Seeded-format protection                          | RLS-only (no app-layer `owner_id IS NOT NULL` guard)             | RLS UPDATE policy already blocks NULL-owner writes; avoids divergence with how cross-user denial is handled.  | Plan   |
+| Pickers do not gate Start                         | Both default to "no selection"; only `energy_level` gates Start  | Required to preserve the 3-tap budget from PRD line 84.                                                       | Plan   |
+| PATCH `/api/sessions/[id]` widening               | Do not widen -- topic / format are POST-only                     | Preserves the L-01 column-scope contract on the most-tested endpoint.                                         | Plan   |
+| Prod deploy ordering                              | Push migration to prod BEFORE merging the PR                     | Smoke workflow auto-fires on push to `main` and runs `diff` against committed types; prod must match first.   | Plan   |
+| Smoke script update                               | Leave smoke script unchanged                                     | New columns are nullable; existing insert still passes; the `diff` gate already proves prod has the columns.  | Plan   |
 
 ## Scope
 
@@ -80,15 +80,15 @@ Two write contracts get widened (POST `/api/sessions`) or created (POST + PATCH 
 
 ## Phases at a Glance
 
-| Phase                                     | What it delivers                                                                | Key risk                                                                                              |
-| ----------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| 1. Schema + RLS tests + types               | `archived_at` columns, partial indexes, pgTAP coverage, regenerated types     | Forgetting prod migration push in Phase 7 breaks the smoke `diff` gate on merge                       |
-| 2. Widen POST `/api/sessions`               | Endpoint accepts optional `topic_id` / `material_format_id`                   | Accidentally spreading `parsed.data` into `.insert` (L-01 layer 2 break) -- hand-pick                 |
-| 3. Topic customization end-to-end           | Topics CRUD API + `/topics` page with empty state + Topbar nav                | Modal + Dialog primitives need `node_modules/.vite/` reset after shadcn install (L-04)                |
-| 4. Material format customization end-to-end | Material formats CRUD API (seeded-row protection) + `/formats` page + nav     | Forgetting to omit Rename / Archive affordances on seeded rows in the UI -- RLS denies but UX is ugly |
-| 5. Pre-session pickers                      | Two `<Select>`s on `/session/new` wired to the widened POST                   | Accidentally gating Start on topic / format breaks the 3-tap budget                                   |
-| 6. Dashboard surface                        | PostgREST embeds + conditional chip line                                      | Long topic names breaking row layout -- truncation + `title` attr handles it                          |
-| 7. Production deploy                        | `supabase db push` to prod + `db:types:prod` reconciled, before PR merge      | Merging before pushing the migration turns the smoke workflow red on `main` -- order is load-bearing  |
+| Phase                                       | What it delivers                                                          | Key risk                                                                                              |
+| ------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| 1. Schema + RLS tests + types               | `archived_at` columns, partial indexes, pgTAP coverage, regenerated types | Forgetting prod migration push in Phase 7 breaks the smoke `diff` gate on merge                       |
+| 2. Widen POST `/api/sessions`               | Endpoint accepts optional `topic_id` / `material_format_id`               | Accidentally spreading `parsed.data` into `.insert` (L-01 layer 2 break) -- hand-pick                 |
+| 3. Topic customization end-to-end           | Topics CRUD API + `/topics` page with empty state + Topbar nav            | Modal + Dialog primitives need `node_modules/.vite/` reset after shadcn install (L-04)                |
+| 4. Material format customization end-to-end | Material formats CRUD API (seeded-row protection) + `/formats` page + nav | Forgetting to omit Rename / Archive affordances on seeded rows in the UI -- RLS denies but UX is ugly |
+| 5. Pre-session pickers                      | Two `<Select>`s on `/session/new` wired to the widened POST               | Accidentally gating Start on topic / format breaks the 3-tap budget                                   |
+| 6. Dashboard surface                        | PostgREST embeds + conditional chip line                                  | Long topic names breaking row layout -- truncation + `title` attr handles it                          |
+| 7. Production deploy                        | `supabase db push` to prod + `db:types:prod` reconciled, before PR merge  | Merging before pushing the migration turns the smoke workflow red on `main` -- order is load-bearing  |
 
 **Prerequisites:** S-01 (capture loop) shipped; local Supabase running; `.dev.vars` has `SUPABASE_SERVICE_ROLE_KEY` for integration tests. Operator has `SUPABASE_ACCESS_TOKEN` + `SUPABASE_PROJECT_REF` available locally for Phase 7.
 

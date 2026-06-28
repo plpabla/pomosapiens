@@ -16,19 +16,20 @@ Four Playwright specs run in CI on every PR to `main`, blocking merge when the c
 
 ## Key Decisions Made
 
-| Decision                        | Choice                                                      | Why (1 sentence)                                                                                            | Source |
-| ------------------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- | ------ |
-| Timer speed-up                  | Click "Stop early" button                                   | Exercises the real SessionRunner state machine end-to-end without fixture special-casing.                   | Plan   |
-| Browser matrix                  | Chromium only                                               | Cheapest signal for cross-cutting regression; matches workerd's V8 identity; Safari autoplay is out of scope. | Plan   |
-| Scenario count                  | 4 (happy + #3 cross-user + #5 ended + #5 abandoned)         | Risk #5 has two SSR-only branches; abandoned redirect can only be proven in a real browser context.         | Plan   |
-| User fixture                    | Per-spec `setupTwoUsers` + cleanup                          | Full isolation; supports parallel specs; mirrors the integration-test pattern verbatim.                     | Plan   |
-| Web server                      | Playwright `webServer` runs `astro dev`                     | Uses the workerd-backed Astro dev runtime; no extra build step; supports `reuseExistingServer` locally.     | Plan   |
-| CI placement                    | Separate `e2e:` job parallel to `ci:` in `ci.yml`           | Independent PR-check reporting; parallel execution keeps wall-time flat.                                    | Plan   |
-| Gate timing                     | Required from the first green run, `retries: 0`             | Matches test-plan §5 stance; flake gets investigated, not papered over with auto-retry.                     | Plan   |
+| Decision       | Choice                                              | Why (1 sentence)                                                                                              | Source |
+| -------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ------ |
+| Timer speed-up | Click "Stop early" button                           | Exercises the real SessionRunner state machine end-to-end without fixture special-casing.                     | Plan   |
+| Browser matrix | Chromium only                                       | Cheapest signal for cross-cutting regression; matches workerd's V8 identity; Safari autoplay is out of scope. | Plan   |
+| Scenario count | 4 (happy + #3 cross-user + #5 ended + #5 abandoned) | Risk #5 has two SSR-only branches; abandoned redirect can only be proven in a real browser context.           | Plan   |
+| User fixture   | Per-spec `setupTwoUsers` + cleanup                  | Full isolation; supports parallel specs; mirrors the integration-test pattern verbatim.                       | Plan   |
+| Web server     | Playwright `webServer` runs `astro dev`             | Uses the workerd-backed Astro dev runtime; no extra build step; supports `reuseExistingServer` locally.       | Plan   |
+| CI placement   | Separate `e2e:` job parallel to `ci:` in `ci.yml`   | Independent PR-check reporting; parallel execution keeps wall-time flat.                                      | Plan   |
+| Gate timing    | Required from the first green run, `retries: 0`     | Matches test-plan §5 stance; flake gets investigated, not papered over with auto-retry.                       | Plan   |
 
 ## Scope
 
 **In scope:**
+
 - `@playwright/test` install + `playwright.config.ts` (Chromium, webServer = `astro dev`)
 - `tests/e2e/_fixtures/{auth,sessions}.ts` (auth cookie seeder + service-role insert helper)
 - `tests/e2e/session-capture.spec.ts` (happy path via "Stop early")
@@ -37,6 +38,7 @@ Four Playwright specs run in CI on every PR to `main`, blocking merge when the c
 - test-plan.md §3/§5/§6.5 updates + CLAUDE.md command list update
 
 **Out of scope:**
+
 - Firefox / WebKit projects, visual regression, accessibility scans
 - Audio assertions (L-02 stays manual)
 - Timer-natural-completion test (would require 25 min)
@@ -58,12 +60,12 @@ Happy path drives the real UI (`getByRole` locators only — no Tailwind class s
 
 ## Phases at a Glance
 
-| Phase                          | What it delivers                                          | Key risk                                                                  |
-| ------------------------------ | --------------------------------------------------------- | ------------------------------------------------------------------------- |
-| 1. Test harness scaffolding    | Playwright installed; `npx playwright test --list` works  | webServer wiring against `astro dev` cold-start                           |
-| 2. Auth fixture + happy path   | Cookie seeder + the cross-cutting flow spec               | Cookie domain/format mismatch breaks middleware authentication            |
-| 3. SSR redirect specs          | Service-role insert helper + three SSR-only assertions    | Abandoned-threshold value drift if S-05 changes `2 × focusPresetSeconds`  |
-| 4. CI gate + docs              | Parallel `e2e:` job, test-plan + CLAUDE.md updates        | Branch-protection update is a one-time operator step (named in Manual)    |
+| Phase                        | What it delivers                                         | Key risk                                                                 |
+| ---------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------ |
+| 1. Test harness scaffolding  | Playwright installed; `npx playwright test --list` works | webServer wiring against `astro dev` cold-start                          |
+| 2. Auth fixture + happy path | Cookie seeder + the cross-cutting flow spec              | Cookie domain/format mismatch breaks middleware authentication           |
+| 3. SSR redirect specs        | Service-role insert helper + three SSR-only assertions   | Abandoned-threshold value drift if S-05 changes `2 × focusPresetSeconds` |
+| 4. CI gate + docs            | Parallel `e2e:` job, test-plan + CLAUDE.md updates       | Branch-protection update is a one-time operator step (named in Manual)   |
 
 **Prerequisites:** Supabase remote project with `SUPABASE_URL` / `SUPABASE_KEY` / `SUPABASE_SERVICE_ROLE_KEY` available locally and in CI secrets (already true — integration tests use the same).
 **Estimated effort:** ~2 sessions across 4 phases. Each phase is independently mergeable; Phase 1 is ~15 min, Phases 2-3 are the bulk, Phase 4 is mostly YAML + docs.

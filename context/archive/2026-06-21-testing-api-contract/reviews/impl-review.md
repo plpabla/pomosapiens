@@ -1,4 +1,5 @@
 <!-- IMPL-REVIEW-REPORT -->
+
 # Implementation Review: Test Runner Bootstrap + Session API Contract
 
 - **Plan**: context/changes/testing-api-contract/plan.md
@@ -9,14 +10,14 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| Plan Adherence | PASS |
-| Scope Discipline | PASS |
-| Safety & Quality | WARNING |
-| Architecture | PASS |
+| Dimension           | Verdict |
+| ------------------- | ------- |
+| Plan Adherence      | PASS    |
+| Scope Discipline    | PASS    |
+| Safety & Quality    | WARNING |
+| Architecture        | PASS    |
 | Pattern Consistency | WARNING |
-| Success Criteria | WARNING |
+| Success Criteria    | WARNING |
 
 ## Summary
 
@@ -52,7 +53,7 @@ The substantive findings are about **test signal quality**: the regression gates
 - **Dimension**: Safety & Quality / Success Criteria
 - **Location**: tests/integration/api/sessions.end.test.ts:173-195 (vs plan.md:17, test-plan.md §2 row #3)
 - **Detail**: Plan.md:17 promises: "This plan does NOT re-prove the DB layer; it proves the API boundary." Progress 3.3 (plan.md:396) admits removing `.eq("user_id", context.locals.user.id)` from `src/pages/api/sessions/[id].ts:45` does NOT make the cross-user test fail — RLS `sessions_update_own USING` blocks user B from seeing user A's row at the DB layer; PostgREST returns zero rows and the endpoint emits 409 via the `!data` branch regardless of the `.eq` guard. Risk #3's "cross-user PATCH returns 409 + no row mutation" is currently gated by `supabase/tests/rls_sessions.sql` alone, not by the new integration test. The information-hiding test at lines 197-250 IS signal-bearing (byte-identical JSON body is an API-only concern); only the cross-user-409 test at 173-195 is duplicate signal.
-- **Fix ⭐ Recommended**: Annotate the test and update test-plan.md §2 row #3 to credit the actual signal source. Add a leading comment on the test block explaining it pins the *response shape* at the API boundary (status + body) while DB-layer RLS pins the access-denial enforcement, with a cross-reference to `supabase/tests/rls_sessions.sql`. Update test-plan.md §2 row #3 evidence column to read "API integration pins 409 response shape and information-hiding; access-denial enforcement traced to pgTAP rls_sessions.sql".
+- **Fix ⭐ Recommended**: Annotate the test and update test-plan.md §2 row #3 to credit the actual signal source. Add a leading comment on the test block explaining it pins the _response shape_ at the API boundary (status + body) while DB-layer RLS pins the access-denial enforcement, with a cross-reference to `supabase/tests/rls_sessions.sql`. Update test-plan.md §2 row #3 evidence column to read "API integration pins 409 response shape and information-hiding; access-denial enforcement traced to pgTAP rls_sessions.sql".
   - Strength: Honest accounting in the test plan; future contributors won't assume the API guard is gated by Vitest.
   - Tradeoff: Minor doc churn against a closed-out phase.
   - Confidence: HIGH — Progress 3.3 already disclosed this.
@@ -75,7 +76,7 @@ The substantive findings are about **test signal quality**: the regression gates
 - **Impact**: 🔎 MEDIUM — real tradeoff; pause to reason through it
 - **Dimension**: Pattern Consistency (rules-file integrity)
 - **Location**: context/foundation/lessons.md:7-13
-- **Detail**: L-01 reads: "RLS enforces row-level ownership; the endpoint enforces column-level immutability." Today the column-level immutability for *unknown* body keys is enforced by Zod's default-strip on `z.object(...)`, not by the hand-picked `.update({ ended_at, focus_rating })`. A future contributor who switches `endSessionSchema` to `.passthrough()` or `z.looseObject` silently breaks L-01 *without* touching the endpoint. The rule doesn't say so. Closely related to F1; fix together.
+- **Detail**: L-01 reads: "RLS enforces row-level ownership; the endpoint enforces column-level immutability." Today the column-level immutability for _unknown_ body keys is enforced by Zod's default-strip on `z.object(...)`, not by the hand-picked `.update({ ended_at, focus_rating })`. A future contributor who switches `endSessionSchema` to `.passthrough()` or `z.looseObject` silently breaks L-01 _without_ touching the endpoint. The rule doesn't say so. Closely related to F1; fix together.
 - **Fix**: Append one sentence to L-01: "This relies on the request schema being a non-passthrough `z.object(...)` — switching to `.passthrough()` would break column-scope without touching the endpoint."
 - **Decision**: SKIPPED -- already resolved by F1 Fix A (L-01 updated with Zod-strip dependency paragraph).
 
@@ -84,7 +85,7 @@ The substantive findings are about **test signal quality**: the regression gates
 - **Severity**: 💡 OBSERVATION
 - **Impact**: 🏃 LOW
 - **Dimension**: Pattern Consistency
-- **Location**: tests/_fixtures/db.ts:13 (comment)
+- **Location**: tests/\_fixtures/db.ts:13 (comment)
 - **Detail**: Comment says "Module-level singleton" but `@cloudflare/vitest-pool-workers` isolates each test file into its own Worker context, so it is per-file, not per-suite. Not a bug — just docs.
 - **Fix**: Reword to "Per-file singleton (each test file gets its own Worker context under @cloudflare/vitest-pool-workers)."
 - **Decision**: FIXED -- rewrote comment to "Per-file singleton (each test file gets its own Worker context under @cloudflare/vitest-pool-workers)."

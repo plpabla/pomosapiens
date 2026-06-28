@@ -1,4 +1,5 @@
 <!-- IMPL-REVIEW-REPORT -->
+
 # Implementation Review: Timer State Machine + Finalization Guards
 
 - **Plan**: context/changes/test-timer-sm/plan.md
@@ -9,14 +10,14 @@
 
 ## Verdicts
 
-| Dimension | Verdict |
-|-----------|---------|
-| Plan Adherence | PASS |
-| Scope Discipline | PASS (1 observation) |
-| Safety & Quality | PASS |
-| Architecture | PASS |
-| Pattern Consistency | PASS |
-| Success Criteria | PASS (1 observation -- env-related) |
+| Dimension           | Verdict                             |
+| ------------------- | ----------------------------------- |
+| Plan Adherence      | PASS                                |
+| Scope Discipline    | PASS (1 observation)                |
+| Safety & Quality    | PASS                                |
+| Architecture        | PASS                                |
+| Pattern Consistency | PASS                                |
+| Success Criteria    | PASS (1 observation -- env-related) |
 
 ## Summary
 
@@ -49,7 +50,7 @@ Plan was followed cleanly across all five phases. The refactor cleanly lifts `us
 - **Severity**: OBSERVATION
 - **Impact**: LOW -- quick decision; fix is obvious and narrowly scoped
 - **Dimension**: Pattern Consistency
-- **Location**: tests/unit/_setup.ts:24-34 + tests/unit/timer/useFocusTimer.test.ts:19-23
+- **Location**: tests/unit/\_setup.ts:24-34 + tests/unit/timer/useFocusTimer.test.ts:19-23
 - **Detail**: `dispatchVisibilityChange` redefines `document.visibilityState` / `document.hidden` via `Object.defineProperty` but never restores them. `useFocusTimer.test.ts` works around this by calling `dispatchVisibilityChange("visible")` in `afterEach`, but the cleanup pattern lives in the test file rather than in `_setup.ts` -- a future jsdom test author who skips that line will get the last-set state bleed across files. Not a current bug (`audio.test.ts` doesn't dispatch visibility changes), but a footgun for §6.2's "contributor can add a new timer/hook test from these instructions alone" goal.
 - **Fix**: Add a `restoreVisibility()` helper in `_setup.ts` and call it via a top-level `afterEach` (or move the reset into the dispatch helper itself with a teardown registration). Saves a future test author 30 minutes of head-scratching.
 - **Decision**: FIXED -- added global `afterEach(() => dispatchVisibilityChange("visible"))` in `_setup.ts`; removed redundant manual reset from `useFocusTimer.test.ts` afterEach.

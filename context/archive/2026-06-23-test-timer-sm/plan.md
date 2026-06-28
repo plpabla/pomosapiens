@@ -59,6 +59,7 @@ Verification: a CI run on a branch where the visibilitychange effect is removed 
 Refactor first, test second. Phase 1 lifts the timer state machine into `useFocusTimer` and the redirect rules into `resolveSessionPageAccess`, leaving SessionRunner and `[id].astro` thin orchestrators. Phase 1 ships a green build without any new tests -- proving the refactor is behavior-preserving via manual smoke. Phases 2-4 then add tests against the new pure surfaces. Phase 5 closes the rollout phase: cookbook §6.2 is filled and §3 row 2 flips to `complete`.
 
 Test layout mirrors §6.1's cookbook style:
+
 - `tests/unit/timer/useFocusTimer.test.ts` -- risk #1
 - `tests/unit/session/resolveSessionPageAccess.test.ts` -- risk #5
 - `tests/unit/timer/audio.test.ts` -- risk #6 (kept in `timer/` because audio is part of the timer concern)
@@ -112,6 +113,7 @@ Install the jsdom test stack, scaffold the second Vitest project, and lift `useF
 **Intent**: Move the three timer-related useEffects + their state out of SessionRunner into a hook. SessionRunner becomes a render-only component consuming `{ phase, remaining, stopEarly }` plus the rating/submit logic which stays in the component.
 
 **Contract**:
+
 - `useFocusTimer({ startedAtMs, focusSeconds }): { phase: 'running' | 'rating'; remaining: number; stoppedAtMs: number | null; stopEarly: () => void }` -- the hook owns the `phase`, `now`, `stoppedAtMs` state; the setTimeout tick effect; the visibilitychange effect; and the audio prime + fire effects. The audio Audio instance is encapsulated inside the hook (refs).
 - SessionRunner now: calls `useFocusTimer(...)`, narrows on `phase`, renders the running view or the rating view (rating logic / `handleRate` / `error` stays in the component since it's tied to the fetch contract, not the timer).
 - The hook does NOT export the audio ref -- L-02's prime + fire are an internal contract of the hook.
@@ -126,6 +128,7 @@ The hook file has a leading 2-line comment naming L-03 and L-02 as the lessons i
 **Intent**: Lift the row-existence, ended-state, and abandoned-age checks out of the `.astro` frontmatter into a pure decider. The `.astro` file still owns the auth check, the Supabase fetch, and the actual `Astro.redirect()` calls -- the decider returns a discriminated result.
 
 **Contract**:
+
 - `resolveSessionPageAccess({ row, nowMs, focusPresetSeconds }): { kind: 'redirect'; to: '/dashboard' } | { kind: 'allow'; startedAtMs: number }` where `row: { id: string; started_at: string; ended_at: string | null; energy_level: string } | null`. Logic: row null -> redirect; `row.ended_at !== null` -> redirect; `nowMs - new Date(row.started_at).getTime() > 2 * focusPresetSeconds * 1000` -> redirect; otherwise `{ kind: 'allow', startedAtMs: new Date(row.started_at).getTime() }`.
 - `[id].astro` frontmatter now: keeps the `if (!id)`, `if (!supabase)`, `if (!user)` checks; performs the supabase select; calls `resolveSessionPageAccess({ row: data, nowMs: Date.now(), focusPresetSeconds: FOCUS_PRESET_SECONDS })`; switches on the result kind to either `Astro.redirect("/dashboard")` or read `startedAtMs` from the allow branch.
 - `FOCUS_PRESET_SECONDS = 25 * 60` stays declared in the `.astro` file -- it's part of the page contract, not the decider.
@@ -215,7 +218,7 @@ Pure unit tests on `resolveSessionPageAccess`. No jsdom-specific APIs needed -- 
 
 **Contract**:
 
-- `describe("resolveSessionPageAccess (risk #5: stuck-open SSR guard)")` containing five `it` blocks. Each test constructs a row via a small `makeRow(overrides)` helper at the top of the file; `focusPresetSeconds` is held at 1500 (25 * 60) for clarity but referenced via a `const FOCUS = 1500` so the boundary formula is visible.
+- `describe("resolveSessionPageAccess (risk #5: stuck-open SSR guard)")` containing five `it` blocks. Each test constructs a row via a small `makeRow(overrides)` helper at the top of the file; `focusPresetSeconds` is held at 1500 (25 \* 60) for clarity but referenced via a `const FOCUS = 1500` so the boundary formula is visible.
   - `it("redirects when row is null (not found or cross-user)")` -- `resolveSessionPageAccess({ row: null, nowMs: 0, focusPresetSeconds: FOCUS })` -> `{ kind: 'redirect', to: '/dashboard' }`.
   - `it("redirects when ended_at is non-null (already-ended replay guard)")` -- row with `ended_at: '2026-06-23T10:00:00Z'`, started_at recent; expect redirect.
   - `it("redirects when started_at is older than 2 * focusPresetSeconds (abandoned guard) -- TODO(S-05)")` -- `nowMs - startedMs = 2 * FOCUS * 1000 + 1`; expect redirect. Leading comment: `// TODO(S-05): boundary will be removed by roadmap S-05 (explicit abandon). This test pins current 50-min behavior as a regression target until S-05 ships.`
@@ -294,6 +297,7 @@ Fill the §6.2 placeholder with the canonical jsdom integration pattern from thi
 **Intent**: Replace the `§6.2 Adding a Vitest jsdom integration test (timer or component logic)` placeholder with a canonical pattern derived from the three test files this PR adds.
 
 **Contract**: §6.2 section becomes:
+
 - **Location**: `tests/unit/<concern>/<name>.test.ts` -- pure unit tests live alongside concern (e.g. `tests/unit/timer/useFocusTimer.test.ts`, `tests/unit/session/resolveSessionPageAccess.test.ts`). One file per hook or pure function.
 - **Pattern**:
   1. Import `vi`, `describe`, `it`, `expect`, `beforeEach`, `afterEach` from `vitest`.

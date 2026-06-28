@@ -130,6 +130,7 @@ Already includes `topic_id`, `material_format_id` (nullable) on the sessions Row
 Three files exist: `rls_sessions.sql`, `rls_topics.sql`, `rls_material_formats.sql`. Each wraps in `BEGIN ... ROLLBACK`, uses two test users, impersonates via `set_config('request.jwt.claims', ...)` + `SET LOCAL ROLE authenticated`, asserts cross-user denial + anon zero-rows.
 
 Representative test (rls_sessions.sql, summary):
+
 - `plan(9)` declares 9 assertions
 - INSERT two users with one session each (as service role)
 - Switch to user A's JWT, assert SELECT count = 1
@@ -254,6 +255,7 @@ const { data, error } = await supabase
 Row template renders date + energy (color-coded) + duration/status + rating.
 
 **S-02 changes**:
+
 - Widen `.select` to embed FKs via PostgREST: `"id, started_at, energy_level, duration_seconds, focus_rating, ended_at, topic:topics(name), material_format:material_formats(name)"`. The FK names are unambiguous (only one FK per join in the schema).
 - The `SessionRow` `Pick<>` type widens accordingly -- nested select returns `topic: { name: string } | null` shape; the `Database` type from `db:types` after migration will give correct typing.
 - Surface topic name + material_format name in the row -- design TBD (e.g., a small chip line under the date).
@@ -272,6 +274,7 @@ Row template renders date + energy (color-coded) + duration/status + rating.
 Present: `button.tsx`, `card.tsx` only.
 
 Missing (S-02 will likely need): `input`, `label`, `dialog`, plus one of `select` / `combobox` / `radio-group` for the topic picker. Recommend:
+
 - **Topic picker**: `select` (or custom button-group like energy if topic count is small).
 - **Material format picker**: button-group mirroring energy (only 5 fixed options, fits the existing visual pattern).
 - **Topic CRUD modal**: `dialog` + `input` + `label`.
@@ -281,11 +284,12 @@ Install with `npx shadcn@latest add <name>`.
 ### E. Tests
 
 #### Infrastructure
+
 - **Vitest + @cloudflare/vitest-pool-workers** for API integration tests ([tests/integration/api/](../../../tests/integration/api/)). Dispatch via `SELF.fetch`.
 - **Vitest jsdom-ish** for unit tests ([tests/unit/](../../../tests/unit/)).
 - **Playwright** for e2e ([tests/e2e/](../../../tests/e2e/)).
 - **pgTAP** for RLS ([supabase/tests/](../../../supabase/tests/)). Local pre-PR gate.
-- Fixtures: [tests/_fixtures/auth.ts](../../../tests/_fixtures/auth.ts) `setupTwoUsers()`, [tests/_fixtures/db.ts](../../../tests/_fixtures/db.ts) `readSession(id)` via service role.
+- Fixtures: [tests/\_fixtures/auth.ts](../../../tests/_fixtures/auth.ts) `setupTwoUsers()`, [tests/\_fixtures/db.ts](../../../tests/_fixtures/db.ts) `readSession(id)` via service role.
 
 #### S-02 test requirements (binding per [test-plan.md §6.3](../../foundation/test-plan.md))
 
@@ -293,9 +297,10 @@ Install with `npx shadcn@latest add <name>`.
 2. **Column-scope regression** on new POST `/api/topics`: `owner_id` from body ignored; `name` lands.
 3. **pgTAP extension** of `rls_topics.sql` if `archived_at` is added: assertions for `archived_at` SELECT/UPDATE per owner.
 4. **Cross-user denial** on PATCH `/api/topics/[id]`: 409 byte-identical with not-found case.
-5. Add `readTopic(id)` helper to [tests/_fixtures/db.ts](../../../tests/_fixtures/db.ts) for ground-truth assertions.
+5. Add `readTopic(id)` helper to [tests/\_fixtures/db.ts](../../../tests/_fixtures/db.ts) for ground-truth assertions.
 
 #### Tests explicitly NOT required ([test-plan.md §7](../../foundation/test-plan.md))
+
 - No Tailwind class assertions.
 - No responsive-layout / mobile snapshots (PRD allows topic-list management to be desktop-first -- [prd.md:133](../../foundation/prd.md#L133)).
 - No e2e is required by the test plan; if added, follow `/10x-e2e` skill + seed pattern.
@@ -315,6 +320,7 @@ Install with `npx shadcn@latest add <name>`.
 ## Code References
 
 ### Schema layer
+
 - [supabase/migrations/20260531182506_sessions_data_foundation.sql:80-102](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L80-L102) -- sessions CREATE TABLE (topic_id + material_format_id already present)
 - [supabase/migrations/20260531182506_sessions_data_foundation.sql:56-74](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L56-L74) -- topics CREATE TABLE
 - [supabase/migrations/20260531182506_sessions_data_foundation.sql:30-50](../../../supabase/migrations/20260531182506_sessions_data_foundation.sql#L30-L50) -- material_formats CREATE TABLE + seed
@@ -323,6 +329,7 @@ Install with `npx shadcn@latest add <name>`.
 - [src/db/database.types.ts:66-152](../../../src/db/database.types.ts#L66-L152) -- generated types include all S-02 fields already
 
 ### API layer
+
 - [src/pages/api/sessions/index.ts:8-38](../../../src/pages/api/sessions/index.ts#L8-L38) -- POST sessions (skeleton to extend)
 - [src/pages/api/sessions/[id].ts:13-59](../../../src/pages/api/sessions/[id].ts#L13-L59) -- PATCH sessions (do NOT widen)
 - [src/lib/schemas/session.ts:3-17](../../../src/lib/schemas/session.ts#L3-L17) -- createSessionSchema (widen here) + endSessionSchema (leave alone)
@@ -331,6 +338,7 @@ Install with `npx shadcn@latest add <name>`.
 - [src/middleware.ts](../../../src/middleware.ts) -- PROTECTED_ROUTES (add "/topics/")
 
 ### Frontend layer
+
 - [src/pages/session/new.astro:1-10](../../../src/pages/session/new.astro#L1-L10) -- pre-session page shell
 - [src/components/session/EnergyPicker.tsx:59-95](../../../src/components/session/EnergyPicker.tsx#L59-L95) -- form JSX + submit handler (extend)
 - [src/pages/dashboard.astro:26-31](../../../src/pages/dashboard.astro#L26-L31) -- sessions SSR select (widen with PostgREST embeds)
@@ -340,12 +348,13 @@ Install with `npx shadcn@latest add <name>`.
 - [src/lib/utils.ts:4-6](../../../src/lib/utils.ts#L4-L6) -- cn() for class merging
 
 ### Tests
+
 - [supabase/tests/rls_topics.sql](../../../supabase/tests/rls_topics.sql) -- extend for archived_at
 - [supabase/tests/rls_sessions.sql](../../../supabase/tests/rls_sessions.sql) -- template
 - [tests/integration/api/sessions.create.test.ts:21-38](../../../tests/integration/api/sessions.create.test.ts#L21-L38) -- column-scope regression template (server-stamps user_id)
 - [tests/integration/api/sessions.end.test.ts:39-68](../../../tests/integration/api/sessions.end.test.ts#L39-L68) -- L-01 PATCH column-scope template
-- [tests/_fixtures/auth.ts](../../../tests/_fixtures/auth.ts) -- setupTwoUsers()
-- [tests/_fixtures/db.ts](../../../tests/_fixtures/db.ts) -- service-role helpers (add readTopic)
+- [tests/\_fixtures/auth.ts](../../../tests/_fixtures/auth.ts) -- setupTwoUsers()
+- [tests/\_fixtures/db.ts](../../../tests/_fixtures/db.ts) -- service-role helpers (add readTopic)
 
 ## Architecture Insights
 
@@ -359,6 +368,7 @@ Install with `npx shadcn@latest add <name>`.
 ## Historical Context (from prior changes)
 
 ### F-01 (sessions foundation) -- [context/archive/2026-05-29-sessions-data-foundation/](../../archive/2026-05-29-sessions-data-foundation/)
+
 - [plan.md:5](../../archive/2026-05-29-sessions-data-foundation/plan.md#L5) -- "anticipating-but-nullable" design rationale
 - [plan.md:41-42](../../archive/2026-05-29-sessions-data-foundation/plan.md#L41-L42) -- topics ships empty; S-02 owns empty-state
 - [plan.md:45](../../archive/2026-05-29-sessions-data-foundation/plan.md#L45) -- `archived_at` deferred to S-02
@@ -367,6 +377,7 @@ Install with `npx shadcn@latest add <name>`.
 - [reviews/impl-review.md:36-43](../../archive/2026-05-29-sessions-data-foundation/reviews/impl-review.md#L36-L43) -- L-01 origin
 
 ### S-01 (capture loop) -- [context/archive/2026-06-19-first-session-capture-loop/](../../archive/2026-06-19-first-session-capture-loop/)
+
 - [plan.md:347-349](../../archive/2026-06-19-first-session-capture-loop/plan.md#L347-L349) -- 3-tap count (energy at tap 2, Start at tap 3)
 - [plan.md:221-228](../../archive/2026-06-19-first-session-capture-loop/plan.md#L221-L228) -- EnergyPicker pattern S-02 extends
 - [plan.md:155](../../archive/2026-06-19-first-session-capture-loop/plan.md#L155) -- Topbar auto-mounted in Layout.astro for authed users
@@ -374,12 +385,15 @@ Install with `npx shadcn@latest add <name>`.
 - [research.md:273](../../archive/2026-06-19-first-session-capture-loop/research.md#L273) -- topic_id / material_format_id stay NULL in S-01
 
 ### Testing Phase 1 -- [context/archive/2026-06-21-testing-api-contract/](../../archive/2026-06-21-testing-api-contract/)
+
 - [reviews/impl-review.md:29-46](../../archive/2026-06-21-testing-api-contract/reviews/impl-review.md#L29-L46) -- L-01 regression test mechanics + known signal gap
 
 ### Testing Phase 3 -- [context/archive/2026-06-24-testing-schema-validation-gate/](../../archive/2026-06-24-testing-schema-validation-gate/)
+
 - [runbook.md](../../archive/2026-06-24-testing-schema-validation-gate/runbook.md) -- `db:types:prod` vs `db:types` to keep smoke `diff` gate green
 
 ### Lessons -- [context/foundation/lessons.md](../../foundation/lessons.md)
+
 - **L-01** binds every S-02 write endpoint (POST/PATCH topics; widened POST sessions). Schema default-strip + hand-picked `.insert/.update` -- two layers, both required.
 - **L-04** likely triggers after `npx shadcn add <name>` -- delete `node_modules/.vite/` if SSR hook errors appear.
 - L-02 (audio) and L-03 (timer resilience) don't apply -- S-02 touches neither.

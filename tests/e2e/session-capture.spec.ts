@@ -2,18 +2,24 @@
 // Risk: full session capture flow -- a broken slice in auth, routing, POST/PATCH API,
 // or history rendering blocks the user from completing a session.
 // Covers: POST /api/sessions, SessionRunner mount + Stop early, PATCH /api/sessions/[id],
-// dashboard history card with energy level and rating.
+// dashboard history card with energy level, rating, topic chip, and material format chip.
 // Seed: tests/e2e/seed.spec.ts
 // test-plan.md: §2 cross-cutting risk (Phase 4 regression gate)
 import { test, expect } from "@playwright/test";
 
 import type { TwoUserFixture } from "./_fixtures/auth";
 import { setupTwoUsers, seedAuthCookie } from "./_fixtures/auth";
+import { insertTopic } from "./_fixtures/topics";
 
 let fixture: TwoUserFixture;
+let topicName: string;
 
 test.beforeAll(async () => {
   fixture = await setupTwoUsers();
+  // material_formats rows are system-seeded (NULL owner_id, visible via RLS) -- no per-user seeding needed.
+  // topics ship empty by design; seed one per run to avoid (owner_id, name) unique-constraint collisions.
+  topicName = `e2e-topic-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  await insertTopic({ userId: fixture.userA.id, name: topicName });
 });
 
 test.afterAll(async () => {
@@ -34,8 +40,14 @@ test("session capture flow: dashboard → energy pick → timer → stop early �
     await page.waitForURL(/\/session\/new/);
     await page.waitForLoadState("networkidle");
 
-    // Step 2: Pick energy level and submit (POST /api/sessions).
+    // Step 2: Pick energy level, topic, and material format, then submit (POST /api/sessions).
     await page.getByRole("button", { name: "Medium" }).click();
+    // Pick the seeded topic.
+    await page.getByRole("combobox", { name: "Topic" }).click();
+    await page.getByRole("option", { name: topicName }).click();
+    // Pick the system-seeded material format ("Writing code" is one of five NULL-owner rows).
+    await page.getByRole("combobox", { name: "Material format" }).click();
+    await page.getByRole("option", { name: "Writing code" }).click();
     // Wait for React re-render to enable the Start button before clicking it.
     await expect(page.getByRole("button", { name: "Start" })).toBeEnabled();
     // Listen for the POST response before clicking so we don't miss it.
@@ -60,8 +72,10 @@ test("session capture flow: dashboard → energy pick → timer → stop early �
     // Step 6: Redirected back to /dashboard.
     await page.waitForURL("**/dashboard");
 
-    // Step 7: New session card is visible with correct energy level and rating.
+    // Step 7: New session card is visible with correct energy level, rating, and category chips.
     await expect(page.getByText("medium", { exact: false }).first()).toBeVisible();
+    await expect(page.getByText(topicName).first()).toBeVisible();
+    await expect(page.getByText("Writing code").first()).toBeVisible();
     await expect(page.getByText("★ 4 / 5")).toBeVisible();
   } finally {
     await context.close();
