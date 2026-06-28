@@ -539,29 +539,29 @@ None. No schema changes, no breaking API changes, no data backfill.
 
 #### Automated
 
-- [x] 1.1 `npm test -- tests/unit/session/EnergyPicker.test.tsx` exits 0 with both rejection and 401 cases passing
-- [x] 1.2 `npm test` full suite still exits 0 (no regression on existing jsdom or workers tests)
-- [x] 1.3 `npm run lint` passes
-- [x] 1.4 Glob widening proves out: a `.test.tsx` file appears in `vitest --reporter=verbose` output
+- [x] 1.1 `npm test -- tests/unit/session/EnergyPicker.test.tsx` exits 0 with both rejection and 401 cases passing -- b78af5d
+- [x] 1.2 `npm test` full suite still exits 0 (no regression on existing jsdom or workers tests) -- b78af5d
+- [x] 1.3 `npm run lint` passes -- b78af5d
+- [x] 1.4 Glob widening proves out: a `.test.tsx` file appears in `vitest --reporter=verbose` output -- b78af5d
 
 #### Manual
 
-- [x] 1.5 Deliberate-revert check: test fails against pre-`24c718b` `EnergyPicker.tsx`
+- [x] 1.5 Deliberate-revert check: test fails against pre-`24c718b` `EnergyPicker.tsx` -- b78af5d
 
 ### Phase 2: E2E categorization-wedge extension
 
 #### Automated
 
-- [ ] 2.1 `npm run test:e2e -- tests/e2e/session-capture.spec.ts` exits 0
-- [ ] 2.2 `npm run test:e2e` full suite still exits 0
-- [ ] 2.3 `npm run lint` passes
-- [ ] 2.4 `npm run build` exits 0
+- [x] 2.1 `npm run test:e2e -- tests/e2e/session-capture.spec.ts` exits 0
+- [x] 2.2 `npm run test:e2e` full suite still exits 0
+- [x] 2.3 `npm run lint` passes
+- [x] 2.4 `npm run build` exits 0
 
 #### Manual
 
-- [ ] 2.5 Locator names match real `aria-label` values on the rendered Select triggers
-- [ ] 2.6 Chip line on `/dashboard` shows both names during a manual headed run
-- [ ] 2.7 Deliberate-removal check: e2e fails when `dashboard.astro:133-152` chip block is commented out
+- [x] 2.5 Locator names match real `aria-label` values on the rendered Select triggers
+- [x] 2.6 Chip line on `/dashboard` shows both names during a manual headed run
+- [x] 2.7 Deliberate-removal check: e2e fails when `dashboard.astro:133-152` chip block is commented out
 
 ### Phase 3: `test-plan.md` refresh
 
