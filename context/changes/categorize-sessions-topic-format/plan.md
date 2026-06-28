@@ -757,22 +757,22 @@ The smoke script itself is NOT updated -- the new columns are nullable, the exis
 
 #### Automated
 
-- [x] 6.1 Build passes: `npm run build`
-- [x] 6.2 Lint passes: `npm run lint`
+- [x] 6.1 Build passes: `npm run build` -- e48b789
+- [x] 6.2 Lint passes: `npm run lint` -- e48b789
 
 #### Manual
 
-- [x] 6.3 Dashboard renders sessions with topic + format chips on rows where they're set
-- [x] 6.4 Sessions with no topic / format render the original two lines (no extra empty chip row)
-- [x] 6.5 A session whose topic was later archived still shows the topic name on its history row
-- [x] 6.6 Truncation works on a long topic name (test with a 60-char topic)
-- [x] 6.7 Mobile width: chips wrap or truncate gracefully (no horizontal scroll)
+- [x] 6.3 Dashboard renders sessions with topic + format chips on rows where they're set -- e48b789
+- [x] 6.4 Sessions with no topic / format render the original two lines (no extra empty chip row) -- e48b789
+- [x] 6.5 A session whose topic was later archived still shows the topic name on its history row -- e48b789
+- [x] 6.6 Truncation works on a long topic name (test with a 60-char topic) -- e48b789
+- [x] 6.7 Mobile width: chips wrap or truncate gracefully (no horizontal scroll) -- e48b789
 
 ### Phase 7: Production deploy
 
 #### Automated
 
-- [ ] 7.1 `npm run db:types:prod` exits 0
+- [x] 7.1 `npm run db:types:prod` exits 0
 - [ ] 7.2 `git diff src/db/database.types.ts` is clean after regen + commit
 - [ ] 7.3 After merging the PR, the `Smoke` workflow run on the merge commit succeeds (both `Diff types against committed file` and `Run session smoke test` go green)
 

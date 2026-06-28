@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Non-negotiable rules
+
+- do not try to read any passwords from .env files and similar. Request setting them as env variables and use those varaibles instead.
+
 ## Commands
 
 - `npm run dev` — start dev server (Astro dev, Cloudflare workerd runtime via `@astrojs/cloudflare`)
