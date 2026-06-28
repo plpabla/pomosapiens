@@ -79,3 +79,32 @@ export async function readTopic(id: string): Promise<TopicRow | null> {
   }
   return data;
 }
+
+export interface MaterialFormatRow {
+  id: string;
+  owner_id: string | null;
+  name: string;
+  archived_at: string | null;
+}
+
+export async function readMaterialFormat(id: string): Promise<MaterialFormatRow | null> {
+  const { data, error } = await supabase
+    .from("material_formats")
+    .select("id, owner_id, name, archived_at")
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`readMaterialFormat(${id}): ${error.message}`);
+  }
+  return data;
+}
+
+export async function readSeededMaterialFormatId(): Promise<string> {
+  const { data, error } = await supabase.from("material_formats").select("id").is("owner_id", null).limit(1).single();
+
+  if (error) {
+    throw new Error(`readSeededMaterialFormatId: ${error.message}`);
+  }
+  return data.id as string;
+}

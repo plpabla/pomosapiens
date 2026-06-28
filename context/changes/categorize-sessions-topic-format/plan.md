@@ -706,36 +706,36 @@ The smoke script itself is NOT updated -- the new columns are nullable, the exis
 
 #### Automated
 
-- [x] 3.1 All topic integration tests pass: `npm run test -- topics`
-- [x] 3.2 Existing tests still pass: `npm run test`
-- [x] 3.3 Lint passes: `npm run lint`
-- [x] 3.4 Build passes: `npm run build`
+- [x] 3.1 All topic integration tests pass: `npm run test -- topics` -- 10dba6c
+- [x] 3.2 Existing tests still pass: `npm run test` -- 10dba6c
+- [x] 3.3 Lint passes: `npm run lint` -- 10dba6c
+- [x] 3.4 Build passes: `npm run build` -- 10dba6c
 
 #### Manual
 
-- [x] 3.5 Logged-out visit to `/topics` redirects to signin
-- [x] 3.6 Logged-in fresh-account visit to `/topics` shows empty state with Add CTA
-- [x] 3.7 Add a topic, rename it, archive it, unarchive it -- full flow works
-- [x] 3.8 Second account's `/topics` page is empty -- no leak from the first account
-- [x] 3.9 Topbar shows the Topics link on every authed page
+- [x] 3.5 Logged-out visit to `/topics` redirects to signin -- 10dba6c
+- [x] 3.6 Logged-in fresh-account visit to `/topics` shows empty state with Add CTA -- 10dba6c
+- [x] 3.7 Add a topic, rename it, archive it, unarchive it -- full flow works -- 10dba6c
+- [x] 3.8 Second account's `/topics` page is empty -- no leak from the first account -- 10dba6c
+- [x] 3.9 Topbar shows the Topics link on every authed page -- 10dba6c
 
 ### Phase 4: Material format customization (API + `/formats` page)
 
 #### Automated
 
-- [ ] 4.1 All material-formats integration tests pass: `npm run test -- material-formats`
-- [ ] 4.2 Existing tests still pass: `npm run test`
-- [ ] 4.3 pgTAP still passes: `npm run db:test`
-- [ ] 4.4 Lint passes: `npm run lint`
-- [ ] 4.5 Build passes: `npm run build`
+- [x] 4.1 All material-formats integration tests pass: `npm run test -- material-formats`
+- [x] 4.2 Existing tests still pass: `npm run test`
+- [x] 4.3 pgTAP still passes: `npm run db:test`
+- [x] 4.4 Lint passes: `npm run lint`
+- [x] 4.5 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 4.6 Logged-out visit to `/formats` redirects to signin
-- [ ] 4.7 Logged-in visit shows 5 seeded rows as Built-in (no rename / archive affordance), empty Yours, Add CTA
-- [ ] 4.8 Add a custom format, rename it, archive it, unarchive it -- full flow works
-- [ ] 4.9 Forge a PATCH on a seeded row via DevTools -- response is 409, row unchanged in Studio
-- [ ] 4.10 Second account does not see the first account's custom formats; both see the same 5 seeded rows
+- [x] 4.6 Logged-out visit to `/formats` redirects to signin
+- [x] 4.7 Logged-in visit shows 5 seeded rows as Built-in (no rename / archive affordance), empty Yours, Add CTA
+- [x] 4.8 Add a custom format, rename it, archive it, unarchive it -- full flow works
+- [x] 4.9 Forge a PATCH on a seeded row via DevTools -- response is 409, row unchanged in Studio
+- [x] 4.10 Second account does not see the first account's custom formats; both see the same 5 seeded rows
 
 ### Phase 5: Pre-session screen pickers
 
