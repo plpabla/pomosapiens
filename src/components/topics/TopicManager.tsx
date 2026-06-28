@@ -78,7 +78,7 @@ export function TopicManager() {
     setRenameError(null);
     setRenameSubmitting(true);
     const prev = topics;
-    setTopics((ts) => ts.map((t) => (t.id === renameId ? { ...t, name: renameName } : t)));
+    setTopics((ts) => ts.map((t) => (t.id === renameId ? { ...t, name: renameName.trim() } : t)));
     try {
       await apiFetch(`/api/topics/${renameId}`, "PATCH", { name: renameName });
       setRenameId(null);
@@ -261,16 +261,6 @@ export function TopicManager() {
           )}
         </div>
       )}
-
-      {/* Rename dialog is rendered outside the list to avoid stale closure issues */}
-      <Dialog
-        open={renameId !== null && !active.find((t) => t.id === renameId)}
-        onOpenChange={() => {
-          setRenameId(null);
-        }}
-      >
-        <DialogContent>{/* placeholder; per-row dialogs above handle it */}</DialogContent>
-      </Dialog>
     </div>
   );
 }
