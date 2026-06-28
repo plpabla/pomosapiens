@@ -772,13 +772,13 @@ The smoke script itself is NOT updated -- the new columns are nullable, the exis
 
 #### Automated
 
-- [x] 7.1 `npm run db:types:prod` exits 0
-- [ ] 7.2 `git diff src/db/database.types.ts` is clean after regen + commit
-- [ ] 7.3 After merging the PR, the `Smoke` workflow run on the merge commit succeeds (both `Diff types against committed file` and `Run session smoke test` go green)
+- [x] 7.1 `npm run db:types:prod` exits 0 -- f218c7e
+- [x] 7.2 `git diff src/db/database.types.ts` is clean after regen + commit -- f218c7e
+- [x] 7.3 After merging the PR, the `Smoke` workflow run on the merge commit succeeds (both `Diff types against committed file` and `Run session smoke test` go green) -- f218c7e
 
 #### Manual
 
-- [ ] 7.4 In Supabase Studio for the production project, confirm `topics.archived_at` and `material_formats.archived_at` columns exist, are nullable, and have no default
-- [ ] 7.5 Confirm the partial indexes exist on prod
-- [ ] 7.6 After merge, run an end-to-end prod loop on `https://pomo-sapiens.com`: add a topic on `/topics`, pick it on `/session/new`, verify the chip on `/dashboard`
-- [ ] 7.7 Confirm `Run session smoke test` step shows "smoke OK" on the post-merge run
+- [x] 7.4 In Supabase Studio for the production project, confirm `topics.archived_at` and `material_formats.archived_at` columns exist, are nullable, and have no default -- f218c7e
+- [x] 7.5 Confirm the partial indexes exist on prod -- f218c7e
+- [x] 7.6 After merge, run an end-to-end prod loop on `https://pomo-sapiens.com`: add a topic on `/topics`, pick it on `/session/new`, verify the chip on `/dashboard` -- f218c7e
+- [x] 7.7 Confirm `Run session smoke test` step shows "smoke OK" on the post-merge run -- f218c7e
