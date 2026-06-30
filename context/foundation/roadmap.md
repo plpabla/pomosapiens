@@ -37,6 +37,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | proposed |
 | S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | proposed |
 | S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | proposed |
+| S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | proposed |
 
 ## Baseline
 
@@ -160,6 +161,22 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Risk:** Pure client-side work (document.title updated in a React useEffect inside the running timer component). The only realistic failure mode is forgetting to clean up the effect on unmount, leaving a stale time string in the tab after the session ends. No backend changes; no new schema; no new routes.
 - **Status:** proposed
 
+### S-07: Edit and delete logged sessions
+
+- **Outcome:** User can delete a logged session from the history list (e.g. a 10-second session started by accident) so it is removed completely from history and from any future focus-rating aggregates. User can also edit a logged session's duration and other captured fields (e.g. correct a count-up session that ran to 3h because the user forgot to stop the clock down to the ~1h that was actually worked). Edits and deletes are scoped to the session's owner via RLS.
+- **Change ID:** `edit-delete-sessions`
+- **PRD refs:** No new PRD FR — extends FR-015 (history list) with corrective controls. Gap discovered from real use: count-up mode (FR-005) and accidental session starts (FR-006) both produce history rows the user cannot currently fix.
+- **Prerequisites:** S-01
+- **Parallel with:** S-02, S-03, S-04, S-05, S-06
+- **Blockers:** —
+- **Unknowns:**
+  - Which fields are editable — just `ended_at` / duration, or also energy / topic / material format / focus rating / note? Minimum useful set is duration; everything else is cheap once the edit screen exists. Decide at plan time.
+  - Hard delete vs soft delete (`deleted_at` flag). Hard delete is simpler and matches user mental model ("remove completely from that list"); soft delete preserves audit trail. PRD has no retention requirement. Decide at plan time.
+  - Edit UI surface — inline on the dashboard row, a modal, or a dedicated `/session/[id]/edit` page? The existing `/session/[id]` page is the natural host.
+  - Whether editing `ended_at` must re-validate against the API's plausibility window (see S-05 unknown) — a corrective edit may legitimately set `ended_at` to a value far from `now()`.
+- **Risk:** Small surface — one or two routes (PATCH and DELETE on `/api/sessions/[id]`; PATCH likely already exists from S-01's focus-rating flow) plus a row-level UI affordance. Primary risk is forgetting that mutations must enforce ownership at the RLS layer, not just at the API layer — the privacy NFR (cross-user leakage) explicitly covers this. Secondary risk: deletion cascading to anything that aggregates sessions (focus-rating chart in S-04) — if S-04 has shipped first, verify the chart re-derives cleanly from current rows.
+- **Status:** proposed
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                          | Suggested issue title                                         | Ready for `/10x-plan` | Notes                                 |
@@ -172,6 +189,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                         |
 | S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Waits on S-01; parallel with S-02/3/4 |
 | S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Waits on S-01                         |
+| S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history      | no                    | Waits on S-01; parallel with S-02..S-06 |
 
 ## Open Roadmap Questions
 
@@ -192,6 +210,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Compliance certification beyond baseline privacy hygiene** — Why parked: PRD §Non-Goals — no HIPAA, no SOC 2, no formal accessibility certification in v1.
 - **Admin user-facing UI** — Why parked: Access Control describes the Admin role conceptually ("not exposed in normal user-facing UI"; "assigned out-of-band"). No FR demands v1 admin tooling — the project owner inspects user records via Supabase Studio.
 - **Account-merging UI** — Why parked: Open Roadmap Question #1; defer until real-user friction surfaces.
+- **Account deletion (GDPR right to erasure)** — User can permanently delete their account and all associated data (sessions, topics, profile) from within the app, satisfying GDPR Art. 17. Why parked: requires a hard-delete or anonymisation cascade across all user-owned tables, a confirmation UX with a mandatory re-auth step, and a Supabase Auth user deletion call -- non-trivial work that has no impact on the MVP capture loop. Revisit once the product has real users who may invoke their erasure right.
 - **Contiue timer** - when session is closed, user can click "I'm still working" and the counter continues - it helps to protect the flow state. Why parked: It is an extension of MVP
 - **Auto-resume running session on app open** — when a signed-in user opens the app and has an in-progress session (no `ended_at`), redirect them straight to that session's page so they can interact with it (rate, stop early, abandon), instead of only seeing it listed on the dashboard. Pairs with a single-active-session guarantee: starting a new session must be blocked while one is already running, so it is not possible to run multiple sessions in parallel for the same user. Motivation: today, if the user closes the tab mid-session there is no way to reopen and finish that exact session from the dashboard. Why parked: outside MVP scope; revisit after S-01..S-04 land.
 
