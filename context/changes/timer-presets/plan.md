@@ -579,31 +579,31 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [x] 1.1 Migration applies cleanly: `npm run db:reset`
-- [x] 1.2 Types regenerate without drift: `npm run db:types` (working tree clean after)
-- [x] 1.3 pgTAP passes: `npm run db:test`
-- [x] 1.4 Type check + lint pass: `npm run lint`
+- [x] 1.1 Migration applies cleanly: `npm run db:reset` — e1b378d
+- [x] 1.2 Types regenerate without drift: `npm run db:types` (working tree clean after) — e1b378d
+- [x] 1.3 pgTAP passes: `npm run db:test` — e1b378d
+- [x] 1.4 Type check + lint pass: `npm run lint` — e1b378d
 
 #### Manual
 
-- [x] 1.5 Local Supabase Studio shows `user_presets` table with the four policies enabled
-- [x] 1.6 `sessions` row shows the two new nullable columns
-- [x] 1.7 Inserting a row with `slot = 4` is rejected at the DB layer
+- [x] 1.5 Local Supabase Studio shows `user_presets` table with the four policies enabled — e1b378d
+- [x] 1.6 `sessions` row shows the two new nullable columns — e1b378d
+- [x] 1.7 Inserting a row with `slot = 4` is rejected at the DB layer — e1b378d
 
 ### Phase 2: Preset CRUD API + Zod schemas
 
 #### Automated
 
-- [ ] 2.1 Lint + type check pass: `npm run lint`
-- [ ] 2.2 Build succeeds: `npm run build`
+- [x] 2.1 Lint + type check pass: `npm run lint`
+- [x] 2.2 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.3 GET /api/user-presets returns three default slots on a fresh account
-- [ ] 2.4 PUT /api/user-presets/2 updates and persists across GET
-- [ ] 2.5 PUT /api/user-presets/4 returns 400
-- [ ] 2.6 PUT /api/user-presets/1 with focus_seconds=30 returns 400
-- [ ] 2.7 Unauthenticated GET returns 401
+- [x] 2.3 GET /api/user-presets returns three default slots on a fresh account
+- [x] 2.4 PUT /api/user-presets/2 updates and persists across GET
+- [x] 2.5 PUT /api/user-presets/4 returns 400
+- [x] 2.6 PUT /api/user-presets/1 with focus_seconds=30 returns 400
+- [x] 2.7 Unauthenticated GET returns 401
 
 ### Phase 3: Preset management page
 

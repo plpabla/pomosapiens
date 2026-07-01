@@ -405,7 +405,7 @@ sequenceDiagram
         TIM-->>SR: phase=rating
     else mode == "count_up"
         rect rgba(31, 111, 235, 0.18)
-            Note over U,TIM: S-03 count-up: auto-flip disabled, no chime; only Stop ends it
+            Note over U,TIM: S-03 count-up, auto-flip disabled, no chime, only Stop ends it
             U->>SR: click Stop
             SR->>TIM: stopEarly()
             TIM-->>SR: phase=rating (no chime)
