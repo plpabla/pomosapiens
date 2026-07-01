@@ -22,7 +22,7 @@ if (!user) {
 
 const { data, error } = await supabase
   .from("sessions")
-  .select("id, started_at, ended_at, energy_level")
+  .select("id, started_at, ended_at, energy_level, planned_focus_seconds")
   .eq("id", id)
   .eq("user_id", user.id)
   .maybeSingle();
@@ -42,10 +42,11 @@ if (access.kind === "redirect") {
 if (!data) return Astro.redirect("/dashboard");
 
 const { startedAtMs } = access;
+const focusSeconds = data.planned_focus_seconds ?? 25 * 60;
 ---
 
 <Layout title="Session">
   <div class="bg-cosmic min-h-screen">
-    <SessionRunner sessionId={data.id} startedAtMs={startedAtMs} focusSeconds={FOCUS_PRESET_SECONDS} client:load />
+    <SessionRunner sessionId={data.id} startedAtMs={startedAtMs} focusSeconds={focusSeconds} client:load />
   </div>
 </Layout>

@@ -609,27 +609,27 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [x] 3.1 Lint + type check pass: `npm run lint`
-- [x] 3.2 Build succeeds: `npm run build`
+- [x] 3.1 Lint + type check pass: `npm run lint` — ed04db5
+- [x] 3.2 Build succeeds: `npm run build` — ed04db5
 
 #### Manual
 
-- [x] 3.3 Signed-in user can open /presets, edit slot 2, save, reload, change persists
-- [x] 3.4 focus_seconds=0 shows inline validation error without losing other rows
-- [x] 3.5 Unauthenticated /presets redirects to /auth/signin
+- [x] 3.3 Signed-in user can open /presets, edit slot 2, save, reload, change persists — ed04db5
+- [x] 3.4 focus_seconds=0 shows inline validation error without losing other rows — ed04db5
+- [x] 3.5 Unauthenticated /presets redirects to /auth/signin — ed04db5
 
 ### Phase 4: Timer hook refactor — parameterise focus duration end-to-end
 
 #### Automated
 
-- [ ] 4.1 Lint + type check pass: `npm run lint`
-- [ ] 4.2 Build succeeds: `npm run build`
-- [ ] 4.3 Existing e2e specs still pass: `npm run test:e2e`
+- [x] 4.1 Lint + type check pass: `npm run lint`
+- [x] 4.2 Build succeeds: `npm run build`
+- [x] 4.3 Existing e2e specs still pass: `npm run test:e2e`
 
 #### Manual
 
-- [ ] 4.4 New 25-min session behaves identically (focus, chime, rating, dashboard)
-- [ ] 4.5 Doctored row with planned_focus_seconds=60 runs as 60-second focus
+- [x] 4.4 New 25-min session behaves identically (focus, chime, rating, dashboard)
+- [x] 4.5 Doctored row with planned_focus_seconds=60 runs as 60-second focus
 
 ### Phase 5: Timer hook — count-up mode arm
 
