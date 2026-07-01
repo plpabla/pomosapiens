@@ -6,7 +6,11 @@ import { setupTwoUsers, type TwoUserFixture } from "../../_fixtures/auth";
 
 const BASE = "http://localhost";
 
-type Preset = { slot: number; focus_seconds: number; break_seconds: number };
+interface Preset {
+  slot: number;
+  focus_seconds: number;
+  break_seconds: number;
+}
 
 describe("GET /api/user-presets", () => {
   let fixture: TwoUserFixture;

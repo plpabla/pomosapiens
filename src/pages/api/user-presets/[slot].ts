@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
 import { parseJson } from "@/lib/parse-request";
-import { updateUserPresetSchema } from "@/lib/schemas/user-preset";
+import { putUserPresetSchema } from "@/lib/schemas/user-preset";
 
 export const prerender = false;
 
@@ -21,7 +21,7 @@ export const PUT: APIRoute = async (context) => {
     return Response.json({ error: "Supabase is not configured" }, { status: 500 });
   }
 
-  const parsed = await parseJson(context.request, updateUserPresetSchema);
+  const parsed = await parseJson(context.request, putUserPresetSchema);
   if (!parsed.data) {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
@@ -41,6 +41,9 @@ export const PUT: APIRoute = async (context) => {
     .single();
 
   if (error) {
+    if (error.code === "23514") {
+      return Response.json({ error: "Value out of allowed range" }, { status: 400 });
+    }
     return Response.json({ error: error.message }, { status: 500 });
   }
 

@@ -594,16 +594,16 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [x] 2.1 Lint + type check pass: `npm run lint`
-- [x] 2.2 Build succeeds: `npm run build`
+- [x] 2.1 Lint + type check pass: `npm run lint` — 4be6579
+- [x] 2.2 Build succeeds: `npm run build` — 4be6579
 
 #### Manual
 
-- [x] 2.3 GET /api/user-presets returns three default slots on a fresh account
-- [x] 2.4 PUT /api/user-presets/2 updates and persists across GET
-- [x] 2.5 PUT /api/user-presets/4 returns 400
-- [x] 2.6 PUT /api/user-presets/1 with focus_seconds=30 returns 400
-- [x] 2.7 Unauthenticated GET returns 401
+- [x] 2.3 GET /api/user-presets returns three default slots on a fresh account — 4be6579
+- [x] 2.4 PUT /api/user-presets/2 updates and persists across GET — 4be6579
+- [x] 2.5 PUT /api/user-presets/4 returns 400 — 4be6579
+- [x] 2.6 PUT /api/user-presets/1 with focus_seconds=30 returns 400 — 4be6579
+- [x] 2.7 Unauthenticated GET returns 401 — 4be6579
 
 ### Phase 3: Preset management page
 

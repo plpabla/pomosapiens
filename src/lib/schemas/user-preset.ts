@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const updateUserPresetSchema = z.object({
+export const putUserPresetSchema = z.object({
   focus_seconds: z
     .number()
     .int()
@@ -13,4 +13,4 @@ export const updateUserPresetSchema = z.object({
     .max(60 * 60),
 });
 
-export type UpdateUserPresetPayload = z.infer<typeof updateUserPresetSchema>;
+export type PutUserPresetPayload = z.infer<typeof putUserPresetSchema>;

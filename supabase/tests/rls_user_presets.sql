@@ -69,7 +69,7 @@ SELECT throws_ok(
   $$INSERT INTO public.user_presets (user_id, slot, focus_seconds, break_seconds)
     VALUES ('00000000-0000-0000-0000-000000000001', 2, 1500, 300)$$,
   '42501',
-  NULL,
+  'new row violates row-level security policy for table "user_presets"',
   'anon cannot insert preset'
 );
 
