@@ -622,14 +622,14 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [x] 4.1 Lint + type check pass: `npm run lint`
-- [x] 4.2 Build succeeds: `npm run build`
-- [x] 4.3 Existing e2e specs still pass: `npm run test:e2e`
+- [x] 4.1 Lint + type check pass: `npm run lint` — de5a1a3
+- [x] 4.2 Build succeeds: `npm run build` — de5a1a3
+- [x] 4.3 Existing e2e specs still pass: `npm run test:e2e` — de5a1a3
 
 #### Manual
 
-- [x] 4.4 New 25-min session behaves identically (focus, chime, rating, dashboard)
-- [x] 4.5 Doctored row with planned_focus_seconds=60 runs as 60-second focus
+- [x] 4.4 New 25-min session behaves identically (focus, chime, rating, dashboard) — de5a1a3
+- [x] 4.5 Doctored row with planned_focus_seconds=60 runs as 60-second focus — de5a1a3
 
 ### Phase 5: Timer hook — count-up mode arm
 
