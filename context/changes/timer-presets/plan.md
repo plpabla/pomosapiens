@@ -609,14 +609,14 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [ ] 3.1 Lint + type check pass: `npm run lint`
-- [ ] 3.2 Build succeeds: `npm run build`
+- [x] 3.1 Lint + type check pass: `npm run lint`
+- [x] 3.2 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 3.3 Signed-in user can open /presets, edit slot 2, save, reload, change persists
-- [ ] 3.4 focus_seconds=0 shows inline validation error without losing other rows
-- [ ] 3.5 Unauthenticated /presets redirects to /auth/signin
+- [x] 3.3 Signed-in user can open /presets, edit slot 2, save, reload, change persists
+- [x] 3.4 focus_seconds=0 shows inline validation error without losing other rows
+- [x] 3.5 Unauthenticated /presets redirects to /auth/signin
 
 ### Phase 4: Timer hook refactor — parameterise focus duration end-to-end
 

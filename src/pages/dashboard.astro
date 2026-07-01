@@ -76,13 +76,14 @@ const energyColorClass: Record<string, string> = {
 <Layout title="Dashboard">
   <div class="bg-cosmic min-h-screen p-4">
     <div class="mx-auto max-w-2xl">
-      <div class="mb-8">
+      <div class="mb-8 flex items-center gap-4">
         <a
           href="/session/new"
           class="bg-blaze hover:bg-spark text-off-white inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-semibold transition-colors"
         >
           Start session
         </a>
+        <a href="/presets" class="text-ash hover:text-off-white text-sm transition-colors">Manage presets</a>
       </div>
 
       <h2 class="text-off-white mb-4 text-xl font-semibold">History</h2>
