@@ -22,7 +22,7 @@ if (!user) {
 
 const { data, error } = await supabase
   .from("sessions")
-  .select("id, started_at, ended_at, energy_level, planned_focus_seconds, timer_mode")
+  .select("id, started_at, ended_at, energy_level, planned_focus_seconds, planned_break_seconds, timer_mode")
   .eq("id", id)
   .eq("user_id", user.id)
   .maybeSingle();
@@ -44,10 +44,18 @@ if (!data) return Astro.redirect("/dashboard");
 const { startedAtMs } = access;
 const focusSeconds = data.planned_focus_seconds ?? 25 * 60;
 const mode = data.timer_mode === "count_up" ? "count_up" : "preset";
+const breakSeconds = mode === "count_up" ? null : (data.planned_break_seconds ?? 0);
 ---
 
 <Layout title="Session">
   <div class="bg-cosmic min-h-screen">
-    <SessionRunner sessionId={data.id} startedAtMs={startedAtMs} focusSeconds={focusSeconds} mode={mode} client:load />
+    <SessionRunner
+      sessionId={data.id}
+      startedAtMs={startedAtMs}
+      focusSeconds={focusSeconds}
+      mode={mode}
+      breakSeconds={breakSeconds}
+      client:load
+    />
   </div>
 </Layout>

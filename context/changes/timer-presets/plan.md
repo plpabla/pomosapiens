@@ -74,6 +74,7 @@ One migration: create `public.user_presets` (per-user rows for slots 1/2/3, focu
 **Intent**: Create the user-owned preset table with RLS mirroring the topics/material_formats pattern, and widen `sessions` with two nullable audit columns so history can distinguish "planned 45 min" from "actually 38 min" without coupling to live preset values.
 
 **Contract**:
+
 - `CREATE TABLE public.user_presets (id uuid pk default gen_random_uuid(), user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE, slot smallint NOT NULL CHECK (slot IN (1,2,3)), focus_seconds integer NOT NULL CHECK (focus_seconds BETWEEN 60 AND 4*60*60), break_seconds integer NOT NULL CHECK (break_seconds BETWEEN 0 AND 60*60), created_at timestamptz NOT NULL DEFAULT now(), updated_at timestamptz NOT NULL DEFAULT now(), UNIQUE (user_id, slot))`. No NULL-owner defaults — defaults live in app code; the API merges them server-side on GET.
 - Index: `CREATE INDEX user_presets_user_id_idx ON public.user_presets (user_id)`.
 - Trigger: `CREATE TRIGGER user_presets_set_updated_at BEFORE UPDATE ... EXECUTE FUNCTION public.set_updated_at()` (reuse existing function from F-01).
@@ -400,7 +401,7 @@ Add the mode strip above `EnergyPicker`, default-select from `localStorage.pomos
 
 **Intent**: Become the orchestrator for the full start flow: load presets alongside topics/formats, restore last-used mode from `localStorage`, render the mode strip, and include the mode + planned durations in the POST body. Persist last-used on success.
 
-**Contract**: New state: `presets` (set from `/api/user-presets`), `mode` (init from `localStorage.getItem("pomosapiens.last_mode") || "preset_1"` inside a `useEffect` to avoid SSR mismatch — SSR sees `"preset_1"`, client hydration may overwrite). Extend the existing `Promise.all` to also fetch `/api/user-presets`. Render `<ModePicker presets={presets} value={mode} onChange={setMode} />` above the energy buttons. In `handleSubmit`, compute `const selectedPreset = mode === "count_up" ? null : presets.find(p => \`preset_${p.slot}\` === mode)`. Include in POST body: `timer_mode: mode, planned_focus_seconds: selectedPreset?.focus_seconds ?? null, planned_break_seconds: selectedPreset?.break_seconds ?? null`. On POST success, `localStorage.setItem("pomosapiens.last_mode", mode)` before navigating.
+**Contract**: New state: `presets` (set from `/api/user-presets`), `mode` (init from `localStorage.getItem("pomosapiens.last_mode") || "preset_1"` inside a `useEffect` to avoid SSR mismatch — SSR sees `"preset_1"`, client hydration may overwrite). Extend the existing `Promise.all` to also fetch `/api/user-presets`. Render `<ModePicker presets={presets} value={mode} onChange={setMode} />` above the energy buttons. In `handleSubmit`, compute `const selectedPreset = mode === "count_up" ? null : presets.find(p => \`preset\_${p.slot}\` === mode)`. Include in POST body: `timer_mode: mode, planned_focus_seconds: selectedPreset?.focus_seconds ?? null, planned_break_seconds: selectedPreset?.break_seconds ?? null`. On POST success, `localStorage.setItem("pomosapiens.last_mode", mode)` before navigating.
 
 #### 3. Zod schema — widen createSessionSchema
 
@@ -440,7 +441,7 @@ Add the mode strip above `EnergyPicker`, default-select from `localStorage.pomos
 - Dashboard shows the four-chip mode strip; defaults to `preset_1` on first visit; after starting a `preset_2` session, dashboard reloads with `preset_2` pre-selected.
 - Count-up session: choose Count-up, Start, count-up timer runs, Stop after >60s, rate, navigate to dashboard, badge shows `∞` (or whichever label) on the row.
 - Preset session with edited preset: edit slot 2 to 1-min focus / 30-sec break on `/presets`, start a `preset_2` session from the dashboard, focus ends in ~1 min, rating, break offer for 30s, chime, dashboard.
-- Editing slot 2 to a different value mid-stream does NOT change the already-running session (planned_* snapshotted at POST).
+- Editing slot 2 to a different value mid-stream does NOT change the already-running session (planned\_\* snapshotted at POST).
 
 **Implementation Note**: Pause after Phase 7 — the feature is end-user complete except for the access-guard removal. Verify the 3-tap guardrail still holds (Start with all defaults = three clicks: energy + Start, no extra friction).
 
@@ -648,17 +649,17 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [ ] 6.1 Lint + type check pass: `npm run lint`
-- [ ] 6.2 Build succeeds: `npm run build`
-- [ ] 6.3 Existing e2e specs still pass: `npm run test:e2e`
+- [x] 6.1 Lint + type check pass: `npm run lint`
+- [x] 6.2 Build succeeds: `npm run build`
+- [x] 6.3 Existing e2e specs still pass: `npm run test:e2e`
 
 #### Manual
 
-- [ ] 6.4 Preset doctored with planned_break_seconds=60: rating → break offer → Yes → 60s countdown → chime → /dashboard
-- [ ] 6.5 Skip on the offer navigates immediately
-- [ ] 6.6 End-break mid-countdown navigates immediately, no chime
-- [ ] 6.7 Count-up: no break offer after rating
-- [ ] 6.8 Tab-switching during break reconciles via visibilitychange
+- [x] 6.4 Preset doctored with planned_break_seconds=60: rating → break offer → Yes → 60s countdown → chime → /dashboard
+- [x] 6.5 Skip on the offer navigates immediately
+- [x] 6.6 End-break mid-countdown navigates immediately, no chime
+- [x] 6.7 Count-up: no break offer after rating
+- [x] 6.8 Tab-switching during break reconciles via visibilitychange
 
 ### Phase 7: Mode picker + start-flow wiring
 
@@ -667,7 +668,7 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 - [ ] 7.1 Lint + type check pass: `npm run lint`
 - [ ] 7.2 Build succeeds: `npm run build`
 - [ ] 7.3 e2e specs pass: `npm run test:e2e`
-- [ ] 7.4 New regression: POST with mismatched timer_mode + planned_* returns 400
+- [ ] 7.4 New regression: POST with mismatched timer*mode + planned*\* returns 400
 - [ ] 7.5 New regression: POST without timer_mode returns 400
 - [ ] 7.6 L-01 regression: POST with a protected column in body does not persist it
 
