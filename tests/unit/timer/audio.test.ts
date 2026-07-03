@@ -60,4 +60,40 @@ describe("useFocusTimer audio (risk #6: chime at focus-end -- L-02)", () => {
     expect(audioStub.instances[0].play).toHaveBeenCalled(); // fire happened
     expect(result.current.phase).toBe("rating"); // fail-open: rating despite rejection
   });
+
+  it("re-primes inside the first user interaction to survive page-refresh", async () => {
+    // On page-refresh the mount-time muted play() succeeds but the <audio> element
+    // is never touched inside a user gesture, so browsers block the fire-time play.
+    // A one-shot pointerdown/keydown/touchstart listener must re-prime inside the
+    // gesture handler, arming the element for later unmuted playback.
+    renderHook(() => useFocusTimer({ startedAtMs: START_MS, focusSeconds: 60 }));
+
+    // Flush the initial prime .then().
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const audio = audioStub.instances[0];
+    expect(audio.play).toHaveBeenCalledTimes(1); // mount prime only so far
+
+    // First user interaction should re-prime.
+    act(() => {
+      window.dispatchEvent(new Event("pointerdown"));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(audio.play).toHaveBeenCalledTimes(2); // re-primed inside gesture
+
+    // Subsequent interactions must NOT re-prime (one-shot).
+    act(() => {
+      window.dispatchEvent(new Event("pointerdown"));
+      window.dispatchEvent(new Event("keydown"));
+      window.dispatchEvent(new Event("touchstart"));
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(audio.play).toHaveBeenCalledTimes(2); // listener removed after first fire
+  });
 });

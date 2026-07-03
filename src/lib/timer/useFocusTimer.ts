@@ -29,21 +29,44 @@ export function useFocusTimer({
 
   // Stage 2 audio re-prime: warm the chime on mount so the same-document
   // user-activation carries through to the unmuted play at focus-end (L-02).
+  // On page-refresh there is no carried activation, so also re-prime on the
+  // first user interaction -- that call runs inside a gesture handler and arms
+  // the <audio> element for the fire-time play() the browser would otherwise block.
   useEffect(() => {
     const audio = new Audio("/audio/chime.mp3");
     audioRef.current = audio;
-    audio.muted = true;
-    void audio
-      .play()
-      .then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-        audio.muted = false;
-      })
-      .catch(() => {
-        // fail open: Safari edge -- chime may fail at focus-end
+
+    function prime() {
+      audio.muted = true;
+      void audio
+        .play()
+        .then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.muted = false;
+        })
+        .catch(() => {
+          // fail open: Safari edge -- chime may fail at focus-end
+        });
+    }
+
+    prime();
+
+    const activationEvents = ["pointerdown", "keydown", "touchstart"] as const;
+    function onFirstInteraction() {
+      prime();
+      activationEvents.forEach((e) => {
+        window.removeEventListener(e, onFirstInteraction);
       });
+    }
+    activationEvents.forEach((e) => {
+      window.addEventListener(e, onFirstInteraction);
+    });
+
     return () => {
+      activationEvents.forEach((e) => {
+        window.removeEventListener(e, onFirstInteraction);
+      });
       audio.pause();
       audio.src = "";
       audio.load();
