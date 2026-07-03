@@ -31,8 +31,7 @@ if (error) {
   return Astro.redirect("/dashboard");
 }
 
-const FOCUS_PRESET_SECONDS = 25 * 60;
-const access = resolveSessionPageAccess({ row: data, nowMs: Date.now(), focusPresetSeconds: FOCUS_PRESET_SECONDS });
+const access = resolveSessionPageAccess({ row: data });
 
 if (access.kind === "redirect") {
   return Astro.redirect(access.to);

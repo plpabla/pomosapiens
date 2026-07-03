@@ -46,3 +46,13 @@ Run this on every `setTimeout` tick (1 s chain, not `setInterval`) and on every 
 When `npm install` runs during development (e.g. `npx shadcn add <component>`), Vite's pre-bundled SSR dependency cache (`node_modules/.vite/deps_ssr/`) can become inconsistent with the updated `node_modules`. This manifests as cryptic SSR hook errors (e.g. `Cannot read properties of null (reading 'useHostTransitionStatus')` from `useFormStatus`) that do not reproduce in a production build. Fix: delete `node_modules/.vite/` and restart the dev server.
 
 **Source:** S-01 Phase 5 -- cache stale after `npx shadcn add card` in Phase 2.
+
+---
+
+## L-05: Time-based access guards couple to session duration and break under open-ended modes
+
+A guard of the form "redirect if session age > N * focusPresetSeconds" silently assumes a fixed nominal duration. It breaks the moment any feature removes or loosens that assumption (count-up mode, deep-work sessions, user-editable presets). The guard provides no safety once the duration is variable -- it either cuts short legitimate sessions or lets abandoned ones through.
+
+Prefer explicit state transitions: the `/session/[id]` page should allow any non-ended session (null `ended_at`) regardless of age, and the only guards that belong there are ownership (cross-user redirect) and ended-state (replay-protection redirect). Age-based heuristics for "abandoned" belong in UI labels, not in access control -- and even those should be driven by an explicit user action once one exists.
+
+**Source:** S-03 Phase 8 -- 50-min redirect in `session/[id].astro` and "Abandoned" label in `dashboard.astro` folded out when count-up mode made fixed-duration assumptions invalid.

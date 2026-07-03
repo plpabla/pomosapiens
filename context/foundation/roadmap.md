@@ -118,7 +118,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Blockers:** —
 - **Unknowns:**
   - Preset-state storage — DB column on a `user_profiles` table, or localStorage? — Owner: implementer (decided at `/10x-plan` time). Block: no.
-- **Risk:** Count-up timer mode changes session-save logic (no nominal preset duration to compare against); ensure FR-012's "actual elapsed time" rule from S-01 still holds. The state machine S-01 establishes is the load-bearing piece this slice extends — regression risk on timer resilience is real.
+- **Risk:** Count-up timer mode changes session-save logic (no nominal preset duration to compare against); ensure FR-012's "actual elapsed time" rule from S-01 still holds. The state machine S-01 establishes is the load-bearing piece this slice extends -- regression risk on timer resilience is real. The S-05 time-based access-guard removal (50-min redirect in `session/[id].astro` + "abandoned" label in `dashboard.astro`) was folded into S-03 Phase 8 so count-up sessions of any length survive tab reload.
 - **Status:** proposed
 
 ### S-04: Session notes and focus-rating chart
@@ -143,7 +143,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Parallel with:** S-02, S-03, S-04
 - **Blockers:** —
 - **Unknowns:**
-  - What happens to the API's 2-hour lower-bound plausibility check on `ended_at` once the 50-min threshold is removed? The plausibility window guards against stale-tab backdating, not session duration -- `ended_at = now()` always passes regardless of how long the session ran. Low risk; verify at plan time.
+  - ~~What happens to the API's 2-hour lower-bound plausibility check on `ended_at` once the 50-min threshold is removed?~~ Resolved in S-03 Phase 8: the 2-hour PATCH window guards stale-tab backdating (`ended_at ≈ now`), not session duration -- any session length PATCHes cleanly. The 50-min redirect was removed; the PATCH guard is unchanged.
   - Does the "Abandon" action call the existing PATCH `/api/sessions/[id]` with `focus_rating: null` (treating abandon as "skip rating"), or does it need a separate endpoint / a new `abandoned` column? Decide at plan time.
 - **Risk:** Small surface -- three files touched (dashboard.astro, session/[id].astro, possibly api/sessions/[id].ts). No schema change required. Primary risk is forgetting the abandoned-guard in `[id].astro` and breaking replay-protection behavior for already-ended sessions; keep that guard untouched.
 

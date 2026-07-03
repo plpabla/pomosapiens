@@ -17,9 +17,6 @@ type SessionListItem = Pick<
   material_format: { name: string } | null;
 };
 
-const FOCUS_PRESET_SECONDS = 25 * 60;
-const ABANDONED_THRESHOLD_MS = 2 * FOCUS_PRESET_SECONDS * 1000;
-
 function modeLabel(mode: string | null): string | null {
   if (mode === "preset_1") return "P1";
   if (mode === "preset_2") return "P2";
@@ -68,10 +65,8 @@ function formatDuration(seconds: number) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
-function getStatus(session: { ended_at: string | null; started_at: string }) {
-  if (session.ended_at !== null) return "done";
-  const ageMs = Date.now() - new Date(session.started_at).getTime();
-  return ageMs <= ABANDONED_THRESHOLD_MS ? "in_progress" : "abandoned";
+function getStatus(session: { ended_at: string | null }) {
+  return session.ended_at !== null ? "done" : "in_progress";
 }
 
 const energyColorClass: Record<string, string> = {
@@ -127,9 +122,7 @@ const energyColorClass: Record<string, string> = {
                       <span class="text-off-white text-sm">
                         {status === "done" && session.duration_seconds != null
                           ? formatDuration(session.duration_seconds)
-                          : status === "in_progress"
-                            ? "In progress"
-                            : "Abandoned"}
+                          : "In progress"}
                       </span>
                       <span class="text-off-white/80 text-sm">
                         {status === "done"

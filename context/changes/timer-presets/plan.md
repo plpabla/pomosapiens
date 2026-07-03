@@ -665,35 +665,35 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [x] 7.1 Lint + type check pass: `npm run lint`
-- [x] 7.2 Build succeeds: `npm run build`
-- [x] 7.3 e2e specs pass: `npm run test:e2e`
-- [x] 7.4 New regression: POST with mismatched timer*mode + planned*\* returns 400
-- [x] 7.5 New regression: POST without timer_mode returns 400
-- [x] 7.6 L-01 regression: POST with a protected column in body does not persist it
+- [x] 7.1 Lint + type check pass: `npm run lint` — 30ab8a7
+- [x] 7.2 Build succeeds: `npm run build` — 30ab8a7
+- [x] 7.3 e2e specs pass: `npm run test:e2e` — 30ab8a7
+- [x] 7.4 New regression: POST with mismatched timer*mode + planned*\* returns 400 — 30ab8a7
+- [x] 7.5 New regression: POST without timer_mode returns 400 — 30ab8a7
+- [x] 7.6 L-01 regression: POST with a protected column in body does not persist it — 30ab8a7
 
 #### Manual
 
-- [x] 7.7 Four-chip mode strip renders; defaults to preset_1 on first visit
-- [x] 7.8 After preset_2 session, dashboard reload pre-selects preset_2
-- [x] 7.9 Count-up end-to-end with badge on dashboard row
-- [x] 7.10 Edited preset (slot 2 → 1min/30sec) runs correctly; mid-flight preset edit does not affect running session
-- [x] 7.11 3-tap guardrail holds (energy + Start, no extra friction with default mode)
+- [x] 7.7 Four-chip mode strip renders; defaults to preset_1 on first visit — 30ab8a7
+- [x] 7.8 After preset_2 session, dashboard reload pre-selects preset_2 — 30ab8a7
+- [x] 7.9 Count-up end-to-end with badge on dashboard row — 30ab8a7
+- [x] 7.10 Edited preset (slot 2 → 1min/30sec) runs correctly; mid-flight preset edit does not affect running session — 30ab8a7
+- [x] 7.11 3-tap guardrail holds (energy + Start, no extra friction with default mode) — 30ab8a7
 
 ### Phase 8: Fold S-05 forward — remove the 50-min access guard
 
 #### Automated
 
-- [ ] 8.1 Lint + type check pass: `npm run lint`
-- [ ] 8.2 Build succeeds: `npm run build`
-- [ ] 8.3 All tests pass: `npm run test`, `npm run db:test`, `npm run test:e2e`
-- [ ] 8.4 No remaining references to FOCUS_PRESET_SECONDS / ABANDONED_THRESHOLD_MS in src/
+- [x] 8.1 Lint + type check pass: `npm run lint`
+- [x] 8.2 Build succeeds: `npm run build`
+- [x] 8.3 All tests pass: `npm run test`, `npm run db:test`, `npm run test:e2e`
+- [x] 8.4 No remaining references to FOCUS_PRESET_SECONDS / ABANDONED_THRESHOLD_MS in src/
 
 #### Manual
 
-- [ ] 8.5 2-hour-old non-ended session still accessible at /session/<id>
-- [ ] 8.6 Dashboard shows it as "In progress" (no "Abandoned" label remaining)
-- [ ] 8.7 Long count-up session of >60 min survives a tab close + reopen
+- [x] 8.5 2-hour-old non-ended session still accessible at /session/<id>
+- [x] 8.6 Dashboard shows it as "In progress" (no "Abandoned" label remaining)
+- [x] 8.7 Long count-up session of >60 min survives a tab close + reopen
 
 ### Phase 9: Bugfixes
 
