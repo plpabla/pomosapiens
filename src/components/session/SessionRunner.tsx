@@ -7,6 +7,7 @@ interface Props {
   sessionId: string;
   startedAtMs: number;
   focusSeconds: number;
+  mode?: "preset" | "count_up";
 }
 
 function formatTime(seconds: number) {
@@ -16,8 +17,8 @@ function formatTime(seconds: number) {
   return `${String(m).padStart(2, "0")}:${String(rem).padStart(2, "0")}`;
 }
 
-export default function SessionRunner({ sessionId, startedAtMs, focusSeconds }: Props) {
-  const { phase, remaining, stoppedAtMs, stopEarly } = useFocusTimer({ startedAtMs, focusSeconds });
+export default function SessionRunner({ sessionId, startedAtMs, focusSeconds, mode = "preset" }: Props) {
+  const { phase, remaining, elapsed, stoppedAtMs, stopEarly } = useFocusTimer({ startedAtMs, focusSeconds, mode });
   const [submitPhase, setSubmitPhase] = useState<"rating" | "submitting">("rating");
   const [error, setError] = useState<string | null>(null);
 
@@ -49,10 +50,12 @@ export default function SessionRunner({ sessionId, startedAtMs, focusSeconds }: 
   }
 
   if (phase === "running") {
+    const display = mode === "count_up" ? elapsed : remaining;
+    const label = mode === "count_up" ? "Count-up session" : "Focus session";
     return (
       <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4 text-center">
-        <div className="text-off-white font-mono text-7xl font-bold tabular-nums">{formatTime(remaining)}</div>
-        <p className="text-ash text-sm tracking-widest uppercase">Focus session</p>
+        <div className="text-off-white font-mono text-7xl font-bold tabular-nums">{formatTime(display)}</div>
+        <p className="text-ash text-sm tracking-widest uppercase">{label}</p>
         <Button variant="outline" onClick={stopEarly} className="border-charred text-ash hover:text-off-white mt-4">
           Stop early
         </Button>

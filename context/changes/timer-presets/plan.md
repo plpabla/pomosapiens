@@ -635,14 +635,14 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [ ] 5.1 Lint + type check pass: `npm run lint`
-- [ ] 5.2 Build succeeds: `npm run build`
-- [ ] 5.3 Existing e2e specs still pass: `npm run test:e2e`
+- [x] 5.1 Lint + type check pass: `npm run lint`
+- [x] 5.2 Build succeeds: `npm run build`
+- [x] 5.3 Existing e2e specs still pass: `npm run test:e2e`
 
 #### Manual
 
-- [ ] 5.4 Doctored count-up row does not auto-flip; Stop ends it; PATCH stores actual elapsed
-- [ ] 5.5 Preset session still chimes and auto-flips
+- [x] 5.4 Doctored count-up row does not auto-flip; Stop ends it; PATCH stores actual elapsed
+- [x] 5.5 Preset session still chimes and auto-flips
 
 ### Phase 6: Timer hook — opt-in break-phase after rating
 
