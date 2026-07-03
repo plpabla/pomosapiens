@@ -684,16 +684,16 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [x] 8.1 Lint + type check pass: `npm run lint`
-- [x] 8.2 Build succeeds: `npm run build`
-- [x] 8.3 All tests pass: `npm run test`, `npm run db:test`, `npm run test:e2e`
-- [x] 8.4 No remaining references to FOCUS_PRESET_SECONDS / ABANDONED_THRESHOLD_MS in src/
+- [x] 8.1 Lint + type check pass: `npm run lint` — f95c6d3
+- [x] 8.2 Build succeeds: `npm run build` — f95c6d3
+- [x] 8.3 All tests pass: `npm run test`, `npm run db:test`, `npm run test:e2e` — f95c6d3
+- [x] 8.4 No remaining references to FOCUS_PRESET_SECONDS / ABANDONED_THRESHOLD_MS in src/ — f95c6d3
 
 #### Manual
 
-- [x] 8.5 2-hour-old non-ended session still accessible at /session/<id>
-- [x] 8.6 Dashboard shows it as "In progress" (no "Abandoned" label remaining)
-- [x] 8.7 Long count-up session of >60 min survives a tab close + reopen
+- [x] 8.5 2-hour-old non-ended session still accessible at /session/<id> — f95c6d3
+- [x] 8.6 Dashboard shows it as "In progress" (no "Abandoned" label remaining) — f95c6d3
+- [x] 8.7 Long count-up session of >60 min survives a tab close + reopen — f95c6d3
 
 ### Phase 9: Bugfixes
 
