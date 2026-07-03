@@ -649,28 +649,28 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Automated
 
-- [x] 6.1 Lint + type check pass: `npm run lint`
-- [x] 6.2 Build succeeds: `npm run build`
-- [x] 6.3 Existing e2e specs still pass: `npm run test:e2e`
+- [x] 6.1 Lint + type check pass: `npm run lint` - 85483a3
+- [x] 6.2 Build succeeds: `npm run build` - 85483a3
+- [x] 6.3 Existing e2e specs still pass: `npm run test:e2e` - 85483a3
 
 #### Manual
 
-- [x] 6.4 Preset doctored with planned_break_seconds=60: rating → break offer → Yes → 60s countdown → chime → /dashboard
-- [x] 6.5 Skip on the offer navigates immediately
-- [x] 6.6 End-break mid-countdown navigates immediately, no chime
-- [x] 6.7 Count-up: no break offer after rating
-- [x] 6.8 Tab-switching during break reconciles via visibilitychange
+- [x] 6.4 Preset doctored with planned_break_seconds=60: rating → break offer → Yes → 60s countdown → chime → /dashboard - 85483a3
+- [x] 6.5 Skip on the offer navigates immediately - 85483a3
+- [x] 6.6 End-break mid-countdown navigates immediately, no chime - 85483a3
+- [x] 6.7 Count-up: no break offer after rating - 85483a3
+- [x] 6.8 Tab-switching during break reconciles via visibilitychange - 85483a3
 
 ### Phase 7: Mode picker + start-flow wiring
 
 #### Automated
 
-- [ ] 7.1 Lint + type check pass: `npm run lint`
-- [ ] 7.2 Build succeeds: `npm run build`
-- [ ] 7.3 e2e specs pass: `npm run test:e2e`
-- [ ] 7.4 New regression: POST with mismatched timer*mode + planned*\* returns 400
-- [ ] 7.5 New regression: POST without timer_mode returns 400
-- [ ] 7.6 L-01 regression: POST with a protected column in body does not persist it
+- [x] 7.1 Lint + type check pass: `npm run lint`
+- [x] 7.2 Build succeeds: `npm run build`
+- [x] 7.3 e2e specs pass: `npm run test:e2e`
+- [x] 7.4 New regression: POST with mismatched timer*mode + planned*\* returns 400
+- [x] 7.5 New regression: POST without timer_mode returns 400
+- [x] 7.6 L-01 regression: POST with a protected column in body does not persist it
 
 #### Manual
 
@@ -694,3 +694,7 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 - [ ] 8.5 2-hour-old non-ended session still accessible at /session/<id>
 - [ ] 8.6 Dashboard shows it as "In progress" (no "Abandoned" label remaining)
 - [ ] 8.7 Long count-up session of >60 min survives a tab close + reopen
+
+### Phase 9: Bugfixes
+
+- [x] 9.1. GIVEN `/session/new` page visited WHEN I click on `P2` chip THEN `P1` chip highlight is off
