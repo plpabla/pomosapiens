@@ -674,11 +674,11 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 #### Manual
 
-- [ ] 7.7 Four-chip mode strip renders; defaults to preset_1 on first visit
-- [ ] 7.8 After preset_2 session, dashboard reload pre-selects preset_2
-- [ ] 7.9 Count-up end-to-end with badge on dashboard row
-- [ ] 7.10 Edited preset (slot 2 → 1min/30sec) runs correctly; mid-flight preset edit does not affect running session
-- [ ] 7.11 3-tap guardrail holds (energy + Start, no extra friction with default mode)
+- [x] 7.7 Four-chip mode strip renders; defaults to preset_1 on first visit
+- [x] 7.8 After preset_2 session, dashboard reload pre-selects preset_2
+- [x] 7.9 Count-up end-to-end with badge on dashboard row
+- [x] 7.10 Edited preset (slot 2 → 1min/30sec) runs correctly; mid-flight preset edit does not affect running session
+- [x] 7.11 3-tap guardrail holds (energy + Start, no extra friction with default mode)
 
 ### Phase 8: Fold S-05 forward — remove the 50-min access guard
 
@@ -697,4 +697,4 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 
 ### Phase 9: Bugfixes
 
-- [x] 9.1. GIVEN `/session/new` page visited WHEN I click on `P2` chip THEN `P1` chip highlight is off
+- [x] 9.1. GIVEN `/session/new` page visited WHEN I click on `P2` chip THEN `P1` chip highlight is off — aaf5153

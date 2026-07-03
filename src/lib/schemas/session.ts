@@ -6,6 +6,19 @@ export const createSessionSchema = z.object({
   }),
   topic_id: z.uuid({ message: "topic_id must be a valid UUID" }).nullable().optional(),
   material_format_id: z.uuid({ message: "material_format_id must be a valid UUID" }).nullable().optional(),
+  timer_mode: z.enum(["preset_1", "preset_2", "preset_3", "count_up"]),
+  planned_focus_seconds: z
+    .number()
+    .int()
+    .min(60)
+    .max(4 * 60 * 60)
+    .nullable(),
+  planned_break_seconds: z
+    .number()
+    .int()
+    .min(0)
+    .max(60 * 60)
+    .nullable(),
 });
 
 export const endSessionSchema = z.object({
