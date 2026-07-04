@@ -135,12 +135,13 @@ the relevant rollout phase ships; before that, the sub-section reads
 - **Location**: `tests/unit/<concern>/<name>.test.ts` -- pure unit tests live alongside concern (e.g. `tests/unit/timer/useFocusTimer.test.ts`, `tests/unit/session/resolveSessionPageAccess.test.ts`). One file per hook or pure function.
 - **Pattern**:
   1. Import `vi`, `describe`, `it`, `expect`, `beforeEach`, `afterEach` from `vitest`.
-  2. For hook tests: import `renderHook`, `act` from `@testing-library/react`.
-  3. For tests touching Date / setTimeout: `beforeEach(() => vi.useFakeTimers({ toFake: ['setTimeout','clearTimeout','Date','queueMicrotask'] }))`; `afterEach(() => vi.useRealTimers())`.
-  4. For visibilitychange: use `dispatchVisibilityChange('hidden')` / `dispatchVisibilityChange('visible')` from `tests/unit/_setup.ts`.
-  5. For audio: use `stubAudioGlobal()` from `tests/unit/_setup.ts`; access mock instances via the returned `instances` array; call `restore()` in `afterEach`.
-  6. Always wrap timer advances and event dispatches in `act(() => ...)` when testing hooks.
-  7. For component-mount + fetch-stub tests: `vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(...)))` in `beforeEach`; `vi.unstubAllGlobals()` in `afterEach`; render via `@testing-library/react`'s `render`; assert async state changes with `findByText` / `findByRole`.
+  2. For hook tests: import `renderHook`, `act`, `cleanup` from `@testing-library/react`.
+  3. **Always call `cleanup()` in `afterEach`, even for `renderHook`-only files with no explicit `render()` call.** This project does not set `test.globals: true`, so Testing Library's auto-cleanup (which hooks `globalThis.afterEach`) never engages -- every test file must unmount its own trees. A `renderHook` result left mounted keeps its effects alive (event listeners, pending timer callbacks) past the test; React's scheduler can still have async work pending when the jsdom environment for that file tears down, surfacing as an intermittent, hard-to-reproduce `ReferenceError: window is not defined` unhandled error that fails CI even though every test passes. Call `cleanup()` before `vi.useRealTimers()` in `afterEach`. (Root-caused and fixed 2026-07-04 across `tests/unit/timer/{useFocusTimer,useFocusTimer.countup,useBreakTimer,audio}.test.ts`.)
+  4. For tests touching Date / setTimeout: `beforeEach(() => vi.useFakeTimers({ toFake: ['setTimeout','clearTimeout','Date','queueMicrotask'] }))`; `afterEach(() => vi.useRealTimers())`.
+  5. For visibilitychange: use `dispatchVisibilityChange('hidden')` / `dispatchVisibilityChange('visible')` from `tests/unit/_setup.ts`.
+  6. For audio: use `stubAudioGlobal()` from `tests/unit/_setup.ts`; access mock instances via the returned `instances` array; call `restore()` in `afterEach`.
+  7. Always wrap timer advances and event dispatches in `act(() => ...)` when testing hooks.
+  8. For component-mount + fetch-stub tests: `vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(...)))` in `beforeEach`; `vi.unstubAllGlobals()` in `afterEach`; render via `@testing-library/react`'s `render`; assert async state changes with `findByText` / `findByRole`.
 - **Reference test**: `tests/unit/timer/useFocusTimer.test.ts` -- specifically the "reconciles after tab background" test as the canonical L-03 regression gate template.
 - **Reference test**: `tests/unit/session/EnergyPicker.test.tsx` -- canonical component-mount + fetch-stub pattern; covers the picker silent-failure regression (Risk #7).
 - **Run locally**: `npm test` (both projects); `npm test -- tests/unit/...` (jsdom only by include filter); `npx vitest --project jsdom` (jsdom project watch mode).
