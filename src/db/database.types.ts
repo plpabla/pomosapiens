@@ -76,6 +76,8 @@ export type Database = {
           id: string
           material_format_id: string | null
           note: string | null
+          planned_break_seconds: number | null
+          planned_focus_seconds: number | null
           started_at: string
           timer_mode: string | null
           topic_id: string | null
@@ -91,6 +93,8 @@ export type Database = {
           id?: string
           material_format_id?: string | null
           note?: string | null
+          planned_break_seconds?: number | null
+          planned_focus_seconds?: number | null
           started_at: string
           timer_mode?: string | null
           topic_id?: string | null
@@ -106,6 +110,8 @@ export type Database = {
           id?: string
           material_format_id?: string | null
           note?: string | null
+          planned_break_seconds?: number | null
+          planned_focus_seconds?: number | null
           started_at?: string
           timer_mode?: string | null
           topic_id?: string | null
@@ -153,6 +159,36 @@ export type Database = {
           name?: string
           owner_id?: string | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_presets: {
+        Row: {
+          break_seconds: number
+          created_at: string
+          focus_seconds: number
+          id: string
+          slot: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          break_seconds: number
+          created_at?: string
+          focus_seconds: number
+          id?: string
+          slot: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          break_seconds?: number
+          created_at?: string
+          focus_seconds?: number
+          id?: string
+          slot?: number
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

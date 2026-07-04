@@ -118,7 +118,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Blockers:** —
 - **Unknowns:**
   - Preset-state storage — DB column on a `user_profiles` table, or localStorage? — Owner: implementer (decided at `/10x-plan` time). Block: no.
-- **Risk:** Count-up timer mode changes session-save logic (no nominal preset duration to compare against); ensure FR-012's "actual elapsed time" rule from S-01 still holds. The state machine S-01 establishes is the load-bearing piece this slice extends — regression risk on timer resilience is real.
+- **Risk:** Count-up timer mode changes session-save logic (no nominal preset duration to compare against); ensure FR-012's "actual elapsed time" rule from S-01 still holds. The state machine S-01 establishes is the load-bearing piece this slice extends -- regression risk on timer resilience is real. The S-05 time-based access-guard removal (50-min redirect in `session/[id].astro` + "abandoned" label in `dashboard.astro`) was folded into S-03 Phase 8 so count-up sessions of any length survive tab reload.
 - **Status:** proposed
 
 ### S-04: Session notes and focus-rating chart
@@ -143,7 +143,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Parallel with:** S-02, S-03, S-04
 - **Blockers:** —
 - **Unknowns:**
-  - What happens to the API's 2-hour lower-bound plausibility check on `ended_at` once the 50-min threshold is removed? The plausibility window guards against stale-tab backdating, not session duration -- `ended_at = now()` always passes regardless of how long the session ran. Low risk; verify at plan time.
+  - ~~What happens to the API's 2-hour lower-bound plausibility check on `ended_at` once the 50-min threshold is removed?~~ Resolved in S-03 Phase 8: the 2-hour PATCH window guards stale-tab backdating (`ended_at ≈ now`), not session duration -- any session length PATCHes cleanly. The 50-min redirect was removed; the PATCH guard is unchanged.
   - Does the "Abandon" action call the existing PATCH `/api/sessions/[id]` with `focus_rating: null` (treating abandon as "skip rating"), or does it need a separate endpoint / a new `abandoned` column? Decide at plan time.
 - **Risk:** Small surface -- three files touched (dashboard.astro, session/[id].astro, possibly api/sessions/[id].ts). No schema change required. Primary risk is forgetting the abandoned-guard in `[id].astro` and breaking replay-protection behavior for already-ended sessions; keep that guard untouched.
 
@@ -213,6 +213,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Account deletion (GDPR right to erasure)** — User can permanently delete their account and all associated data (sessions, topics, profile) from within the app, satisfying GDPR Art. 17. Why parked: requires a hard-delete or anonymisation cascade across all user-owned tables, a confirmation UX with a mandatory re-auth step, and a Supabase Auth user deletion call -- non-trivial work that has no impact on the MVP capture loop. Revisit once the product has real users who may invoke their erasure right.
 - **Contiue timer** - when session is closed, user can click "I'm still working" and the counter continues - it helps to protect the flow state. Why parked: It is an extension of MVP
 - **Auto-resume running session on app open** — when a signed-in user opens the app and has an in-progress session (no `ended_at`), redirect them straight to that session's page so they can interact with it (rate, stop early, abandon), instead of only seeing it listed on the dashboard. Pairs with a single-active-session guarantee: starting a new session must be blocked while one is already running, so it is not possible to run multiple sessions in parallel for the same user. Motivation: today, if the user closes the tab mid-session there is no way to reopen and finish that exact session from the dashboard. Why parked: outside MVP scope; revisit after S-01..S-04 land.
+- **Web Notifications API fallback for focus-end chime** — request `Notification.requestPermission()` inside the "Start session" click and, if granted, fire a system notification at focus-end alongside (or instead of) the `<audio>` chime. Motivation: when the user refreshes the session page mid-session, the reloaded document has no transient user activation and browsers block unmuted `<audio>.play()` at fire-time -- so the chime is silent even though the timer works. A Notification does not require gesture at fire-time and survives refresh, tab-switch, and minimised windows. Why parked: MVP already ships an audible chime on the happy path (no refresh); the refresh-without-interaction hole is real but narrow. Revisit after MVP to close it. Also consider pairing with a purely-visual fallback (S-06 tab-title timer + favicon swap + full-screen "Focus done" banner) that requires no permission.
 
 ## Done
 

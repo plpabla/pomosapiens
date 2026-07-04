@@ -20,6 +20,15 @@ export const POST: APIRoute = async (context) => {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
 
+  const { timer_mode, planned_focus_seconds, planned_break_seconds } = parsed.data;
+  const isCountUp = timer_mode === "count_up";
+  if (isCountUp && (planned_focus_seconds !== null || planned_break_seconds !== null)) {
+    return Response.json({ error: "count_up mode requires null planned durations" }, { status: 400 });
+  }
+  if (!isCountUp && (planned_focus_seconds === null || planned_break_seconds === null)) {
+    return Response.json({ error: "preset mode requires non-null planned durations" }, { status: 400 });
+  }
+
   const { data, error } = await supabase
     .from("sessions")
     .insert({
@@ -28,6 +37,9 @@ export const POST: APIRoute = async (context) => {
       started_at: new Date().toISOString(),
       topic_id: parsed.data.topic_id ?? null,
       material_format_id: parsed.data.material_format_id ?? null,
+      timer_mode,
+      planned_focus_seconds,
+      planned_break_seconds,
     })
     .select("id, started_at")
     .single();

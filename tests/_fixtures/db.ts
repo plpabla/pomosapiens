@@ -10,6 +10,9 @@ export interface SessionRow {
   note: string | null;
   topic_id: string | null;
   material_format_id: string | null;
+  timer_mode: string | null;
+  planned_focus_seconds: number | null;
+  planned_break_seconds: number | null;
 }
 
 // Per-file singleton (each test file gets its own Worker context under @cloudflare/vitest-pool-workers).
@@ -28,7 +31,9 @@ const supabase = buildServiceRoleClient();
 export async function readSession(id: string): Promise<SessionRow> {
   const { data, error } = await supabase
     .from("sessions")
-    .select("id, user_id, started_at, ended_at, energy_level, focus_rating, note, topic_id, material_format_id")
+    .select(
+      "id, user_id, started_at, ended_at, energy_level, focus_rating, note, topic_id, material_format_id, timer_mode, planned_focus_seconds, planned_break_seconds",
+    )
     .eq("id", id)
     .single();
 

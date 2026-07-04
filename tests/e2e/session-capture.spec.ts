@@ -69,6 +69,11 @@ test("session capture flow: dashboard → energy pick → timer → stop early �
     await expect(page.getByRole("heading", { name: "How was your focus?" })).toBeVisible();
     await page.getByRole("button", { name: "4" }).click();
 
+    // Step 5b: Break offer appears for preset sessions with planned_break_seconds > 0.
+    // Skip it so the test navigates directly to dashboard.
+    await expect(page.getByRole("heading", { name: "Take a break?" })).toBeVisible();
+    await page.getByRole("button", { name: "Skip" }).click();
+
     // Step 6: Redirected back to /dashboard.
     await page.waitForURL("**/dashboard");
 

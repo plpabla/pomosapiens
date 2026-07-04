@@ -11,7 +11,12 @@ async function createSession(cookie: string): Promise<{ id: string; started_at: 
   const res = await SELF.fetch(`${BASE}/api/sessions`, {
     method: "POST",
     headers: { Cookie: cookie, "Content-Type": "application/json" },
-    body: JSON.stringify({ energy_level: "low" }),
+    body: JSON.stringify({
+      energy_level: "low",
+      timer_mode: "preset_1",
+      planned_focus_seconds: 25 * 60,
+      planned_break_seconds: 5 * 60,
+    }),
   });
   if (res.status !== 201) {
     throw new Error(`createSession failed: ${res.status} ${await res.text()}`);
