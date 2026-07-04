@@ -11,7 +11,7 @@ type SessionRow = Database["public"]["Tables"]["sessions"]["Row"];
 
 type SessionListItem = Pick<
   SessionRow,
-  "id" | "started_at" | "energy_level" | "duration_seconds" | "focus_rating" | "ended_at" | "timer_mode"
+  "id" | "started_at" | "energy_level" | "duration_seconds" | "focus_rating" | "ended_at" | "timer_mode" | "note"
 > & {
   topic: { name: string } | null;
   material_format: { name: string } | null;
@@ -36,7 +36,7 @@ if (!supabase) {
   const { data, error } = await supabase
     .from("sessions")
     .select(
-      "id, started_at, energy_level, duration_seconds, focus_rating, ended_at, timer_mode, topic:topics(name), material_format:material_formats(name)",
+      "id, started_at, energy_level, duration_seconds, focus_rating, ended_at, timer_mode, note, topic:topics(name), material_format:material_formats(name)",
     )
     .eq("user_id", user.id)
     .order("started_at", { ascending: false })
@@ -159,6 +159,7 @@ const energyColorClass: Record<string, string> = {
                         )}
                       </div>
                     )}
+                    {session.note !== null && <p class="text-off-white/70 text-sm">{session.note}</p>}
                   </Card>
                 </li>
               );

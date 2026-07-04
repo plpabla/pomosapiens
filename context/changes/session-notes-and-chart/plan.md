@@ -316,16 +316,16 @@ None — the `note` column and its RLS policies already exist from `202605311825
 
 #### Automated
 
-- [ ] 2.1 Lint passes: `npm run lint`
-- [ ] 2.2 Unit tests pass: `npm test -- tests/unit/session`
-- [ ] 2.3 Full test suite passes: `npm test`
-- [ ] 2.4 Build succeeds: `npm run build`
+- [x] 2.1 Lint passes: `npm run lint`
+- [x] 2.2 Unit tests pass: `npm test -- tests/unit/session`
+- [x] 2.3 Full test suite passes: `npm test`
+- [x] 2.4 Build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 2.5 Note saved and displayed on dashboard after rating
-- [ ] 2.6 No note shown / no error after Skip with blank note
-- [ ] 2.7 Existing rating/Skip buttons unaffected by textarea
+- [x] 2.5 Note saved and displayed on dashboard after rating
+- [x] 2.6 No note shown / no error after Skip with blank note
+- [x] 2.7 Existing rating/Skip buttons unaffected by textarea
 
 ### Phase 3: Focus-rating chart
 
