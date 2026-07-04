@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { createSessionSchema } from "@/lib/schemas/session";
+import { createSessionSchema, endSessionSchema } from "@/lib/schemas/session";
 
 describe("createSessionSchema", () => {
   it("rejects when timer_mode is missing", () => {
@@ -69,5 +69,47 @@ describe("createSessionSchema", () => {
     if (result.success) {
       expect(result.data).not.toHaveProperty("focus_rating");
     }
+  });
+});
+
+describe("endSessionSchema", () => {
+  const base = { focus_rating: 3, ended_at: new Date().toISOString() };
+
+  it("accepts a valid note", () => {
+    const result = endSessionSchema.safeParse({ ...base, note: "went well" });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.note).toBe("went well");
+    }
+  });
+
+  it("rejects a note over 500 characters", () => {
+    const result = endSessionSchema.safeParse({ ...base, note: "a".repeat(501) });
+    expect(result.success).toBe(false);
+  });
+
+  it("trims surrounding whitespace from the note", () => {
+    const result = endSessionSchema.safeParse({ ...base, note: "  hello  " });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.note).toBe("hello");
+    }
+  });
+
+  it("converts an empty/whitespace-only note to null", () => {
+    const result = endSessionSchema.safeParse({ ...base, note: "   " });
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.note).toBeNull();
+    }
+  });
+
+  it("accepts a null or omitted note", () => {
+    const withNull = endSessionSchema.safeParse({ ...base, note: null });
+    const omitted = endSessionSchema.safeParse(base);
+    expect(withNull.success).toBe(true);
+    expect(omitted.success).toBe(true);
+    if (withNull.success) expect(withNull.data.note).toBeNull();
+    if (omitted.success) expect(omitted.data.note).toBeUndefined();
   });
 });

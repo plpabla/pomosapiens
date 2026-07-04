@@ -1,5 +1,5 @@
 // ended_at is client-snapshotted at phase transition and server-validated for plausibility.
-// focus_rating is the only other writable column. The row is writable only once (ended_at IS NULL guard).
+// focus_rating and note are the only other writable columns. The row is writable only once (ended_at IS NULL guard).
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
 import { parseJson } from "@/lib/parse-request";
@@ -30,7 +30,7 @@ export const PATCH: APIRoute = async (context) => {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
 
-  const { focus_rating, ended_at: endedAtIso } = parsed.data;
+  const { focus_rating, ended_at: endedAtIso, note } = parsed.data;
   const endedAtMs = new Date(endedAtIso).getTime();
   const nowMs = Date.now();
 
@@ -40,7 +40,7 @@ export const PATCH: APIRoute = async (context) => {
 
   const { data, error } = await supabase
     .from("sessions")
-    .update({ ended_at: endedAtIso, focus_rating })
+    .update({ ended_at: endedAtIso, focus_rating, note })
     .eq("id", id)
     .eq("user_id", context.locals.user.id)
     .is("ended_at", null)
