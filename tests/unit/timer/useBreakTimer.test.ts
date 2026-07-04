@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, cleanup } from "@testing-library/react";
 import { useBreakTimer } from "@/lib/timer/useBreakTimer";
 import { stubAudioGlobal, dispatchVisibilityChange, createAudioMock, type AudioMock } from "../_setup";
 
@@ -21,6 +21,7 @@ describe("useBreakTimer", () => {
   });
 
   afterEach(() => {
+    cleanup();
     audioStub.restore();
     vi.useRealTimers();
   });

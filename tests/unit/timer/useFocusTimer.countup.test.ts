@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, cleanup } from "@testing-library/react";
 import { useFocusTimer } from "@/lib/timer/useFocusTimer";
 import { stubAudioGlobal, dispatchVisibilityChange } from "../_setup";
 
@@ -15,6 +15,7 @@ describe("useFocusTimer count_up mode", () => {
   });
 
   afterEach(() => {
+    cleanup();
     audioStub.restore();
     vi.useRealTimers();
   });
