@@ -288,6 +288,10 @@ Recharts adds ~145 KB gzip to the client bundle for the dashboard page only (loa
 
 None — the `note` column and its RLS policies already exist from `20260531182506_sessions_data_foundation.sql`.
 
+## Addenda
+
+- **Palette contrast fix (post-Phase 3, commit `968307f`).** Beyond the single planned `--color-chart-focus` token (Phase 3 #2), the app-wide `--color-ash` and `--muted-foreground` tokens were lightened `#3d3830 → #8c8578` (both light and dark blocks, `src/styles/global.css`). This widened the "only a single new token" scope guardrail deliberately: the new `text-ash` note label and chart empty-state surfaced that `#3d3830` on the `#1a0f0d` background was effectively unreadable. The change improves muted-text contrast everywhere those tokens are used, not just the new components. Flagged and accepted in impl-review F1.
+
 ## References
 
 - Related research: `context/changes/session-notes-and-chart/research.md`

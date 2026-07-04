@@ -191,6 +191,7 @@ export default function SessionRunner({
           onChange={(e) => {
             setNote(e.target.value);
           }}
+          maxLength={500}
           disabled={submitting}
         />
       </div>
