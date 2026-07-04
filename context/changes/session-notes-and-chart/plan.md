@@ -347,9 +347,9 @@ None — the `note` column and its RLS policies already exist from `202605311825
 
 #### Automated
 
-- [x] 4.1 Existing E2E suite passes unmodified: `npm run test:e2e -- session-capture.spec.ts`
-- [x] 4.2 New `/10x-e2e`-generated spec(s) pass: `npm run test:e2e`
+- [x] 4.1 Existing E2E suite passes unmodified: `npm run test:e2e -- session-capture.spec.ts` — fea94a9
+- [x] 4.2 New `/10x-e2e`-generated spec(s) pass: `npm run test:e2e` — fea94a9
 
 #### Manual
 
-- [x] 4.3 Generated spec(s) reviewed against the five anti-patterns
+- [x] 4.3 Generated spec(s) reviewed against the five anti-patterns — fea94a9
