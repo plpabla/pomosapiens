@@ -306,11 +306,11 @@ None — the `note` column and its RLS policies already exist from `202605311825
 
 #### Automated
 
-- [x] 1.1 Lint passes: `npm run lint`
-- [x] 1.2 Unit tests pass: `npm test -- tests/unit/schemas/session.test.ts`
-- [x] 1.3 Integration tests pass: `npm test -- tests/integration/api/sessions.end.test.ts`
-- [x] 1.4 pgTAP RLS tests pass: `npm run db:test`
-- [x] 1.5 Full test suite passes: `npm test`
+- [x] 1.1 Lint passes: `npm run lint` — 729e64d
+- [x] 1.2 Unit tests pass: `npm test -- tests/unit/schemas/session.test.ts` — 729e64d
+- [x] 1.3 Integration tests pass: `npm test -- tests/integration/api/sessions.end.test.ts` — 729e64d
+- [x] 1.4 pgTAP RLS tests pass: `npm run db:test` — 729e64d
+- [x] 1.5 Full test suite passes: `npm test` — 729e64d
 
 ### Phase 2: Note capture UI + history display
 
