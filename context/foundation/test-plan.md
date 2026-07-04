@@ -6,7 +6,7 @@
 >
 > Refresh: re-run `/10x-test-plan --refresh` when stale (see §8).
 >
-> Last updated: 2026-07-04 (Risks #8-#9 added; e2e extended for session-notes-and-chart)
+> Last updated: 2026-07-04 (Risks #8-#9 added; e2e extended for session-notes-and-chart; §6.7 ephemeral-local-Supabase rule added after prod test-user leak)
 
 ## 1. Strategy
 
@@ -199,6 +199,16 @@ Any endpoint that writes to a user-owned, RLS-bearing table (e.g. `public.sessio
   2. Reuse `SMOKE_USER_ID` if the new table has a `user_id` FK to `auth.users`. If the table uses a different ownership key, add a dedicated `SMOKE_<TABLE>_KEY` secret and document it in the runbook (see `context/changes/testing-schema-validation-gate/runbook.md`).
   3. Add a new step in `.github/workflows/smoke.yml` after the existing `node scripts/smoke-session-write.mjs` step, passing the same env block plus any table-specific secrets.
 - **Anti-pattern**: Do not extend the existing `smoke-session-write.mjs` to cover multiple tables. One script per table keeps failure attribution clean -- a failing smoke step names exactly which table's write path broke.
+
+### 6.7 Where data-mutating tests run: ephemeral local Supabase, never prod
+
+Any suite that goes through `setupTwoUsers()` (all §6.1 Workers integration tests and all §6.5 e2e specs) creates and deletes **real** auth users and writes real rows through the service-role admin API. It must run only against a local or throwaway Supabase -- never a shared or production project.
+
+- **Two enforcement layers**:
+  1. **Fixture guard** (`tests/_fixtures/auth.ts`): `setupTwoUsers()` aborts unless the `SUPABASE_URL` host is `localhost` / `127.0.0.1` / `::1`. Override only with `ALLOW_REMOTE_TEST_DB=1`, and only for a project you are willing to see polluted.
+  2. **CI** (`.github/workflows/ci.yml`): the `ci` and `e2e` jobs run `npx supabase start`, then export the local API URL + anon/service keys from `supabase status -o json` into the job env. They no longer receive the production `secrets.SUPABASE_*`. Only `npm run build` (which never connects to the DB) and the smoke job still use prod secrets; the smoke job is intentionally prod (fixed `SMOKE_USER_ID`, delete-before/after, no user lifecycle -- see §6.6).
+- **Why this is a hard rule**: cleanup is best-effort (`Promise.allSettled` + a warning). A crashed, timed-out, or cancelled run skips `afterAll`/`cleanup()` and leaks its users. Pointed at prod, that pollutes the production `auth.users` table with `test-<uuid>@example.com` accounts, and the `ON DELETE CASCADE` FKs mean their sessions/topics/material_formats ride along.
+- **Root cause (2026-07-04)**: leaked `test-<uuid>@example.com` users were found in the production project. CI had been injecting the prod `secrets.SUPABASE_*` straight into `npm test` and `npm run test:e2e`, so every push to `main` created (and intermittently leaked) real users in prod. Fixed by the fixture guard + the ephemeral-local-Supabase CI wiring above.
 
 ## 7. What We Deliberately Don't Test
 
