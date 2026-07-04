@@ -186,7 +186,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)            | no                    | Implemented                             |
 | S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Implemented                             |
 | S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Implemented                             |
-| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                           |
+| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Implemented                             |
 | S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Waits on S-01; parallel with S-02/3/4   |
 | S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Waits on S-01                           |
 | S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history      | no                    | Waits on S-01; parallel with S-02..S-06 |
