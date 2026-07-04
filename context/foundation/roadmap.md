@@ -219,6 +219,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - For count-up sessions, the stop button should read "Stop" instead of "Stop early" (there's no "early" concept without a fixed duration).
   - Default the energy-level picker to "Medium" instead of requiring an explicit pick, to reduce pre-session friction.
   - Move the time badges to sit directly above the "Start" button.
+  - Make counter clock much bigger
   - Why parked: cosmetic, low-risk polish with no PRD FR backing; bundle into one small change once picked up rather than trickling in as one-offs.
 
 ## Done
