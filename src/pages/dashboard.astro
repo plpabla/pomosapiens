@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
 import type { Database } from "@/db/database.types";
 import { Card } from "@/components/ui/card";
+import FocusRatingChart from "@/components/dashboard/FocusRatingChart";
 
 const { user } = Astro.locals;
 const supabase = createClient(Astro.request.headers, Astro.cookies);
@@ -11,7 +12,7 @@ type SessionRow = Database["public"]["Tables"]["sessions"]["Row"];
 
 type SessionListItem = Pick<
   SessionRow,
-  "id" | "started_at" | "energy_level" | "duration_seconds" | "focus_rating" | "ended_at" | "timer_mode"
+  "id" | "started_at" | "energy_level" | "duration_seconds" | "focus_rating" | "ended_at" | "timer_mode" | "note"
 > & {
   topic: { name: string } | null;
   material_format: { name: string } | null;
@@ -36,7 +37,7 @@ if (!supabase) {
   const { data, error } = await supabase
     .from("sessions")
     .select(
-      "id, started_at, energy_level, duration_seconds, focus_rating, ended_at, timer_mode, topic:topics(name), material_format:material_formats(name)",
+      "id, started_at, energy_level, duration_seconds, focus_rating, ended_at, timer_mode, note, topic:topics(name), material_format:material_formats(name)",
     )
     .eq("user_id", user.id)
     .order("started_at", { ascending: false })
@@ -69,6 +70,15 @@ function getStatus(session: { ended_at: string | null }) {
   return session.ended_at !== null ? "done" : "in_progress";
 }
 
+function isRated(s: SessionListItem): s is SessionListItem & { focus_rating: number } {
+  return s.ended_at !== null && s.focus_rating !== null;
+}
+
+const ratedSessions = sessions
+  .filter(isRated)
+  .map((s) => ({ started_at: s.started_at, focus_rating: s.focus_rating }))
+  .reverse();
+
 const energyColorClass: Record<string, string> = {
   high: "text-spark",
   medium: "text-blaze",
@@ -90,6 +100,10 @@ const energyColorClass: Record<string, string> = {
       </div>
 
       <h2 class="text-off-white mb-4 text-xl font-semibold">History</h2>
+
+      <div class="mb-6">
+        <FocusRatingChart sessions={ratedSessions} client:only="react" />
+      </div>
 
       {
         dbError && (
@@ -159,6 +173,7 @@ const energyColorClass: Record<string, string> = {
                         )}
                       </div>
                     )}
+                    {session.note !== null && <p class="text-off-white/70 text-sm">{session.note}</p>}
                   </Card>
                 </li>
               );

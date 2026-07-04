@@ -1,6 +1,6 @@
 // Pins L-02 (audio autoplay prime contract) -- test-plan §2 row #6 (chime at focus-end, cheapest layer).
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, cleanup } from "@testing-library/react";
 import { useFocusTimer } from "@/lib/timer/useFocusTimer";
 import { stubAudioGlobal } from "../_setup";
 
@@ -16,6 +16,7 @@ describe("useFocusTimer audio (risk #6: chime at focus-end -- L-02)", () => {
   });
 
   afterEach(() => {
+    cleanup();
     audioStub.restore();
     vi.useRealTimers();
   });

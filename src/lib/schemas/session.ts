@@ -29,6 +29,13 @@ export const endSessionSchema = z.object({
     .max(5, "focus_rating must be between 1 and 5")
     .nullable(),
   ended_at: z.iso.datetime({ message: "ended_at must be a valid ISO-8601 datetime" }),
+  note: z
+    .string()
+    .trim()
+    .max(500, "note must be at most 500 characters")
+    .nullable()
+    .optional()
+    .transform((v) => (v === "" ? null : v)),
 });
 
 export type CreateSessionPayload = z.infer<typeof createSessionSchema>;

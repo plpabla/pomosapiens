@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { ServerError } from "@/components/auth/ServerError";
 import { useFocusTimer } from "@/lib/timer/useFocusTimer";
 import { useBreakTimer } from "@/lib/timer/useBreakTimer";
@@ -33,6 +35,7 @@ export default function SessionRunner({
   });
   const [submitPhase, setSubmitPhase] = useState<"rating" | "submitting">("rating");
   const [error, setError] = useState<string | null>(null);
+  const [note, setNote] = useState("");
   const [internalPhase, setInternalPhase] = useState<"rating" | "break_offer" | "running_break">("rating");
   const [breakStartedAtMs, setBreakStartedAtMs] = useState<number | null>(null);
   const [breakComplete, setBreakComplete] = useState(false);
@@ -81,6 +84,7 @@ export default function SessionRunner({
         body: JSON.stringify({
           focus_rating: rating,
           ended_at: new Date(stoppedAtMs).toISOString(),
+          note: note.trim() === "" ? null : note.trim(),
         }),
       });
 
@@ -176,6 +180,20 @@ export default function SessionRunner({
             {n}
           </Button>
         ))}
+      </div>
+      <div className="flex w-full max-w-sm flex-col gap-2 text-left">
+        <Label htmlFor="session-note" className="text-ash">
+          Add a note (optional)
+        </Label>
+        <Textarea
+          id="session-note"
+          value={note}
+          onChange={(e) => {
+            setNote(e.target.value);
+          }}
+          maxLength={500}
+          disabled={submitting}
+        />
       </div>
       <ServerError message={error} />
       <Button

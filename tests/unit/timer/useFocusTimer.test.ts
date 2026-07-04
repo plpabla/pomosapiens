@@ -1,6 +1,6 @@
 // Pins L-03 (timer resilience: wall-clock derive) -- test-plan §2 row #1 (timer reconcile across tab background / device sleep).
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, act, cleanup } from "@testing-library/react";
 import { useFocusTimer } from "@/lib/timer/useFocusTimer";
 import { stubAudioGlobal, dispatchVisibilityChange } from "../_setup";
 
@@ -17,6 +17,7 @@ describe("useFocusTimer (risk #1: timer reconcile)", () => {
   });
 
   afterEach(() => {
+    cleanup();
     audioStub.restore();
     vi.useRealTimers();
   });

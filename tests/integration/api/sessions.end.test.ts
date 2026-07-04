@@ -36,11 +36,11 @@ describe("PATCH /api/sessions/[id]", () => {
   });
 
   // Column-scope is two-layer: (1) endSessionSchema z.object() strips unknown body keys
-  // (energy_level, user_id, note never reach parsed.data); (2) .update({ ended_at, focus_rating })
-  // pins the write set to exactly those two columns. This test catches layer-1 failure (schema
-  // widened to accept energy_level) + layer-2 failure (endpoint uses .update(parsed.data)) together.
+  // (energy_level, user_id never reach parsed.data); (2) the .update() call pins the write set
+  // to exactly the schema's declared columns. This test catches layer-1 failure (schema widened
+  // to accept energy_level) + layer-2 failure (endpoint uses .update(parsed.data)) together.
   // It does NOT trip on a pure .update(parsed.data) swap alone because today parsed.data
-  // equals {ended_at, focus_rating} -- see L-01 in context/foundation/lessons.md.
+  // equals {ended_at, focus_rating, note} -- see L-01 in context/foundation/lessons.md.
   it("column-scope: extra body keys stripped by Zod and only declared columns written (regression gate for L-01)", async () => {
     const session = await createSession(fixture.cookieFor(fixture.userA.id));
     const garbageUuid = crypto.randomUUID();
@@ -56,7 +56,6 @@ describe("PATCH /api/sessions/[id]", () => {
         ended_at: new Date().toISOString(),
         user_id: garbageUuid,
         energy_level: "high",
-        note: "x",
       }),
     });
 
@@ -68,7 +67,46 @@ describe("PATCH /api/sessions/[id]", () => {
     expect(row.focus_rating).toBe(4);
     expect(row.user_id).toBe(fixture.userA.id);
     expect(row.energy_level).toBe("low");
-    // note column was sent in the body but is not in the endpoint's .update() -- must remain null
+  });
+
+  it("writes note when present in the PATCH body", async () => {
+    const session = await createSession(fixture.cookieFor(fixture.userA.id));
+
+    const res = await SELF.fetch(`${BASE}/api/sessions/${session.id}`, {
+      method: "PATCH",
+      headers: {
+        Cookie: fixture.cookieFor(fixture.userA.id),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        focus_rating: 4,
+        ended_at: new Date().toISOString(),
+        note: "some note",
+      }),
+    });
+
+    expect(res.status).toBe(200);
+    const row = await readSession(session.id);
+    expect(row.note).toBe("some note");
+  });
+
+  it("leaves note null when omitted from the PATCH body", async () => {
+    const session = await createSession(fixture.cookieFor(fixture.userA.id));
+
+    const res = await SELF.fetch(`${BASE}/api/sessions/${session.id}`, {
+      method: "PATCH",
+      headers: {
+        Cookie: fixture.cookieFor(fixture.userA.id),
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        focus_rating: 4,
+        ended_at: new Date().toISOString(),
+      }),
+    });
+
+    expect(res.status).toBe(200);
+    const row = await readSession(session.id);
     expect(row.note).toBeNull();
   });
 
