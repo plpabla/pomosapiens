@@ -33,7 +33,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                               | —             | NFR (privacy), Access Control                         | done     |
 | S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history                  | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done     |
 | S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                  | S-01          | FR-007, FR-008, FR-017                                | done     |
-| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session            | S-01          | FR-004, FR-005, FR-010                                | proposed |
+| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session            | S-01          | FR-004, FR-005, FR-010                                | done     |
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | proposed |
 | S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | proposed |
 | S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | proposed |
@@ -119,7 +119,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Unknowns:**
   - Preset-state storage — DB column on a `user_profiles` table, or localStorage? — Owner: implementer (decided at `/10x-plan` time). Block: no.
 - **Risk:** Count-up timer mode changes session-save logic (no nominal preset duration to compare against); ensure FR-012's "actual elapsed time" rule from S-01 still holds. The state machine S-01 establishes is the load-bearing piece this slice extends -- regression risk on timer resilience is real. The S-05 time-based access-guard removal (50-min redirect in `session/[id].astro` + "abandoned" label in `dashboard.astro`) was folded into S-03 Phase 8 so count-up sessions of any length survive tab reload.
-- **Status:** proposed
+- **Status:** done
 
 ### S-04: Session notes and focus-rating chart
 
@@ -185,7 +185,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | F-01       | `sessions-data-foundation`         | Sessions data foundation — table + per-user RLS               | yes                   | Implemented                           |
 | S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)            | no                    | Waits on F-01                         |
 | S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Waits on S-01                         |
-| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Waits on S-01                         |
+| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Implemented                           |
 | S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Waits on S-01                         |
 | S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Waits on S-01; parallel with S-02/3/4 |
 | S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Waits on S-01                         |
@@ -227,3 +227,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **S-00: A first-time visitor to `/` sees a hero explaining the wedge (energy-gated focus sessions with contextual capture bound to each session) and taps a primary CTA that routes to `/auth/signup`. Replaces the placeholder `src/pages/index.astro`. Authenticated visitors are redirected to `/dashboard`.** — Archived 2026-06-19 → `context/archive/2026-06-18-landing-page/`. Lesson: —.
 - **S-01: User can sign in, tap "Start session" on the dashboard, pick an energy level (only required field), run a default 25 / 5 timer through focus → break with an audible cue, rate focus 1–5 or skip at the end, and see the saved session at the top of their history list.** — Archived 2026-06-21 → `context/archive/2026-06-19-first-session-capture-loop/`. Lesson: —.
 - **S-02: manage topics and tag each session with topic + material format** — Archived 2026-06-28 → `context/archive/2026-06-27-categorize-sessions-topic-format/`. Lesson: —.
+- **S-03: edit the three preset slots and choose count-up vs preset per session** — Archived 2026-07-04 → `context/archive/2026-06-28-timer-presets/`. Lesson: —.
