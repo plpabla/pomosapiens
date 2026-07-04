@@ -698,4 +698,4 @@ Drop the time-based redirect in `resolveSessionPageAccess`. Adjust the dashboard
 ### Phase 9: Bugfixes
 
 - [x] 9.1. GIVEN `/session/new` page visited WHEN I click on `P2` chip THEN `P1` chip highlight is off — aaf5153
-- [x] 9.2. e2e test is failing after we dropped the guard [Risk #5b: opening an abandoned session (older than 2 x focus preset) redirects to /dashboard] - now the session should be opened with no issues, it is not abandon
+- [x] 9.2. e2e test is failing after we dropped the guard [Risk #5b: opening an abandoned session (older than 2 x focus preset) redirects to /dashboard] - now the session should be opened with no issues, it is not abandon — a70a7db
