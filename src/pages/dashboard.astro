@@ -3,6 +3,7 @@ import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
 import type { Database } from "@/db/database.types";
 import { Card } from "@/components/ui/card";
+import FocusRatingChart from "@/components/dashboard/FocusRatingChart";
 
 const { user } = Astro.locals;
 const supabase = createClient(Astro.request.headers, Astro.cookies);
@@ -69,6 +70,15 @@ function getStatus(session: { ended_at: string | null }) {
   return session.ended_at !== null ? "done" : "in_progress";
 }
 
+function isRated(s: SessionListItem): s is SessionListItem & { focus_rating: number } {
+  return s.ended_at !== null && s.focus_rating !== null;
+}
+
+const ratedSessions = sessions
+  .filter(isRated)
+  .map((s) => ({ started_at: s.started_at, focus_rating: s.focus_rating }))
+  .reverse();
+
 const energyColorClass: Record<string, string> = {
   high: "text-spark",
   medium: "text-blaze",
@@ -90,6 +100,10 @@ const energyColorClass: Record<string, string> = {
       </div>
 
       <h2 class="text-off-white mb-4 text-xl font-semibold">History</h2>
+
+      <div class="mb-6">
+        <FocusRatingChart sessions={ratedSessions} client:only="react" />
+      </div>
 
       {
         dbError && (
