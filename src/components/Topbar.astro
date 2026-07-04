@@ -3,55 +3,169 @@ import { Image } from "astro:assets";
 import iconImage from "@/assets/icon.png";
 
 const { user } = Astro.locals;
+const path = Astro.url.pathname;
+
+const navLinks = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/topics", label: "Topics" },
+  { href: "/formats", label: "Formats" },
+  { href: "/presets", label: "Presets" },
+];
+
+function initials(email: string) {
+  const local = email.split("@")[0];
+  const parts = local.split(/[._-]/).filter(Boolean);
+  const chars = parts.length > 1 ? [parts[0][0], parts[1][0]] : local.slice(0, 2).split("");
+  return chars.join("").toUpperCase();
+}
 ---
 
-<div
-  class="border-charred bg-ember text-off-white/80 mb-4 flex items-center justify-between rounded-xl border px-4 py-2 text-sm"
->
-  {
-    user ? (
-      <>
-        <div class="flex items-center gap-2">
-          <Image src={iconImage} alt="PomoSapiens" width={28} height={28} class="rounded" />
-          <span class="text-ash">{user.email}</span>
-        </div>
-        <div class="flex items-center gap-3">
-          <a href="/dashboard" class="text-blaze hover:text-spark transition-colors hover:underline">
-            {" "}
-            Dashboard{" "}
-          </a>
-          <a href="/topics" class="text-blaze hover:text-spark transition-colors hover:underline">
-            {" "}
-            Topics{" "}
-          </a>
-          <a href="/formats" class="text-blaze hover:text-spark transition-colors hover:underline">
-            {" "}
-            Formats{" "}
-          </a>
-          <form method="POST" action="/api/auth/signout">
-            <button type="submit" class="text-blaze hover:text-spark transition-colors hover:underline">
+<div class="border-border bg-card text-foreground border-b">
+  <div class="flex items-center justify-between px-4 py-4 md:px-8 md:py-5">
+    <a href="/" class="flex items-center gap-3">
+      <Image src={iconImage} alt="PomoSapiens" width={48} height={48} />
+      <span class="text-2xl font-bold">PomoSapiens</span>
+    </a>
+    {
+      user && (
+        <nav class="hidden items-center gap-8 text-lg md:flex">
+          {navLinks.map((link) => (
+            <a
+              href={link.href}
+              class:list={[
+                "transition-colors",
+                path === link.href ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground",
+              ]}
+            >
+              {link.label}
+            </a>
+          ))}
+        </nav>
+      )
+    }
+    {
+      user ? (
+        <div class="hidden items-center gap-6 md:flex">
+          <form method="POST" action="/api/auth/signout" class="flex items-center gap-4">
+            <div
+              class="bg-secondary text-secondary-foreground flex size-10 items-center justify-center rounded-full text-sm font-semibold"
+              title={user.email}
+            >
+              {initials(user.email ?? "?")}
+            </div>
+            <button type="submit" class="text-muted-foreground hover:text-foreground text-lg transition-colors">
               Sign out
             </button>
           </form>
         </div>
-      </>
-    ) : (
-      <>
-        <div class="flex items-center gap-2">
-          <Image src={iconImage} alt="PomoSapiens" width={28} height={28} class="rounded" />
-          <span class="text-ash">Not signed in</span>
-        </div>
-        <div class="flex gap-3">
-          <a href="/auth/signin" class="text-blaze hover:text-spark transition-colors hover:underline">
-            {" "}
-            Sign in{" "}
+      ) : (
+        <div class="hidden items-center gap-4 text-lg md:flex">
+          <a href="/auth/signin" class="text-muted-foreground hover:text-foreground transition-colors">
+            Sign in
           </a>
-          <a href="/auth/signup" class="text-blaze hover:text-spark transition-colors hover:underline">
-            {" "}
-            Sign up{" "}
+          <a href="/auth/signup" class="text-muted-foreground hover:text-foreground transition-colors">
+            Sign up
           </a>
         </div>
-      </>
-    )
-  }
+      )
+    }
+    <button
+      id="topbar-menu-toggle"
+      type="button"
+      class="text-foreground flex size-9 items-center justify-center md:hidden"
+      aria-expanded="false"
+      aria-controls="topbar-mobile-menu"
+      aria-label="Toggle menu"
+    >
+      <svg
+        id="topbar-menu-icon-open"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        class="size-6"
+      >
+        <line x1="4" y1="6" x2="20" y2="6"></line>
+        <line x1="4" y1="12" x2="20" y2="12"></line>
+        <line x1="4" y1="18" x2="20" y2="18"></line>
+      </svg>
+      <svg
+        id="topbar-menu-icon-close"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        class="hidden size-6"
+      >
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+        <line x1="6" y1="18" x2="18" y2="6"></line>
+      </svg>
+    </button>
+  </div>
+  <div id="topbar-mobile-menu" class="border-border hidden flex-col gap-4 border-t px-4 py-4 md:hidden">
+    {
+      user ? (
+        <>
+          <nav class="flex flex-col gap-4 text-lg">
+            {navLinks.map((link) => (
+              <a
+                href={link.href}
+                class:list={[
+                  "transition-colors",
+                  path === link.href ? "text-foreground font-semibold" : "text-muted-foreground hover:text-foreground",
+                ]}
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
+          <form method="POST" action="/api/auth/signout" class="flex items-center justify-between gap-3">
+            <div class="flex min-w-0 items-center gap-3">
+              <div
+                class="bg-secondary text-secondary-foreground flex size-10 shrink-0 items-center justify-center rounded-full text-sm font-semibold"
+                title={user.email}
+              >
+                {initials(user.email ?? "?")}
+              </div>
+              <span class="text-muted-foreground truncate text-sm">{user.email}</span>
+            </div>
+            <button
+              type="submit"
+              class="text-muted-foreground hover:text-foreground shrink-0 text-lg transition-colors"
+            >
+              Sign out
+            </button>
+          </form>
+        </>
+      ) : (
+        <div class="flex flex-col gap-4 text-lg">
+          <a href="/auth/signin" class="text-muted-foreground hover:text-foreground transition-colors">
+            Sign in
+          </a>
+          <a href="/auth/signup" class="text-muted-foreground hover:text-foreground transition-colors">
+            Sign up
+          </a>
+        </div>
+      )
+    }
+  </div>
 </div>
+
+<script>
+  const toggle = document.getElementById("topbar-menu-toggle");
+  const menu = document.getElementById("topbar-mobile-menu");
+  const iconOpen = document.getElementById("topbar-menu-icon-open");
+  const iconClose = document.getElementById("topbar-menu-icon-close");
+
+  toggle?.addEventListener("click", () => {
+    const isOpen = menu?.classList.toggle("hidden") === false;
+    menu?.classList.toggle("flex", isOpen);
+    toggle.setAttribute("aria-expanded", String(isOpen));
+    iconOpen?.classList.toggle("hidden", isOpen);
+    iconClose?.classList.toggle("hidden", !isOpen);
+  });
+</script>
