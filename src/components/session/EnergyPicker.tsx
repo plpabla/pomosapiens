@@ -22,13 +22,21 @@ function subscribeMode(callback: () => void) {
   };
 }
 function getModeSnapshot(): Mode {
-  return (localStorage.getItem(LAST_MODE_KEY) as Mode | null) ?? "preset_1";
+  try {
+    return (localStorage.getItem(LAST_MODE_KEY) as Mode | null) ?? "preset_1";
+  } catch {
+    return "preset_1";
+  }
 }
 function getModeServerSnapshot(): Mode {
   return "preset_1";
 }
 function persistMode(mode: Mode) {
-  localStorage.setItem(LAST_MODE_KEY, mode);
+  try {
+    localStorage.setItem(LAST_MODE_KEY, mode);
+  } catch {
+    // fail open: localStorage unavailable (private mode, partitioned storage, etc.)
+  }
   modeListeners.forEach((l) => {
     l();
   });

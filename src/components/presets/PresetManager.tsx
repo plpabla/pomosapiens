@@ -59,9 +59,18 @@ export default function PresetManager() {
     const preset = presets[index] as Preset | undefined;
     if (row === undefined || preset === undefined) return;
 
-    setRow(index, { submitting: true, error: null });
     const focusSec = parseInt(row.focusMin, 10) * 60;
     const breakSec = parseInt(row.breakMin, 10) * 60;
+    if (Number.isNaN(focusSec) || focusSec < 60 || focusSec > 4 * 60 * 60) {
+      setRow(index, { error: "Focus must be between 1 and 240 minutes." });
+      return;
+    }
+    if (Number.isNaN(breakSec) || breakSec < 0 || breakSec > 60 * 60) {
+      setRow(index, { error: "Break must be between 0 and 60 minutes." });
+      return;
+    }
+
+    setRow(index, { submitting: true, error: null });
     try {
       const res = await fetch(`/api/user-presets/${preset.slot}`, {
         method: "PUT",

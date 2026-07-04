@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ServerError } from "@/components/auth/ServerError";
 import { useFocusTimer } from "@/lib/timer/useFocusTimer";
@@ -35,32 +35,39 @@ export default function SessionRunner({
   const [error, setError] = useState<string | null>(null);
   const [internalPhase, setInternalPhase] = useState<"rating" | "break_offer" | "running_break">("rating");
   const [breakStartedAtMs, setBreakStartedAtMs] = useState<number | null>(null);
+  const [breakComplete, setBreakComplete] = useState(false);
 
   const { remaining: breakRemaining } = useBreakTimer({
     breakStartedAtMs,
     breakSeconds: breakSeconds ?? 0,
     audioRef,
     onComplete: () => {
-      // useBreakTimer already called play(); wait for the chime to finish before
-      // navigating so the audio is not cut off by page unload.
-      const audio = audioRef.current;
-      const navigate = () => {
-        window.location.assign("/dashboard");
-      };
-      if (audio) {
-        let gone = false;
-        const go = () => {
-          if (gone) return;
-          gone = true;
-          navigate();
-        };
-        audio.addEventListener("ended", go, { once: true });
-        setTimeout(go, 5000); // fallback if ended never fires
-      } else {
-        navigate();
-      }
+      setBreakComplete(true);
     },
   });
+
+  // useBreakTimer already called play(); wait for the chime to finish before
+  // navigating so the audio is not cut off by page unload.
+  useEffect(() => {
+    if (!breakComplete) return;
+    const audio = audioRef.current;
+    if (!audio) {
+      window.location.assign("/dashboard");
+      return;
+    }
+    let gone = false;
+    const go = () => {
+      if (gone) return;
+      gone = true;
+      window.location.assign("/dashboard");
+    };
+    audio.addEventListener("ended", go, { once: true });
+    const timeoutId = setTimeout(go, 5000); // fallback if ended never fires
+    return () => {
+      clearTimeout(timeoutId);
+      audio.removeEventListener("ended", go);
+    };
+  }, [breakComplete, audioRef]);
 
   async function handleRate(rating: number | null) {
     if (stoppedAtMs === null) return;

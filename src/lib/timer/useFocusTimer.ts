@@ -26,6 +26,7 @@ export function useFocusTimer({
   const [stoppedAtMs, setStoppedAtMs] = useState<number | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const firedRef = useRef(false);
 
   // Stage 2 audio re-prime: warm the chime on mount so the same-document
   // user-activation carries through to the unmuted play at focus-end (L-02).
@@ -83,7 +84,8 @@ export function useFocusTimer({
       setNow(next);
       if (mode === "count_up") return;
       const remaining = focusSeconds - Math.floor((next - startedAtMs) / 1000);
-      if (remaining <= 0) {
+      if (remaining <= 0 && !firedRef.current) {
+        firedRef.current = true;
         setStoppedAtMs(startedAtMs + focusSeconds * 1000);
         void audioRef.current?.play().catch(() => {
           // fail open
@@ -106,7 +108,8 @@ export function useFocusTimer({
         setNow(next);
         if (mode === "count_up") return;
         const remaining = focusSeconds - Math.floor((next - startedAtMs) / 1000);
-        if (remaining <= 0) {
+        if (remaining <= 0 && !firedRef.current) {
+          firedRef.current = true;
           setStoppedAtMs(startedAtMs + focusSeconds * 1000);
           void audioRef.current?.play().catch(() => {
             // fail open

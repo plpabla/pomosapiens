@@ -11,5 +11,8 @@
         ]
       }
     ]
+  },
+  "env": {
+    "CLAUDE_AFK_TIMEOUT_MS": "999999999"
   }
 }
