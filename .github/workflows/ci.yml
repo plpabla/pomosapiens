@@ -21,18 +21,21 @@ jobs:
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+      # Data-mutating suites run against an ephemeral local Supabase, never prod.
+      - name: Start local Supabase
+        run: npx supabase start
+      - name: Export local Supabase credentials
+        run: |
+          status=$(npx supabase status -o json)
+          {
+            echo "SUPABASE_URL=$(echo "$status" | jq -r '.API_URL')"
+            echo "SUPABASE_KEY=$(echo "$status" | jq -r '.ANON_KEY')"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$(echo "$status" | jq -r '.SERVICE_ROLE_KEY')"
+          } >> "$GITHUB_ENV"
       - name: Write .dev.vars for workers test pool
         run: |
           printf 'SUPABASE_URL=%s\nSUPABASE_KEY=%s\nSUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_URL" "$SUPABASE_KEY" "$SUPABASE_SERVICE_ROLE_KEY" > .dev.vars
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - run: npm test
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
   e2e:
     runs-on: ubuntu-latest
@@ -52,19 +55,23 @@ jobs:
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
+      # Data-mutating suites run against an ephemeral local Supabase, never prod.
+      - name: Start local Supabase
+        run: npx supabase start
+      - name: Export local Supabase credentials
+        run: |
+          status=$(npx supabase status -o json)
+          {
+            echo "SUPABASE_URL=$(echo "$status" | jq -r '.API_URL')"
+            echo "SUPABASE_KEY=$(echo "$status" | jq -r '.ANON_KEY')"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$(echo "$status" | jq -r '.SERVICE_ROLE_KEY')"
+          } >> "$GITHUB_ENV"
       - name: Write .dev.vars for e2e
         run: |
           printf 'SUPABASE_URL=%s\nSUPABASE_KEY=%s\nSUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_URL" "$SUPABASE_KEY" "$SUPABASE_SERVICE_ROLE_KEY" > .dev.vars
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
       - name: Run e2e tests
         run: npm run test:e2e
         env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           CI: "true"
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
