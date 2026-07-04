@@ -76,7 +76,7 @@ Warm, not clinical. Much easier to read on dark backgrounds than pure `#FFFFFF` 
 
 ---
 
-### `#3D3830` — Ash
+### `#8C8578` — Ash
 
 A warm mid-gray. Use for anything secondary or supporting.
 
@@ -106,7 +106,7 @@ A deep forest green. Pulled from the character's stem — a small but intentiona
 | `#E8320A` | Blaze Orange    | Primary CTA (hover)           |
 | `#FF5722` | Spark           | Badges, tags, micro-accents   |
 | `#F5F0EB` | Off White       | Primary text                  |
-| `#3D3830` | Ash             | Secondary / muted text        |
+| `#8C8578` | Ash             | Secondary / muted text        |
 | `#2D5A1B` | Tomato Leaf     | Success states, small accents |
 
 ---
@@ -120,7 +120,7 @@ Page background     →  #0D0D0F
               └── Selected / featured card  →  #4A2020
 ```
 
-Text sits on top of any of these — always use `#F5F0EB` for primary text and `#3D3830` for secondary text.
+Text sits on top of any of these — always use `#F5F0EB` for primary text and `#8C8578` for secondary text.
 
 ---
 
@@ -137,5 +137,5 @@ Text sits on top of any of these — always use `#F5F0EB` for primary text and `
 
 - Don't mix the reds randomly — respect the default/hover/active hierarchy.
 - Don't use Spark (`#FF5722`) for large areas; it overwhelms at scale.
-- Don't place Ash text (`#3D3830`) on Deep Ember — contrast is insufficient for body copy.
+- Don't darken Ash text below `#8C8578` — contrast drops below WCAG AA on the dark surface stack.
 - Don't add bright blues, purples, or cool grays — they break the warm dark-red aesthetic.
