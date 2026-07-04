@@ -47,9 +47,6 @@ function initials(email: string) {
     {
       user ? (
         <div class="hidden items-center gap-6 md:flex">
-          <a href="/session/new" class:list={[buttonVariants({ size: "lg" })]}>
-            Start Session
-          </a>
           <form method="POST" action="/api/auth/signout" class="flex items-center gap-4">
             <div
               class="bg-secondary text-secondary-foreground flex size-10 items-center justify-center rounded-full text-sm font-semibold"
@@ -127,9 +124,6 @@ function initials(email: string) {
               </a>
             ))}
           </nav>
-          <a href="/session/new" class:list={[buttonVariants({ size: "lg" }), "w-full"]}>
-            Start Session
-          </a>
           <form method="POST" action="/api/auth/signout" class="flex items-center justify-between gap-3">
             <div class="flex min-w-0 items-center gap-3">
               <div
