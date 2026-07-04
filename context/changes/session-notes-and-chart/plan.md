@@ -331,25 +331,25 @@ None — the `note` column and its RLS policies already exist from `202605311825
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Build succeeds: `npm run build`
-- [x] 3.3 Full test suite passes: `npm test`
+- [x] 3.1 Lint passes: `npm run lint` — 676a62c
+- [x] 3.2 Build succeeds: `npm run build` — 676a62c
+- [x] 3.3 Full test suite passes: `npm test` — 676a62c
 
 #### Manual
 
-- [x] 3.4 Empty state shown with 0-1 rated sessions
-- [x] 3.5 Chart renders correctly with 2+ rated sessions, chronological order
-- [x] 3.6 Skipped/in-progress sessions excluded from chart
-- [x] 3.7 Chart color matches Blaze Orange, not generic OKLCH tokens
-- [x] 3.8 Chart usable on mobile viewport
+- [x] 3.4 Empty state shown with 0-1 rated sessions — 676a62c
+- [x] 3.5 Chart renders correctly with 2+ rated sessions, chronological order — 676a62c
+- [x] 3.6 Skipped/in-progress sessions excluded from chart — 676a62c
+- [x] 3.7 Chart color matches Blaze Orange, not generic OKLCH tokens — 676a62c
+- [x] 3.8 Chart usable on mobile viewport — 676a62c
 
 ### Phase 4: E2E verification
 
 #### Automated
 
-- [ ] 4.1 Existing E2E suite passes unmodified: `npm run test:e2e -- session-capture.spec.ts`
-- [ ] 4.2 New `/10x-e2e`-generated spec(s) pass: `npm run test:e2e`
+- [x] 4.1 Existing E2E suite passes unmodified: `npm run test:e2e -- session-capture.spec.ts`
+- [x] 4.2 New `/10x-e2e`-generated spec(s) pass: `npm run test:e2e`
 
 #### Manual
 
-- [ ] 4.3 Generated spec(s) reviewed against the five anti-patterns
+- [x] 4.3 Generated spec(s) reviewed against the five anti-patterns
