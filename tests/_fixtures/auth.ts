@@ -44,6 +44,19 @@ export async function setupTwoUsers(): Promise<TwoUserFixture> {
     throw new Error("SUPABASE_URL, SUPABASE_KEY, and SUPABASE_SERVICE_ROLE_KEY must be set for integration tests");
   }
 
+  // Guard: this fixture creates and deletes REAL auth users via the service-role
+  // admin API. Pointed at a shared/production project it pollutes it with
+  // test-<uuid>@example.com accounts (and leaks them whenever cleanup is skipped
+  // on a crash/timeout). Refuse any non-local host unless explicitly opted in.
+  const host = new URL(supabaseUrl).hostname;
+  const isLocalHost = host === "localhost" || host === "127.0.0.1" || host === "::1";
+  if (!isLocalHost && process.env.ALLOW_REMOTE_TEST_DB !== "1") {
+    throw new Error(
+      `Refusing to run data-mutating tests against non-local Supabase host "${host}". ` +
+        `Point SUPABASE_URL at a local or throwaway project, or set ALLOW_REMOTE_TEST_DB=1 to override.`,
+    );
+  }
+
   const admin = createClient(supabaseUrl, serviceRoleKey, {
     auth: { autoRefreshToken: false, persistSession: false },
   });
