@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-06-28
+updated: 2026-07-04
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -34,7 +34,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history                  | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done     |
 | S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                  | S-01          | FR-007, FR-008, FR-017                                | done     |
 | S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session            | S-01          | FR-004, FR-005, FR-010                                | done     |
-| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | proposed |
+| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | done     |
 | S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | proposed |
 | S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | proposed |
 | S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | proposed |
@@ -132,7 +132,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Unknowns:**
   - Chart library choice on Astro + React 19 (Recharts, visx, Chart.js wrapper, hand-rolled SVG)? — Owner: implementer (decided at `/10x-plan` time). Block: no.
 - **Risk:** Lowest-risk slice. The chart needs enough sessions to be meaningful, so v1 value scales with log depth — PRD acknowledges this in the Secondary criterion phrasing ("leading indicator"). If the calendar tightens, this is the slice to thin (drop FR-014 — it's the only nice-to-have FR in v1) or Park.
-- **Status:** proposed
+- **Status:** done
 
 ### S-05: Explicit session abandonment
 
@@ -230,3 +230,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **S-01: User can sign in, tap "Start session" on the dashboard, pick an energy level (only required field), run a default 25 / 5 timer through focus → break with an audible cue, rate focus 1–5 or skip at the end, and see the saved session at the top of their history list.** — Archived 2026-06-21 → `context/archive/2026-06-19-first-session-capture-loop/`. Lesson: —.
 - **S-02: manage topics and tag each session with topic + material format** — Archived 2026-06-28 → `context/archive/2026-06-27-categorize-sessions-topic-format/`. Lesson: —.
 - **S-03: edit the three preset slots and choose count-up vs preset per session** — Archived 2026-07-04 → `context/archive/2026-06-28-timer-presets/`. Lesson: —.
+- **S-04: User can add an optional free-text note to a session at the end (or skip it) and see a chart of focus-rating over time on the history view, alongside the existing session list.** — Archived 2026-07-04 → `context/archive/2026-07-04-session-notes-and-chart/`. Lesson: —.
