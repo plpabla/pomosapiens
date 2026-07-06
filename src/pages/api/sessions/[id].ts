@@ -1,5 +1,6 @@
 // ended_at is client-snapshotted at phase transition and server-validated for plausibility.
 // focus_rating and note are the only other writable columns. The row is writable only once (ended_at IS NULL guard).
+// DELETE removes the caller's own session row outright, any status (fully-open abandon flow, no ended_at scoping).
 import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
 import { parseJson } from "@/lib/parse-request";
@@ -53,6 +54,40 @@ export const PATCH: APIRoute = async (context) => {
 
   if (!data) {
     return Response.json({ error: "Session already ended or not found" }, { status: 409 });
+  }
+
+  return Response.json({ ok: true }, { status: 200 });
+};
+
+export const DELETE: APIRoute = async (context) => {
+  if (!context.locals.user) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const supabase = createClient(context.request.headers, context.cookies);
+  if (!supabase) {
+    return Response.json({ error: "Supabase is not configured" }, { status: 500 });
+  }
+
+  const { id } = context.params;
+  if (!id) {
+    return Response.json({ error: "Missing session id" }, { status: 400 });
+  }
+
+  const { data, error } = await supabase
+    .from("sessions")
+    .delete()
+    .eq("id", id)
+    .eq("user_id", context.locals.user.id)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    return Response.json({ error: error.message }, { status: 500 });
+  }
+
+  if (!data) {
+    return Response.json({ error: "Session not found" }, { status: 404 });
   }
 
   return Response.json({ ok: true }, { status: 200 });
