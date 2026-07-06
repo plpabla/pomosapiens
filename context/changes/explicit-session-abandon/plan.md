@@ -252,6 +252,65 @@ Hand off to `/10x-e2e` to drive the new browser-level abandon flow and confirm n
 
 ---
 
+## Phase 6: Production deploy
+
+### Overview
+
+Apply the Phase 1 migration (`sessions_delete_own`) to the production Supabase project, and only then deploy the app code (Phases 2-3) that depends on it. This is operator work executed locally against prod, not CI. Unlike a column-adding migration, this one is RLS-only and does not change `database.types.ts`, so it is **not** gated by the `.github/workflows/smoke.yml` types-diff step. The real ordering risk is different: nothing auto-deploys the app on merge (`npx wrangler deploy` is manual per `CLAUDE.md`), but if the Phase 2/3 code is deployed to prod before this migration is pushed, the live `DELETE /api/sessions/[id]` endpoint would silently 404 for every caller (RLS blocks the delete with 0 rows affected; the endpoint reads that as not-found, not as a permissions error).
+
+### Prerequisites
+
+- Operator has `SUPABASE_ACCESS_TOKEN` and `SUPABASE_PROJECT_REF` available locally (same values as the GitHub Actions secrets, per the [testing-schema-validation-gate runbook](../../archive/2026-06-24-testing-schema-validation-gate/runbook.md) sections 1-2).
+- Operator is logged into the Supabase CLI (`npx supabase login`, or `SUPABASE_ACCESS_TOKEN` exported).
+- Phases 1-4 are merged to `main`.
+
+### Changes Required:
+
+#### 1. Link the local CLI to the prod project (one-time per machine)
+
+**Command**: `npx supabase link --project-ref <prod-ref>`
+
+**Intent**: Tell the local CLI which remote project subsequent `db push` commands target. Idempotent — safe to re-run; skip if a prior change already linked this machine.
+
+#### 2. Push the migration to prod
+
+**Command**: `npx supabase db push`
+
+**Intent**: Apply `supabase/migrations/20260706120000_add_sessions_delete_policy.sql` to the production database. Additive (a single `CREATE POLICY`), so zero-downtime and safe to run while the existing app is live.
+
+**Contract**: The CLI prints the pending migration filename and asks for confirmation. Confirm. Operator-only step; no file changes in the repo.
+
+#### 3. Reconcile committed types (verification only)
+
+**Command**: `npm run db:types:prod`
+
+**Intent**: Confirm the RLS-only migration produced no schema/type drift, per the README's guidance to run this "only when finalizing a PR."
+
+**Contract**: Expect **zero diff** — this migration touches only a policy, not a column or table. If a diff appears, it is unrelated drift (e.g. CLI version mismatch) and must be investigated before deploying the app, not committed blindly.
+
+#### 4. Deploy the app
+
+**Command**: `npx wrangler deploy`
+
+**Intent**: Ship the Phase 2/3 code (DELETE endpoint + Abandon button) now that prod has the RLS policy it depends on.
+
+**Contract**: Must run strictly after step 2 confirms the migration is live on prod — this is the load-bearing ordering constraint for this phase.
+
+### Success Criteria:
+
+#### Automated Verification:
+
+- `npm run db:types:prod` produces no diff against the committed `src/db/database.types.ts`
+
+#### Manual Verification:
+
+- In Supabase Studio for the **production** project, confirm the `sessions_delete_own` DELETE policy exists on `public.sessions`.
+- After deploy, on the live site, start a session, abandon it, and confirm it disappears from `/dashboard` (real end-to-end prod smoke of the new flow).
+
+**Implementation Note**: Steps 6.1-6.3 happen BEFORE step 6.4 (`wrangler deploy`). Do not deploy the app first — see the ordering risk in the Overview.
+
+---
+
 ## Testing Strategy
 
 ### Unit Tests:
@@ -274,6 +333,8 @@ Hand off to `/10x-e2e` to drive the new browser-level abandon flow and confirm n
 
 One new migration (`20260706120000_add_sessions_delete_policy.sql`) reversing part of `20260601120000_drop_sessions_delete_policy.sql`. No data migration needed — this only changes RLS, not schema or existing rows. `npm run db:reset` re-applies all migrations in order and is the verification step for Phase 1.
 
+Prod deploy is Phase 6: `npx supabase db push` to prod, BEFORE running `npx wrangler deploy` for the Phase 2/3 app code. Unlike a column-adding migration, this one won't turn the smoke workflow's types-diff step red if forgotten — but forgetting it means the live DELETE endpoint 404s for everyone until the migration is pushed.
+
 ## References
 
 - Related roadmap slice: `context/foundation/roadmap.md:137-148` (S-05), `:164-178` (S-07 overlap)
@@ -292,8 +353,8 @@ One new migration (`20260706120000_add_sessions_delete_policy.sql`) reversing pa
 
 #### Automated
 
-- [x] 1.1 pgTAP RLS tests pass: `npm run db:test`
-- [x] 1.2 Migration applies cleanly on a fresh local DB: `npm run db:reset`
+- [x] 1.1 pgTAP RLS tests pass: `npm run db:test` — 0781191
+- [x] 1.2 Migration applies cleanly on a fresh local DB: `npm run db:reset` — 0781191
 
 ### Phase 2: API — DELETE endpoint + integration tests
 
@@ -341,3 +402,15 @@ One new migration (`20260706120000_add_sessions_delete_policy.sql`) reversing pa
 #### Manual
 
 - [ ] 5.3 Generated spec(s) reviewed against the five anti-patterns
+
+### Phase 6: Production deploy
+
+#### Automated
+
+- [ ] 6.1 `npm run db:types:prod` produces no diff against committed `database.types.ts`
+
+#### Manual
+
+- [ ] 6.2 `sessions_delete_own` DELETE policy confirmed in prod Supabase Studio
+- [ ] 6.3 Migration pushed to prod (`npx supabase db push`) BEFORE `npx wrangler deploy`
+- [ ] 6.4 Live prod smoke: abandon a real session on the deployed site, confirm it disappears from `/dashboard`
