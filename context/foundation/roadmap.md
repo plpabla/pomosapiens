@@ -94,6 +94,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Audible-cue strategy — which sound, and how to handle browsers that block autoplay before user interaction? — Owner: implementer. Block: no.
 - **Risk:** This is the north star — the smallest end-to-end flow that proves the wedge. The riskiest sub-piece is timer resilience (NFR + Guardrail "timer survives short tab backgrounding"); if that breaks, the product breaks even with everything else working.
 - **Status:** done
+- **Note (2026-07-06):** Post-rating flow now shows a "Session saved" confirmation screen (rating dots, note recap) with three follow-up actions — start a new session, take a break, or go to dashboard — replacing the old immediate-redirect / silent "Take a break?" offer. Implemented ad hoc from an imported Claude Design file (`FocusRating` component), not sequenced through `/10x-plan`; e2e specs updated in place.
 
 ### S-02: Categorize sessions by topic and material format
 
