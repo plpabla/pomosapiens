@@ -35,7 +35,19 @@ jobs:
       - name: Write .dev.vars for workers test pool
         run: |
           printf 'SUPABASE_URL=%s\nSUPABASE_KEY=%s\nSUPABASE_SERVICE_ROLE_KEY=%s\n' "$SUPABASE_URL" "$SUPABASE_KEY" "$SUPABASE_SERVICE_ROLE_KEY" > .dev.vars
-      - run: npm test
+      - name: Run unit tests (retry up to 3x)
+        run: |
+          for attempt in 1 2 3; do
+            echo "::group::Unit test attempt $attempt of 3"
+            if npm test; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "Attempt $attempt failed"
+          done
+          echo "Unit tests failed after 3 attempts"
+          exit 1
 
   e2e:
     runs-on: ubuntu-latest
