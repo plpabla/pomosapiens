@@ -385,23 +385,23 @@ Prod deploy is Phase 6: `npx supabase db push` to prod, BEFORE running `npx wran
 
 #### Automated
 
-- [x] 4.1 Prettier check passes: `npx prettier --check context/foundation/arch.md context/foundation/lessons.md context/foundation/roadmap.md`
+- [x] 4.1 Prettier check passes: `npx prettier --check context/foundation/arch.md context/foundation/lessons.md context/foundation/roadmap.md` — 77078d6
 
 #### Manual
 
-- [x] 4.2 arch.md no longer references the removed stale-tab redirect guard
-- [x] 4.3 roadmap.md S-07 entry reflects the delete-scope overlap
+- [x] 4.2 arch.md no longer references the removed stale-tab redirect guard — 77078d6
+- [x] 4.3 roadmap.md S-07 entry reflects the delete-scope overlap — 77078d6
 
 ### Phase 5: E2E verification
 
 #### Automated
 
-- [ ] 5.1 Existing E2E suite passes unmodified: `npm run test:e2e -- session-access.spec.ts session-capture.spec.ts`
-- [ ] 5.2 New `/10x-e2e`-generated spec(s) pass: `npm run test:e2e`
+- [x] 5.1 Existing E2E suite passes unmodified: `npm run test:e2e -- session-access.spec.ts session-capture.spec.ts`
+- [x] 5.2 New `/10x-e2e`-generated spec(s) pass: `npm run test:e2e`
 
 #### Manual
 
-- [ ] 5.3 Generated spec(s) reviewed against the five anti-patterns
+- [x] 5.3 Generated spec(s) reviewed against the five anti-patterns
 
 ### Phase 6: Production deploy
 
