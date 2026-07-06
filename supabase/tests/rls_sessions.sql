@@ -53,14 +53,18 @@ WITH del AS (
 SELECT is(count(*)::int, 0, 'user A cannot delete user B session')
 FROM del;
 
--- 5. User A cannot DELETE their OWN session either — sessions are immutable
--- (sessions_delete_own was dropped by 20260601120000_drop_sessions_delete_policy.sql)
+-- 5. User A can DELETE their own session — sessions_delete_own reinstated (fully open) by
+-- 20260706120000_add_sessions_delete_policy.sql for the explicit abandon flow (S-05).
+-- Uses a throwaway row so the fixture row (aaaaaaaa-...) survives for the anon-block tests below.
+INSERT INTO public.sessions (id, user_id, started_at, energy_level) VALUES
+  ('cccccccc-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001', now(), 'medium');
+
 WITH del AS (
   DELETE FROM public.sessions
-  WHERE id = 'aaaaaaaa-0000-0000-0000-000000000001'
+  WHERE id = 'cccccccc-0000-0000-0000-000000000003'
   RETURNING id
 )
-SELECT is(count(*)::int, 0, 'user A cannot delete their own session (immutability)')
+SELECT is(count(*)::int, 1, 'user A can delete their own session (explicit abandon)')
 FROM del;
 
 -- 6. User A cannot INSERT claiming user B's id (RLS WITH CHECK violation → 42501)

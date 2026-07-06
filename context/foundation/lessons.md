@@ -51,8 +51,18 @@ When `npm install` runs during development (e.g. `npx shadcn add <component>`), 
 
 ## L-05: Time-based access guards couple to session duration and break under open-ended modes
 
-A guard of the form "redirect if session age > N * focusPresetSeconds" silently assumes a fixed nominal duration. It breaks the moment any feature removes or loosens that assumption (count-up mode, deep-work sessions, user-editable presets). The guard provides no safety once the duration is variable -- it either cuts short legitimate sessions or lets abandoned ones through.
+A guard of the form "redirect if session age > N \* focusPresetSeconds" silently assumes a fixed nominal duration. It breaks the moment any feature removes or loosens that assumption (count-up mode, deep-work sessions, user-editable presets). The guard provides no safety once the duration is variable -- it either cuts short legitimate sessions or lets abandoned ones through.
 
 Prefer explicit state transitions: the `/session/[id]` page should allow any non-ended session (null `ended_at`) regardless of age, and the only guards that belong there are ownership (cross-user redirect) and ended-state (replay-protection redirect). Age-based heuristics for "abandoned" belong in UI labels, not in access control -- and even those should be driven by an explicit user action once one exists.
 
 **Source:** S-03 Phase 8 -- 50-min redirect in `session/[id].astro` and "Abandoned" label in `dashboard.astro` folded out when count-up mode made fixed-duration assumptions invalid.
+
+---
+
+## L-06: Sessions immutability was deliberately narrowed to support explicit user-initiated delete
+
+`sessions` had no `DELETE` policy at all (`20260601120000_drop_sessions_delete_policy.sql`) -- "sessions are immutable history once written" was an intentional business rule, pinned by a pgTAP test asserting delete is denied. S-05's explicit-abandon flow reversed this: `20260706120000_add_sessions_delete_policy.sql` reinstates `sessions_delete_own`, fully open (owner can delete any of their own sessions, in progress or already ended), not scoped to in-progress rows only.
+
+If you encounter the old immutability RLS test or its accompanying comment and are tempted to "fix" a failing delete back to denial, don't -- the reversal was deliberate and user-confirmed, not a regression. This same DELETE capability also substantially delivers S-07 (`edit-delete-sessions`)'s delete half; S-07's remaining scope is narrowed to editing a session's fields only.
+
+**Source:** S-05 `explicit-session-abandon` (`context/changes/explicit-session-abandon/change.md`, `plan.md`).

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase";
 import type { Database } from "@/db/database.types";
 import { Card } from "@/components/ui/card";
 import FocusRatingChart from "@/components/dashboard/FocusRatingChart";
+import AbandonButton from "@/components/dashboard/AbandonButton";
 
 const { user } = Astro.locals;
 const supabase = createClient(Astro.request.headers, Astro.cookies);
@@ -174,6 +175,11 @@ const energyColorClass: Record<string, string> = {
                       </div>
                     )}
                     {session.note !== null && <p class="text-off-white/70 text-sm">{session.note}</p>}
+                    {status === "in_progress" && (
+                      <div class="flex justify-end">
+                        <AbandonButton sessionId={session.id} client:load />
+                      </div>
+                    )}
                   </Card>
                 </li>
               );

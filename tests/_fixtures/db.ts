@@ -43,6 +43,15 @@ export async function readSession(id: string): Promise<SessionRow> {
   return data;
 }
 
+export async function sessionExists(id: string): Promise<boolean> {
+  const { data, error } = await supabase.from("sessions").select("id").eq("id", id).maybeSingle();
+
+  if (error) {
+    throw new Error(`sessionExists(${id}): ${error.message}`);
+  }
+  return data !== null;
+}
+
 export async function createTestTopic(userId: string, name: string): Promise<string> {
   const { data, error } = await supabase.from("topics").insert({ owner_id: userId, name }).select("id").single();
 

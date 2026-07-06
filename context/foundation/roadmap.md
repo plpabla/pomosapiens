@@ -174,7 +174,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Hard delete vs soft delete (`deleted_at` flag). Hard delete is simpler and matches user mental model ("remove completely from that list"); soft delete preserves audit trail. PRD has no retention requirement. Decide at plan time.
   - Edit UI surface — inline on the dashboard row, a modal, or a dedicated `/session/[id]/edit` page? The existing `/session/[id]` page is the natural host.
   - Whether editing `ended_at` must re-validate against the API's plausibility window (see S-05 unknown) — a corrective edit may legitimately set `ended_at` to a value far from `now()`.
-- **Risk:** Small surface — one or two routes (PATCH and DELETE on `/api/sessions/[id]`; PATCH likely already exists from S-01's focus-rating flow) plus a row-level UI affordance. Primary risk is forgetting that mutations must enforce ownership at the RLS layer, not just at the API layer — the privacy NFR (cross-user leakage) explicitly covers this. Secondary risk: deletion cascading to anything that aggregates sessions (focus-rating chart in S-04) — if S-04 has shipped first, verify the chart re-derives cleanly from current rows.
+- **Risk:** Small surface — one or two routes (PATCH and DELETE on `/api/sessions/[id]`; PATCH likely already exists from S-01's focus-rating flow) plus a row-level UI affordance. Primary risk is forgetting that mutations must enforce ownership at the RLS layer, not just at the API layer — the privacy NFR (cross-user leakage) explicitly covers this. Secondary risk: deletion cascading to anything that aggregates sessions (focus-rating chart in S-04) — if S-04 has shipped first, verify the chart re-derives cleanly from current rows. **Scope note (post-S-05):** the `DELETE /api/sessions/[id]` endpoint and the owner-scoped `sessions_delete_own` RLS policy already exist (added by S-05's explicit-abandon flow, fully open — not scoped to in-progress rows). S-07's remaining scope is editing a logged session's fields only; do not re-implement delete.
 - **Status:** proposed
 
 ## Backlog Handoff
@@ -222,6 +222,11 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Move the time badges to sit directly above the "Start" button.
   - Make counter clock much bigger
   - Why parked: cosmetic, low-risk polish with no PRD FR backing; bundle into one small change once picked up rather than trickling in as one-offs.
+- **Re-open running session from a dashboard** - right now if the session window is closed we have no chance to re-open it (as URL contains UUID which is just lost). From dashboard we can only see it is running or we can abandon it. It would be useful just to return to that session. It should be allowed only for running sessions though (In progress state)
+
+## Bugs to be fixed
+
+### B-00 (placeholder)
 
 ## Done
 
