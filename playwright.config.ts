@@ -3,7 +3,9 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   timeout: 30_000,
-  expect: { timeout: 5_000 },
+  // CI runners are slower and the dev server starts cold (no reused/warmed Vite cache),
+  // so first-hit hydration of a freshly-added island can outrun a tight expect timeout.
+  expect: { timeout: process.env.CI ? 10_000 : 5_000 },
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 0,
