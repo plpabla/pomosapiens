@@ -360,18 +360,18 @@ Prod deploy is Phase 6: `npx supabase db push` to prod, BEFORE running `npx wran
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Integration tests pass: `npm test -- tests/integration/api/sessions.delete.test.ts`
-- [x] 2.3 Full test suite passes: `npm test`
+- [x] 2.1 Lint passes: `npm run lint` — 0129feb
+- [x] 2.2 Integration tests pass: `npm test -- tests/integration/api/sessions.delete.test.ts` — 0129feb
+- [x] 2.3 Full test suite passes: `npm test` — 0129feb
 
 ### Phase 3: UI — Abandon button + dashboard wiring
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Unit tests pass: `npm test -- tests/unit/dashboard`
-- [ ] 3.3 Full test suite passes: `npm test`
-- [ ] 3.4 Build succeeds: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 Unit tests pass: `npm test -- tests/unit/dashboard`
+- [x] 3.3 Full test suite passes: `npm test`
+- [x] 3.4 Build succeeds: `npm run build`
 
 #### Manual
 
