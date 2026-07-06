@@ -129,6 +129,22 @@
   background-image: linear-gradient(to bottom, #0d0d0f, #1a0a08, #0d0d0f);
 }
 
+@keyframes rf-pop {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@utility animate-rf-pop {
+  animation: rf-pop 0.26s ease;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

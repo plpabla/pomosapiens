@@ -25,25 +25,26 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("SessionRunner break-offer phase", () => {
-  it("shows break offer after rating PATCH succeeds for preset session with breakSeconds > 0", async () => {
+describe("SessionRunner session-saved summary", () => {
+  it("shows a Take a break button on the saved summary for preset session with breakSeconds > 0", async () => {
     render(<SessionRunner sessionId="s1" startedAtMs={0} focusSeconds={60} mode="preset" breakSeconds={300} />);
 
     fireEvent.click(screen.getByRole("button", { name: "3" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("heading", { name: /take a break/i })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: /session saved/i })).toBeInTheDocument();
     });
+    expect(screen.getByRole("button", { name: /take a break/i })).toBeInTheDocument();
   });
 
-  it("does not show break offer after rating PATCH when mode is count_up", async () => {
+  it("does not show a Take a break button on the saved summary when mode is count_up", async () => {
     render(<SessionRunner sessionId="s1" startedAtMs={0} focusSeconds={60} mode="count_up" breakSeconds={null} />);
 
     fireEvent.click(screen.getByRole("button", { name: "3" }));
 
-    // Allow the PATCH to settle -- the component navigates away, no break offer should appear.
     await waitFor(() => {
-      expect(screen.queryByText(/take a break/i)).not.toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: /session saved/i })).toBeInTheDocument();
     });
+    expect(screen.queryByRole("button", { name: /take a break/i })).not.toBeInTheDocument();
   });
 });

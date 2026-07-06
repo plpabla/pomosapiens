@@ -46,9 +46,9 @@ test("session note: entered on rating screen is saved and shown on dashboard his
     await page.getByRole("button", { name: "4" }).click();
     await patchResponse;
 
-    // Break offer appears for preset sessions -- skip it to land on the dashboard.
-    await expect(page.getByRole("heading", { name: "Take a break?" })).toBeVisible();
-    await page.getByRole("button", { name: "Skip" }).click();
+    // Session saved summary appears after rating -- go straight to the dashboard.
+    await expect(page.getByRole("heading", { name: "Session saved" })).toBeVisible();
+    await page.getByRole("button", { name: "Go to dashboard" }).click();
     await page.waitForURL("**/dashboard");
 
     await expect(page.getByText(noteText)).toBeVisible();
