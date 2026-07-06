@@ -184,7 +184,7 @@ erDiagram
 
 RLS posture (enforced in the same migration that creates the tables):
 
-- `sessions`: per-operation policies scoped to `authenticated`; row visibility requires `user_id = auth.uid()`. `DELETE` policy was removed in `20260601120000_drop_sessions_delete_policy.sql` - sessions are immutable history once written.
+- `sessions`: per-operation policies scoped to `authenticated`; row visibility requires `user_id = auth.uid()`. `DELETE` was reinstated (owner-scoped, any status) in `20260706120000_add_sessions_delete_policy.sql` to back the explicit-abandon flow (S-05) - a user can delete any of their own sessions, in progress or already ended.
 - `topics`, `material_formats`: SELECT allows `owner_id IS NULL OR owner_id = auth.uid()` so seeded defaults (Video / Reading / ...) are visible to everyone; mutations are restricted to the owner.
 - `anon` role: no policies => fully denied.
 - A partial unique index on `(name) WHERE owner_id IS NULL` keeps two seeded defaults from sharing a name (Postgres treats NULLs as distinct in normal UNIQUE).
@@ -390,7 +390,7 @@ Invariants worth keeping in mind when changing this path:
 - **Audio priming is two-staged.** Stage 1 (muted play/pause inside the Start click handler) carries the user-activation; stage 2 (in `useFocusTimer`'s mount effect) re-primes inside the new document so the unmuted `play()` at focus-end is allowed by Safari.
 - **Single-write rule on sessions.** [PATCH /api/sessions/:id](src/pages/api/sessions/[id].ts) filters on `.is("ended_at", null)`. A second rating attempt returns 409 - the row is effectively immutable once closed.
 - **Plausibility window.** `ended_at` must be inside `[now - 2h, now + 5s]`. Beyond that we assume a tampered clock and reject.
-- **Stale-tab guard.** [resolveSessionPageAccess](src/lib/session/access.ts) redirects to `/dashboard` if the SSR load happens more than `2 * focusPresetSeconds` after `started_at`. This is the in-place stand-in for the planned explicit-abandon flow (`TODO(S-05)`).
+- **Explicit abandon.** A user can remove an in-progress (or already-ended) session from history via the dashboard's `AbandonButton` island, which sends `DELETE /api/sessions/:id`. There is no age-based redirect anywhere in this path - [resolveSessionPageAccess](src/lib/session/access.ts) only redirects on a missing row or an already-ended row, regardless of how long the session has been running.
 
 ---
 

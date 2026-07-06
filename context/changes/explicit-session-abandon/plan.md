@@ -368,29 +368,29 @@ Prod deploy is Phase 6: `npx supabase db push` to prod, BEFORE running `npx wran
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Unit tests pass: `npm test -- tests/unit/dashboard`
-- [x] 3.3 Full test suite passes: `npm test`
-- [x] 3.4 Build succeeds: `npm run build`
+- [x] 3.1 Lint passes: `npm run lint` — 919fc25
+- [x] 3.2 Unit tests pass: `npm test -- tests/unit/dashboard` — 919fc25
+- [x] 3.3 Full test suite passes: `npm test` — 919fc25
+- [x] 3.4 Build succeeds: `npm run build` — 919fc25
 
 #### Manual
 
-- [ ] 3.5 In-progress session shows Abandon; completed session does not
-- [ ] 3.6 Confirm/Cancel two-step flow works with no premature network call
-- [ ] 3.7 Confirming removes the session from history after reload
-- [ ] 3.8 No age gating — freshly started session shows Abandon immediately
-- [ ] 3.9 Deep-work/count-up session past 50 min still shows correctly (S-03 regression check)
+- [x] 3.5 In-progress session shows Abandon; completed session does not — 919fc25
+- [x] 3.6 Confirm/Cancel two-step flow works with no premature network call — 919fc25
+- [x] 3.7 Confirming removes the session from history after reload — 919fc25
+- [x] 3.8 No age gating — freshly started session shows Abandon immediately — 919fc25
+- [x] 3.9 Deep-work/count-up session past 50 min still shows correctly (S-03 regression check) — 919fc25
 
 ### Phase 4: Documentation sync
 
 #### Automated
 
-- [ ] 4.1 Prettier check passes: `npx prettier --check context/foundation/arch.md context/foundation/lessons.md context/foundation/roadmap.md`
+- [x] 4.1 Prettier check passes: `npx prettier --check context/foundation/arch.md context/foundation/lessons.md context/foundation/roadmap.md`
 
 #### Manual
 
-- [ ] 4.2 arch.md no longer references the removed stale-tab redirect guard
-- [ ] 4.3 roadmap.md S-07 entry reflects the delete-scope overlap
+- [x] 4.2 arch.md no longer references the removed stale-tab redirect guard
+- [x] 4.3 roadmap.md S-07 entry reflects the delete-scope overlap
 
 ### Phase 5: E2E verification
 
