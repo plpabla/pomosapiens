@@ -222,6 +222,11 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Move the time badges to sit directly above the "Start" button.
   - Make counter clock much bigger
   - Why parked: cosmetic, low-risk polish with no PRD FR backing; bundle into one small change once picked up rather than trickling in as one-offs.
+- **Re-open running session from a dashboard** - right now if the session window is closed we have no chance to re-open it (as URL contains UUID which is just lost). From dashboard we can only see it is running or we can abandon it. It would be useful just to return to that session. It should be allowed only for running sessions though (In progress state)
+
+## Bugs to be fixed
+
+### B-00 (placeholder)
 
 ## Done
 
