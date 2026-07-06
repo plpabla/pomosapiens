@@ -396,12 +396,12 @@ Prod deploy is Phase 6: `npx supabase db push` to prod, BEFORE running `npx wran
 
 #### Automated
 
-- [x] 5.1 Existing E2E suite passes unmodified: `npm run test:e2e -- session-access.spec.ts session-capture.spec.ts`
-- [x] 5.2 New `/10x-e2e`-generated spec(s) pass: `npm run test:e2e`
+- [x] 5.1 Existing E2E suite passes unmodified: `npm run test:e2e -- session-access.spec.ts session-capture.spec.ts` — da8d794
+- [x] 5.2 New `/10x-e2e`-generated spec(s) pass: `npm run test:e2e` — da8d794
 
 #### Manual
 
-- [x] 5.3 Generated spec(s) reviewed against the five anti-patterns
+- [x] 5.3 Generated spec(s) reviewed against the five anti-patterns — da8d794
 
 ### Phase 6: Production deploy
 

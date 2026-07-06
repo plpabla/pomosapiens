@@ -36,6 +36,7 @@ export default function AbandonButton({ sessionId }: Props) {
           variant="outline"
           size="sm"
           onClick={() => {
+            setError(null);
             setPhase("confirming");
           }}
         >
@@ -65,6 +66,7 @@ export default function AbandonButton({ sessionId }: Props) {
           size="sm"
           disabled={submitting}
           onClick={() => {
+            setError(null);
             setPhase("idle");
           }}
         >
