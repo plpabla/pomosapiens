@@ -120,7 +120,11 @@ const energyColorClass: Record<string, string> = {
                 <li>
                   <Card className="border-charred bg-ember text-off-white gap-2 px-5 py-4 shadow-none">
                     <div class="flex items-center justify-between">
-                      <LocalDateTime iso={session.started_at} className="text-off-white/70 text-sm" client:load />
+                      <LocalDateTime
+                        iso={session.started_at}
+                        className="text-off-white/70 text-sm"
+                        client:only="react"
+                      />
                       <span class:list={["text-xs font-semibold uppercase", energyClass]}>{session.energy_level}</span>
                     </div>
                     <div class="flex items-center justify-between">
