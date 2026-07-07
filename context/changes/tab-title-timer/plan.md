@@ -292,12 +292,12 @@ None. No data or schema changes.
 
 #### Automated
 
-- [x] 3.1 Unit tests pass: `npm test`
-- [x] 3.2 SessionRunner test asserts hidden-break defers navigation + blinks; refocus navigates; visible-break unchanged
-- [x] 3.3 Lint passes: `npm run lint`
+- [x] 3.1 Unit tests pass: `npm test` — 9893100
+- [x] 3.2 SessionRunner test asserts hidden-break defers navigation + blinks; refocus navigates; visible-break unchanged — 9893100
+- [x] 3.3 Lint passes: `npm run lint` — 9893100
 
 #### Manual
 
-- [x] 3.4 Backgrounded tab blinks `Break over!` ↔ `⏰ ⏰ ⏰` on break end, no navigation
-- [x] 3.5 Refocus stops blinking and navigates to the dashboard
-- [x] 3.6 Break ending on a visible tab navigates to the dashboard as before
+- [x] 3.4 Backgrounded tab blinks `Break over!` ↔ `⏰ ⏰ ⏰` on break end, no navigation — 9893100
+- [x] 3.5 Refocus stops blinking and navigates to the dashboard — 9893100
+- [x] 3.6 Break ending on a visible tab navigates to the dashboard as before — 9893100
