@@ -255,6 +255,10 @@ None. No data or schema changes.
 - Integration point: `src/components/session/SessionRunner.tsx`
 - Test patterns: `tests/unit/timer/useBreakTimer.test.ts`, `tests/unit/session/SessionRunner.break.test.tsx`
 
+## Addenda
+
+- **A-01 (2026-07-07, impl-review):** The Phase 1 running-title string builder was extracted into a new module `src/lib/timer/tabTitle.ts` (`getRunningTabTitle`) with its own `tests/unit/timer/tabTitle.test.ts`, rather than computed inline in `SessionRunner` as originally written. Accepted: it makes the builder unit-testable and keeps `SessionRunner` lean. Alert-wording constants (`FOCUS_DONE`, `BREAK_OVER`) remain in `SessionRunner`.
+
 ## Progress
 
 > Convention: `- [ ]` pending, `- [x]` done. Append ` — <commit sha>` when a step lands. Do not rename step titles. See `references/progress-format.md`.

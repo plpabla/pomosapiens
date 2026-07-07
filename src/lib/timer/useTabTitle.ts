@@ -7,10 +7,15 @@ export function useTabTitle(input: {
 }): void {
   const defaultRef = useRef("");
   const onDismissRef = useRef(input.onAlertDismiss);
+  const titleRef = useRef(input.title);
 
   useEffect(() => {
     onDismissRef.current = input.onAlertDismiss;
   }, [input.onAlertDismiss]);
+
+  useEffect(() => {
+    titleRef.current = input.title;
+  }, [input.title]);
 
   useEffect(() => {
     defaultRef.current = document.title;
@@ -26,7 +31,10 @@ export function useTabTitle(input: {
   const alertA = input.alert?.[0] ?? null;
   const alertB = input.alert?.[1] ?? null;
   useEffect(() => {
-    if (alertA === null || alertB === null) return;
+    if (alertA === null || alertB === null) {
+      document.title = titleRef.current ?? defaultRef.current;
+      return;
+    }
     const a = alertA;
     const b = alertB;
     if (!document.hidden) {
