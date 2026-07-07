@@ -278,26 +278,26 @@ None. No data or schema changes.
 
 #### Automated
 
-- [x] 2.1 Unit tests pass: `npm test`
-- [x] 2.2 Hook test asserts blink-while-hidden, refocus stop+dismiss, and visible-at-start immediate dismiss
-- [x] 2.3 Lint passes: `npm run lint`
+- [x] 2.1 Unit tests pass: `npm test` — 7e0efb1
+- [x] 2.2 Hook test asserts blink-while-hidden, refocus stop+dismiss, and visible-at-start immediate dismiss — 7e0efb1
+- [x] 2.3 Lint passes: `npm run lint` — 7e0efb1
 
 #### Manual
 
-- [ ] 2.4 Backgrounded tab blinks `✅ Focus done!` ↔ `⏰ ⏰ ⏰` when focus ends
-- [ ] 2.5 Refocus stops blinking and restores `Session`, rating screen shown
-- [ ] 2.6 Focus end while watching / early stop -> no blink
+- [x] 2.4 Backgrounded tab blinks `✅ Focus done!` ↔ `⏰ ⏰ ⏰` when focus ends — 7e0efb1
+- [x] 2.5 Refocus stops blinking and restores `Session`, rating screen shown — 7e0efb1
+- [x] 2.6 Focus end while watching / early stop -> no blink — 7e0efb1
 
 ### Phase 3: Break-done blink alert
 
 #### Automated
 
-- [ ] 3.1 Unit tests pass: `npm test`
-- [ ] 3.2 SessionRunner test asserts hidden-break defers navigation + blinks; refocus navigates; visible-break unchanged
-- [ ] 3.3 Lint passes: `npm run lint`
+- [x] 3.1 Unit tests pass: `npm test`
+- [x] 3.2 SessionRunner test asserts hidden-break defers navigation + blinks; refocus navigates; visible-break unchanged
+- [x] 3.3 Lint passes: `npm run lint`
 
 #### Manual
 
-- [ ] 3.4 Backgrounded tab blinks `Break over!` ↔ `⏰ ⏰ ⏰` on break end, no navigation
-- [ ] 3.5 Refocus stops blinking and navigates to the dashboard
-- [ ] 3.6 Break ending on a visible tab navigates to the dashboard as before
+- [x] 3.4 Backgrounded tab blinks `Break over!` ↔ `⏰ ⏰ ⏰` on break end, no navigation
+- [x] 3.5 Refocus stops blinking and navigates to the dashboard
+- [x] 3.6 Break ending on a visible tab navigates to the dashboard as before

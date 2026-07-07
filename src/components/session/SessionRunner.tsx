@@ -16,6 +16,7 @@ interface Props {
 }
 
 const FOCUS_DONE = ["✅ Focus done!", "⏰ ⏰ ⏰"] as const;
+const BREAK_OVER = ["Break over!", "⏰ ⏰ ⏰"] as const;
 
 export default function SessionRunner({
   sessionId,
@@ -33,20 +34,24 @@ export default function SessionRunner({
   const [internalPhase, setInternalPhase] = useState<"rating" | "running_break">("rating");
   const [breakStartedAtMs, setBreakStartedAtMs] = useState<number | null>(null);
   const [breakComplete, setBreakComplete] = useState(false);
+  const [breakDoneWhileHidden, setBreakDoneWhileHidden] = useState(false);
 
   const { remaining: breakRemaining } = useBreakTimer({
     breakStartedAtMs,
     breakSeconds: breakSeconds ?? 0,
     audioRef,
     onComplete: () => {
+      setBreakDoneWhileHidden(document.hidden);
       setBreakComplete(true);
     },
   });
 
   // useBreakTimer already called play(); wait for the chime to finish before
-  // navigating so the audio is not cut off by page unload.
+  // navigating so the audio is not cut off by page unload. Hidden-tab
+  // completions defer navigation to the alert dismiss instead (see alert below).
   useEffect(() => {
     if (!breakComplete) return;
+    if (breakDoneWhileHidden) return;
     const audio = audioRef.current;
     if (!audio) {
       window.location.assign("/dashboard");
@@ -64,11 +69,22 @@ export default function SessionRunner({
       clearTimeout(timeoutId);
       audio.removeEventListener("ended", go);
     };
-  }, [breakComplete, audioRef]);
+  }, [breakComplete, breakDoneWhileHidden, audioRef]);
 
   const title = getRunningTabTitle({ phase, internalPhase, mode, remaining, elapsed, breakRemaining });
-  const alert = phase === "rating" && internalPhase === "rating" ? FOCUS_DONE : null;
-  useTabTitle({ title, alert });
+  const alert =
+    breakComplete && breakDoneWhileHidden
+      ? BREAK_OVER
+      : phase === "rating" && internalPhase === "rating"
+        ? FOCUS_DONE
+        : null;
+  const onAlertDismiss =
+    breakComplete && breakDoneWhileHidden
+      ? () => {
+          window.location.assign("/dashboard");
+        }
+      : undefined;
+  useTabTitle({ title, alert, onAlertDismiss });
 
   async function submitRating(rating: number | null, note: string | null) {
     if (stoppedAtMs === null) return;
