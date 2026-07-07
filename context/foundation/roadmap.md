@@ -36,7 +36,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session            | S-01          | FR-004, FR-005, FR-010                                | done     |
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | done     |
 | S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | done     |
-| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | proposed |
+| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | done     |
 | S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | proposed |
 
 ## Baseline
@@ -147,6 +147,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - ~~What happens to the API's 2-hour lower-bound plausibility check on `ended_at` once the 50-min threshold is removed?~~ Resolved in S-03 Phase 8: the 2-hour PATCH window guards stale-tab backdating (`ended_at ≈ now`), not session duration -- any session length PATCHes cleanly. The 50-min redirect was removed; the PATCH guard is unchanged.
   - Does the "Abandon" action call the existing PATCH `/api/sessions/[id]` with `focus_rating: null` (treating abandon as "skip rating"), or does it need a separate endpoint / a new `abandoned` column? Decide at plan time.
 - **Risk:** Small surface -- three files touched (dashboard.astro, session/[id].astro, possibly api/sessions/[id].ts). No schema change required. Primary risk is forgetting the abandoned-guard in `[id].astro` and breaking replay-protection behavior for already-ended sessions; keep that guard untouched.
+- **Status:** done
 
 ### S-06: Tab title live timer
 
@@ -160,7 +161,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Title format while running -- e.g. `[25:00] PomoSapiens` vs `Focus 25:00 | PomoSapiens` -- and whether to show a distinct label during the break phase. -- Owner: project author. Block: no.
   - Whether the title restores to its default value on session end, on early stop (FR-012), and on page navigation away from the timer. -- Owner: implementer. Block: no.
 - **Risk:** Pure client-side work (document.title updated in a React useEffect inside the running timer component). The only realistic failure mode is forgetting to clean up the effect on unmount, leaving a stale time string in the tab after the session ends. No backend changes; no new schema; no new routes.
-- **Status:** proposed
+- **Status:** done
 
 ### S-07: Edit and delete logged sessions
 
@@ -238,3 +239,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **S-03: edit the three preset slots and choose count-up vs preset per session** — Archived 2026-07-04 → `context/archive/2026-06-28-timer-presets/`. Lesson: —.
 - **S-04: User can add an optional free-text note to a session at the end (or skip it) and see a chart of focus-rating over time on the history view, alongside the existing session list.** — Archived 2026-07-04 → `context/archive/2026-07-04-session-notes-and-chart/`. Lesson: —.
 - **S-05: abandon an in-progress session explicitly via a dashboard button** — Archived 2026-07-07 → `context/archive/2026-07-06-explicit-session-abandon/`. Lesson: —.
+- **S-06: see the live timer countdown in the browser tab title while a session is running** — Archived 2026-07-07 → `context/archive/2026-07-07-tab-title-timer/`. Lesson: —.
