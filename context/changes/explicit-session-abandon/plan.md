@@ -407,10 +407,10 @@ Prod deploy is Phase 6: `npx supabase db push` to prod, BEFORE running `npx wran
 
 #### Automated
 
-- [ ] 6.1 `npm run db:types:prod` produces no diff against committed `database.types.ts`
+- [x] 6.1 `npm run db:types:prod` produces no diff against committed `database.types.ts`
 
 #### Manual
 
-- [ ] 6.2 `sessions_delete_own` DELETE policy confirmed in prod Supabase Studio
-- [ ] 6.3 Migration pushed to prod (`npx supabase db push`) BEFORE `npx wrangler deploy`
-- [ ] 6.4 Live prod smoke: abandon a real session on the deployed site, confirm it disappears from `/dashboard`
+- [x] 6.2 `sessions_delete_own` DELETE policy confirmed in prod Supabase Studio
+- [x] 6.3 Migration pushed to prod (`npx supabase db push`) BEFORE `npx wrangler deploy`
+- [x] 6.4 Live prod smoke: abandon a real session on the deployed site, confirm it disappears from `/dashboard`
