@@ -1,7 +1,7 @@
 ---
 change_id: tab-title-timer
 title: Show live timer countdown in the browser tab title during a session
-status: planned
+status: implementing
 created: 2026-07-07
 updated: 2026-07-07
 archived_at: null

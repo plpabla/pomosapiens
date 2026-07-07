@@ -15,7 +15,7 @@ While a study session is running, reflect the live timer value in the browser ta
 
 ## Desired End State
 
-While the focus phase runs, the tab reads `⏱ MM:SS – PomoSapiens` (countdown for presets, elapsed for count-up). During a break it reads `☕ MM:SS – PomoSapiens`. When the timer stops (natural end, early stop, or unmount) the title reverts to `Session`. If the focus phase ends while the tab is hidden, the title blinks `✅ Focus done!` ↔ `⏰ ⏰ ⏰` until the user refocuses the tab, then restores. If the break ends while the tab is hidden, the title blinks `Break over!` ↔ `⏰ ⏰ ⏰` and dashboard navigation is deferred until the user refocuses, then it navigates.
+While the focus phase runs, the tab reads `⏱ MM:SS – PomoSapiens` (countdown for presets, elapsed for count-up). During a break it reads `🌴 MM:SS – PomoSapiens`. When the timer stops (natural end, early stop, or unmount) the title reverts to `Session`. If the focus phase ends while the tab is hidden, the title blinks `✅ Focus done!` ↔ `⏰ ⏰ ⏰` until the user refocuses the tab, then restores. If the break ends while the tab is hidden, the title blinks `Break over!` ↔ `⏰ ⏰ ⏰` and dashboard navigation is deferred until the user refocuses, then it navigates.
 
 Verify: run a preset session, watch the tab countdown; switch tabs during focus and let it end -> the backgrounded tab blinks the focus-done alert; return -> it stops. Take a break, background the tab, let the break end -> blinks the break-over alert and does NOT navigate; return -> it stops blinking and lands on the dashboard.
 
@@ -72,9 +72,9 @@ Extract `formatTime`, add the `useTabTitle` hook with plain-title + default-rest
 
 **File**: `src/components/session/SessionRunner.tsx`
 
-**Intent**: Compute the running title string and pass it to `useTabTitle`. Focus and count-up use the `⏱` marker; break uses `☕`. All other phases pass `title: null` (restore default).
+**Intent**: Compute the running title string and pass it to `useTabTitle`. Focus and count-up use the `⏱` marker; break uses `🌴`. All other phases pass `title: null` (restore default).
 
-**Contract**: While `phase === "running"`, `title = "⏱ " + formatTime(mode === "count_up" ? elapsed : remaining) + " – PomoSapiens"`. While `internalPhase === "running_break"`, `title = "☕ " + formatTime(breakRemaining) + " – PomoSapiens"`. Otherwise `title = null`. Call `useTabTitle({ title })` unconditionally at the top level (hooks rule).
+**Contract**: While `phase === "running"`, `title = "⏱ " + formatTime(mode === "count_up" ? elapsed : remaining) + " – PomoSapiens"`. While `internalPhase === "running_break"`, `title = "🌴 " + formatTime(breakRemaining) + " – PomoSapiens"`. Otherwise `title = null`. Call `useTabTitle({ title })` unconditionally at the top level (hooks rule).
 
 ### Success Criteria:
 
@@ -82,13 +82,13 @@ Extract `formatTime`, add the `useTabTitle` hook with plain-title + default-rest
 
 - Type checking passes: `npm run lint`
 - Unit tests pass: `npm test`
-- New hook test asserts: running focus sets `⏱ MM:SS – PomoSapiens`; break sets `☕ MM:SS – PomoSapiens`; `title: null` restores the captured default; unmount restores the default.
+- New hook test asserts: running focus sets `⏱ MM:SS – PomoSapiens`; break sets `🌴 MM:SS – PomoSapiens`; `title: null` restores the captured default; unmount restores the default.
 
 #### Manual Verification:
 
 - Start a preset session -> tab shows `⏱` countdown ticking each second.
 - Start a count-up session -> tab shows `⏱` elapsed time counting up.
-- Take a break -> tab shows `☕` break countdown.
+- Take a break -> tab shows `🌴` break countdown.
 - Let focus end / stop early / navigate away -> tab title returns to `Session` (no stale time).
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause for manual confirmation before proceeding.
@@ -233,7 +233,7 @@ Reuse the alert mechanism for break completion: if the break ends while the tab 
 
 1. Preset session: confirm `⏱` countdown in the tab, ticking each second.
 2. Count-up session: confirm `⏱` elapsed counting up.
-3. Break: confirm `☕` break countdown.
+3. Break: confirm `🌴` break countdown.
 4. Background during focus end: confirm focus-done blink; refocus stops it and restores `Session`.
 5. Background during break end: confirm break-over blink, no navigation; refocus stops it and navigates to the dashboard.
 6. Early stop and plain navigation: confirm the title always returns to `Session`, never stale.
@@ -263,15 +263,15 @@ None. No data or schema changes.
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `npm run lint`
-- [ ] 1.2 Unit tests pass: `npm test`
-- [ ] 1.3 Hook test asserts running focus / break titles, null-restore, and unmount-restore
+- [x] 1.1 Type checking passes: `npm run lint`
+- [x] 1.2 Unit tests pass: `npm test`
+- [x] 1.3 Hook test asserts running focus / break titles, null-restore, and unmount-restore
 
 #### Manual
 
 - [ ] 1.4 Preset session shows `⏱` countdown ticking each second
 - [ ] 1.5 Count-up session shows `⏱` elapsed counting up
-- [ ] 1.6 Break shows `☕` break countdown
+- [ ] 1.6 Break shows `🌴` break countdown
 - [ ] 1.7 Focus end / stop early / navigate restores title to `Session`
 
 ### Phase 2: Focus-done blink alert

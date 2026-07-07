@@ -3,6 +3,9 @@ import { Button } from "@/components/ui/button";
 import FocusRating from "@/components/session/FocusRating";
 import { useFocusTimer } from "@/lib/timer/useFocusTimer";
 import { useBreakTimer } from "@/lib/timer/useBreakTimer";
+import { formatTime } from "@/lib/timer/formatTime";
+import { useTabTitle } from "@/lib/timer/useTabTitle";
+import { getRunningTabTitle } from "@/lib/timer/tabTitle";
 
 interface Props {
   sessionId: string;
@@ -10,13 +13,6 @@ interface Props {
   focusSeconds: number;
   mode?: "preset" | "count_up";
   breakSeconds?: number | null;
-}
-
-function formatTime(seconds: number) {
-  const s = Math.max(0, seconds);
-  const m = Math.floor(s / 60);
-  const rem = s % 60;
-  return `${String(m).padStart(2, "0")}:${String(rem).padStart(2, "0")}`;
 }
 
 export default function SessionRunner({
@@ -67,6 +63,9 @@ export default function SessionRunner({
       audio.removeEventListener("ended", go);
     };
   }, [breakComplete, audioRef]);
+
+  const title = getRunningTabTitle({ phase, internalPhase, mode, remaining, elapsed, breakRemaining });
+  useTabTitle({ title });
 
   async function submitRating(rating: number | null, note: string | null) {
     if (stoppedAtMs === null) return;
