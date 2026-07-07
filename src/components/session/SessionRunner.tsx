@@ -15,6 +15,8 @@ interface Props {
   breakSeconds?: number | null;
 }
 
+const FOCUS_DONE = ["✅ Focus done!", "⏰ ⏰ ⏰"] as const;
+
 export default function SessionRunner({
   sessionId,
   startedAtMs,
@@ -65,7 +67,8 @@ export default function SessionRunner({
   }, [breakComplete, audioRef]);
 
   const title = getRunningTabTitle({ phase, internalPhase, mode, remaining, elapsed, breakRemaining });
-  useTabTitle({ title });
+  const alert = phase === "rating" && internalPhase === "rating" ? FOCUS_DONE : null;
+  useTabTitle({ title, alert });
 
   async function submitRating(rating: number | null, note: string | null) {
     if (stoppedAtMs === null) return;

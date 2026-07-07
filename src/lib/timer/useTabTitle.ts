@@ -1,7 +1,16 @@
 import { useEffect, useRef } from "react";
 
-export function useTabTitle(input: { title: string | null }): void {
+export function useTabTitle(input: {
+  title: string | null;
+  alert?: readonly [string, string] | null;
+  onAlertDismiss?: () => void;
+}): void {
   const defaultRef = useRef("");
+  const onDismissRef = useRef(input.onAlertDismiss);
+
+  useEffect(() => {
+    onDismissRef.current = input.onAlertDismiss;
+  }, [input.onAlertDismiss]);
 
   useEffect(() => {
     defaultRef.current = document.title;
@@ -13,4 +22,35 @@ export function useTabTitle(input: { title: string | null }): void {
   useEffect(() => {
     document.title = input.title ?? defaultRef.current;
   }, [input.title]);
+
+  const alertA = input.alert?.[0] ?? null;
+  const alertB = input.alert?.[1] ?? null;
+  useEffect(() => {
+    if (alertA === null || alertB === null) return;
+    const a = alertA;
+    const b = alertB;
+    if (!document.hidden) {
+      document.title = defaultRef.current;
+      onDismissRef.current?.();
+      return;
+    }
+    let showFirst = false;
+    document.title = a;
+    const id = setInterval(() => {
+      showFirst = !showFirst;
+      document.title = showFirst ? b : a;
+    }, 1000);
+    const onVis = () => {
+      if (document.hidden) return;
+      clearInterval(id);
+      document.title = defaultRef.current;
+      document.removeEventListener("visibilitychange", onVis);
+      onDismissRef.current?.();
+    };
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, [alertA, alertB]);
 }

@@ -263,24 +263,24 @@ None. No data or schema changes.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npm run lint`
-- [x] 1.2 Unit tests pass: `npm test`
-- [x] 1.3 Hook test asserts running focus / break titles, null-restore, and unmount-restore
+- [x] 1.1 Type checking passes: `npm run lint` — 4288365
+- [x] 1.2 Unit tests pass: `npm test` — 4288365
+- [x] 1.3 Hook test asserts running focus / break titles, null-restore, and unmount-restore — 4288365
 
 #### Manual
 
-- [ ] 1.4 Preset session shows `⏱` countdown ticking each second
-- [ ] 1.5 Count-up session shows `⏱` elapsed counting up
-- [ ] 1.6 Break shows `🌴` break countdown
-- [ ] 1.7 Focus end / stop early / navigate restores title to `Session`
+- [x] 1.4 Preset session shows `⏱` countdown ticking each second — 4288365
+- [x] 1.5 Count-up session shows `⏱` elapsed counting up — 4288365
+- [x] 1.6 Break shows `🌴` break countdown — 4288365
+- [x] 1.7 Focus end / stop early / navigate restores title to `Session` — 4288365
 
 ### Phase 2: Focus-done blink alert
 
 #### Automated
 
-- [ ] 2.1 Unit tests pass: `npm test`
-- [ ] 2.2 Hook test asserts blink-while-hidden, refocus stop+dismiss, and visible-at-start immediate dismiss
-- [ ] 2.3 Lint passes: `npm run lint`
+- [x] 2.1 Unit tests pass: `npm test`
+- [x] 2.2 Hook test asserts blink-while-hidden, refocus stop+dismiss, and visible-at-start immediate dismiss
+- [x] 2.3 Lint passes: `npm run lint`
 
 #### Manual
 
