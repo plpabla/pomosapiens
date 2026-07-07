@@ -1,10 +1,10 @@
 ---
 change_id: explicit-session-abandon
 title: Explicit session abandon via dashboard button; remove time-based auto-detect
-status: impl_reviewed
+status: archived
 created: 2026-07-06
-updated: 2026-07-06
-archived_at: null
+updated: 2026-07-07
+archived_at: 2026-07-07T17:27:46Z
 ---
 
 ## Notes
