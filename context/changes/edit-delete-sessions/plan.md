@@ -19,7 +19,7 @@ Both operations are owner-scoped at the RLS layer and re-enforced at the API lay
 - **RLS** `sessions_update_own` / `sessions_delete_own` are owner-scoped and column-wide (`...182506_...sql:142-149`). Per **L-01**, column-level immutability is the API's job: Zod default-strips unknown keys + a hand-picked `.update({...})` pins the write set. Both layers must hold.
 - **Dashboard** (`src/pages/dashboard.astro`) is Astro SSR with React islands (`FocusRatingChart`, `AbandonButton`, `LocalDateTime`). It renders the history list and derives the focus-rating chart from current rows on each SSR load — so edits/deletes reflect automatically with no cache to invalidate.
 - **Picker-loading pattern** exists in `EnergyPicker.tsx:92-106`: `fetch("/api/topics")` + `fetch("/api/material-formats")`, filter `archived_at === null`, render shadcn `Select`s. The edit modal reuses this verbatim.
-- **UI primitives** available: `dialog`, `input`, `label`, `textarea`, `select` under `src/components/ui/`. `FocusRating.tsx` is the existing 1–5 rating input.
+- **UI primitives** available: `dialog`, `input`, `label`, `textarea`, `select` under `src/components/ui/`. Note: `FocusRating.tsx` is **not** a reusable field input — it is a full-screen session-end view (renders `min-h-screen`, owns its own note `Textarea`, submits immediately via `onSubmit` on tap, then flips to a "Session saved" screen with navigation buttons). The modal needs a small inline 1–5 selector; only its rating-button markup (`FocusRating.tsx:132-146`) is liftable.
 
 ## Desired End State
 
@@ -154,7 +154,7 @@ Add an `EditSessionDialog` island opened from an **Edit** control on completed h
 
 **Intent**: A React island that renders an Edit trigger button and a shadcn `Dialog` form pre-filled with the session's current values, letting the user correct duration (minutes) + energy + topic + material format + focus rating + note, then `PUT`s the change and reloads.
 
-**Contract**: Props = the row's current values (`id`, `startedAt`, `durationSeconds`, `energyLevel`, `topicId`, `materialFormatId`, `focusRating`, `note`). On open, fetch topics + material-formats and filter `archived_at === null` (reuse `EnergyPicker.tsx:92-106` pattern). Form controls: duration `Input` in minutes (default `Math.round(durationSeconds / 60)`), energy `Select`, topic `Select` (with a "No topic" sentinel like EnergyPicker's `NONE`), format `Select` (same sentinel), focus rating (reuse `FocusRating` interaction or a 1–5 selector with a skip/none option), note `Textarea`. On save: `PUT /api/sessions/${id}` with body `{ duration_seconds: minutes * 60, energy_level, topic_id, material_format_id, focus_rating, note }`; on success `window.location.reload()`; on error show `ServerError`. Use accessible labels (`getByLabel`/`getByRole`-friendly) so e2e can target controls without CSS selectors.
+**Contract**: Props = the row's current values (`id`, `startedAt`, `durationSeconds`, `energyLevel`, `topicId`, `materialFormatId`, `focusRating`, `note`). On open, fetch topics + material-formats and filter `archived_at === null` (reuse `EnergyPicker.tsx:92-106` pattern). Form controls: duration `Input` in minutes (default `Math.round(durationSeconds / 60)`) — track whether the user actually edited this field (a "dirty" bit); if untouched, submit the **original `durationSeconds`** unchanged so a no-op save is lossless and sub-minute rows aren't silently rounded (a 90s row must not become 120s, and a 10s row's `Math.round → 0` must not produce a 400), energy `Select`, topic `Select` (with a "No topic" sentinel like EnergyPicker's `NONE`), format `Select` (same sentinel), focus rating (a small inline 1–5 selector with a skip/none option — lift the rating-button markup from `FocusRating.tsx:132-146`; do **not** embed the `FocusRating` component, which is a full-screen submit-on-tap terminal view), note `Textarea`. On save: `PUT /api/sessions/${id}` with body `{ duration_seconds: durationDirty ? minutes * 60 : durationSeconds, energy_level, topic_id, material_format_id, focus_rating, note }`; on success `window.location.reload()`; on error show `ServerError`. Use accessible labels (`getByLabel`/`getByRole`-friendly) so e2e can target controls without CSS selectors.
 
 #### 2. Wire Edit control into completed rows
 
@@ -162,7 +162,7 @@ Add an `EditSessionDialog` island opened from an **Edit** control on completed h
 
 **Intent**: Render the edit trigger on completed rows only, passing the row's current values; in-progress rows are unchanged.
 
-**Contract**: In the `status === "done"` branch of the row footer, render `<EditSessionDialog ... client:load />` with the row's fields (the dashboard `select` already includes `energy_level`, `duration_seconds`, `focus_rating`, `ended_at`, `timer_mode`, `note`). Extend the SSR `select` to also fetch `topic_id` and `material_format_id` (currently only joined `topic:topics(name)` / `material_format:material_formats(name)` are selected) so the modal can pre-select them. Keep the existing in-progress `AbandonButton` block untouched.
+**Contract**: In the `status === "done"` branch of the row footer, render `<EditSessionDialog ... client:visible />` with the row's fields (use `client:visible`, not `client:load`, so up to 50 rows don't eagerly hydrate ~100 islands on page load) (the dashboard `select` already includes `energy_level`, `duration_seconds`, `focus_rating`, `ended_at`, `timer_mode`, `note`). Extend the SSR `select` to also fetch `topic_id` and `material_format_id` (currently only joined `topic:topics(name)` / `material_format:material_formats(name)` are selected) so the modal can pre-select them. Keep the existing in-progress `AbandonButton` block untouched.
 
 #### 3. Edit e2e spec
 
@@ -213,7 +213,7 @@ Expose the existing DELETE endpoint on completed history rows via a confirm-guar
 
 **Intent**: Render the delete control on completed rows alongside Edit; in-progress rows keep Abandon only.
 
-**Contract**: In the `status === "done"` footer (next to `EditSessionDialog`), render `<DeleteSessionButton sessionId={session.id} client:load />`. In-progress `AbandonButton` block unchanged.
+**Contract**: In the `status === "done"` footer (next to `EditSessionDialog`), render `<DeleteSessionButton sessionId={session.id} client:visible />` (`client:visible` for the same hydration reason as `EditSessionDialog`). In-progress `AbandonButton` block unchanged.
 
 #### 3. Delete e2e spec
 
@@ -260,7 +260,7 @@ Expose the existing DELETE endpoint on completed history rows via a confirm-guar
 
 ## Performance Considerations
 
-Negligible. The `PUT` adds one SELECT + one UPDATE per edit (indexed by PK + `user_id`). The dashboard `select` gains two scalar columns (`topic_id`, `material_format_id`). No new N+1 or client polling.
+Negligible. The `PUT` adds one SELECT + one UPDATE per edit (indexed by PK + `user_id`). The dashboard `select` gains two scalar columns (`topic_id`, `material_format_id`). No new N+1 or client polling. The per-row Edit/Delete controls use `client:visible` (not `client:load`) so a 50-row history doesn't eagerly hydrate ~100 islands; picker fetches fire only on modal open.
 
 ## Migration Notes
 
@@ -322,4 +322,4 @@ None. No schema change — RLS `sessions_update_own` / `sessions_delete_own` alr
 
 - [ ] 3.4 Completed row shows Delete requiring a confirm step before removal
 - [ ] 3.5 Confirming removes the row from history and chart after reload
-- [ ] 3.6 In-progress rows still show only Abandon
+- [ ] 3.6 Deleting is not possible cross-user; the Delete control only appears on the owner's own rows
