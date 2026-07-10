@@ -34,8 +34,13 @@ test("dashboard Abandon control: two-step confirm deletes an in-progress session
     await expect(page.getByRole("button", { name: "Abandon" })).toHaveCount(1);
     await expect(page.getByText("★ 4 / 5")).toBeVisible();
 
-    await page.getByRole("button", { name: "Abandon" }).click();
-    await expect(page.getByRole("button", { name: "Confirm?" })).toBeVisible();
+    // AbandonButton is a client:load island -- the DOM node exists (and is clickable)
+    // before React hydration attaches its handler, so retry the click until the
+    // confirm step actually appears rather than assuming the first click landed.
+    await expect(async () => {
+      await page.getByRole("button", { name: "Abandon" }).click();
+      await expect(page.getByRole("button", { name: "Confirm?" })).toBeVisible({ timeout: 1_000 });
+    }).toPass({ timeout: 10_000 });
     const cancelButton = page.getByRole("button", { name: "Cancel" });
     await expect(cancelButton).toBeVisible();
 

@@ -66,7 +66,10 @@ test("session capture flow: dashboard → energy pick → timer → stop early �
     await page.getByRole("button", { name: "Stop early" }).click();
 
     // Step 5: Rating phase -- pick rating 4 (PATCH /api/sessions/[id]).
-    await expect(page.getByRole("heading", { name: "How was your focus?" })).toBeVisible();
+    // Longer timeout: this is a same-island client-side phase transition (not a hydration
+    // race -- SessionRunner is already hydrated by this point), but its re-render can lag
+    // past the default 5s under heavy parallel-worker CPU contention.
+    await expect(page.getByRole("heading", { name: "How was your focus?" })).toBeVisible({ timeout: 10_000 });
     await page.getByRole("button", { name: "4" }).click();
 
     // Step 5b: Session saved summary appears after rating.

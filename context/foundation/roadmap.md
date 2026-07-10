@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-07-07
+updated: 2026-07-10
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -37,7 +37,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | done     |
 | S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | done     |
 | S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | done     |
-| S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | proposed |
+| S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | done     |
 
 ## Baseline
 
@@ -177,7 +177,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Edit UI surface — inline on the dashboard row, a modal, or a dedicated `/session/[id]/edit` page? The existing `/session/[id]` page is the natural host.
   - Whether editing `ended_at` must re-validate against the API's plausibility window (see S-05 unknown) — a corrective edit may legitimately set `ended_at` to a value far from `now()`.
 - **Risk:** Small surface — one or two routes (PATCH and DELETE on `/api/sessions/[id]`; PATCH likely already exists from S-01's focus-rating flow) plus a row-level UI affordance. Primary risk is forgetting that mutations must enforce ownership at the RLS layer, not just at the API layer — the privacy NFR (cross-user leakage) explicitly covers this. Secondary risk: deletion cascading to anything that aggregates sessions (focus-rating chart in S-04) — if S-04 has shipped first, verify the chart re-derives cleanly from current rows. **Scope note (post-S-05):** the `DELETE /api/sessions/[id]` endpoint and the owner-scoped `sessions_delete_own` RLS policy already exist (added by S-05's explicit-abandon flow, fully open — not scoped to in-progress rows). S-07's remaining scope is editing a logged session's fields only; do not re-implement delete.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -191,7 +191,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Implemented                             |
 | S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Implemented                             |
 | S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Implemented                             |
-| S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history      | no                    | Waits on S-01; parallel with S-02..S-06 |
+| S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history      | no                    | Implemented                             |
 
 ## Open Roadmap Questions
 
@@ -218,13 +218,15 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Web Notifications API fallback for focus-end chime** — request `Notification.requestPermission()` inside the "Start session" click and, if granted, fire a system notification at focus-end alongside (or instead of) the `<audio>` chime. Motivation: when the user refreshes the session page mid-session, the reloaded document has no transient user activation and browsers block unmuted `<audio>.play()` at fire-time -- so the chime is silent even though the timer works. A Notification does not require gesture at fire-time and survives refresh, tab-switch, and minimised windows. Why parked: MVP already ships an audible chime on the happy path (no refresh); the refresh-without-interaction hole is real but narrow. Revisit after MVP to close it. Also consider pairing with a purely-visual fallback (S-06 tab-title timer + favicon swap + full-screen "Focus done" banner) that requires no permission.
   **Another option** to consider is to show popup on the page after refresh - it will request user' interaction and unlocks chime (right?)
 - **UI improvements** (small cosmetic changes, bundle together when picked up):
-  - Replace the P1 / P2 / P3 badges in session history with the actual scheduled time, e.g. "25/5" (focus/break); for count-up sessions, "∞" (infinity) is fine.
+  - Replace the P1 / P2 / P3 / ∞ badges in session history with the actual time show as 🍅 - one per 20 min.
   - For count-up sessions, the stop button should read "Stop" instead of "Stop early" (there's no "early" concept without a fixed duration).
   - Default the energy-level picker to "Medium" instead of requiring an explicit pick, to reduce pre-session friction.
   - Move the time badges to sit directly above the "Start" button.
   - Make counter clock much bigger
   - Why parked: cosmetic, low-risk polish with no PRD FR backing; bundle into one small change once picked up rather than trickling in as one-offs.
 - **Re-open running session from a dashboard** - right now if the session window is closed we have no chance to re-open it (as URL contains UUID which is just lost). From dashboard we can only see it is running or we can abandon it. It would be useful just to return to that session. It should be allowed only for running sessions though (In progress state)
+- **Continue focus** - when the session is finished, user can pick also an option to continue - in that case, current session is converted to count-up session and continued (session start time remains as it was). This is needed to protect user' focus and not force him to take a break.
+- **Server-side ownership validation of `topic_id` / `material_format_id` on session writes** — the session write schemas (`createSessionSchema`, and the planned `editSessionSchema` for S-07) validate `topic_id` / `material_format_id` as well-formed UUIDs only, not that the referenced topic/format belongs to the caller. Postgres FK checks bypass RLS, so a user could associate their own session with another user's topic/format UUID (they still can't read that row's name via RLS, so the leak is narrow). Fix would add an owner-scoped existence check (or a trigger/RLS `WITH CHECK`) on both write paths — `POST /api/sessions` and `PUT /api/sessions/[id]`. Why parked: pre-existing behavior shared by the create path, not introduced by S-07; the privacy impact is limited (no cross-user data is readable). Surfaced during the S-07 (`edit-delete-sessions`) plan review; tighten across both write paths together, outside MVP.
 
 ## Bugs to be fixed
 
@@ -240,3 +242,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **S-04: User can add an optional free-text note to a session at the end (or skip it) and see a chart of focus-rating over time on the history view, alongside the existing session list.** — Archived 2026-07-04 → `context/archive/2026-07-04-session-notes-and-chart/`. Lesson: —.
 - **S-05: abandon an in-progress session explicitly via a dashboard button** — Archived 2026-07-07 → `context/archive/2026-07-06-explicit-session-abandon/`. Lesson: —.
 - **S-06: see the live timer countdown in the browser tab title while a session is running** — Archived 2026-07-07 → `context/archive/2026-07-07-tab-title-timer/`. Lesson: —.
+- **S-07: User can delete a logged session from the history list (e.g. a 10-second session started by accident) so it is removed completely from history and from any future focus-rating aggregates. User can also edit a logged session's duration and other captured fields (e.g. correct a count-up session that ran to 3h because the user forgot to stop the clock down to the ~1h that was actually worked). Edits and deletes are scoped to the session's owner via RLS.** — Archived 2026-07-10 → `context/archive/2026-07-08-edit-delete-sessions/`. Lesson: —.
