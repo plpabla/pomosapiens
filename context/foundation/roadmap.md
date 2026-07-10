@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-07-07
+updated: 2026-07-10
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -37,7 +37,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | done     |
 | S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | done     |
 | S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | done     |
-| S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | proposed |
+| S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | done     |
 
 ## Baseline
 
@@ -177,7 +177,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Edit UI surface — inline on the dashboard row, a modal, or a dedicated `/session/[id]/edit` page? The existing `/session/[id]` page is the natural host.
   - Whether editing `ended_at` must re-validate against the API's plausibility window (see S-05 unknown) — a corrective edit may legitimately set `ended_at` to a value far from `now()`.
 - **Risk:** Small surface — one or two routes (PATCH and DELETE on `/api/sessions/[id]`; PATCH likely already exists from S-01's focus-rating flow) plus a row-level UI affordance. Primary risk is forgetting that mutations must enforce ownership at the RLS layer, not just at the API layer — the privacy NFR (cross-user leakage) explicitly covers this. Secondary risk: deletion cascading to anything that aggregates sessions (focus-rating chart in S-04) — if S-04 has shipped first, verify the chart re-derives cleanly from current rows. **Scope note (post-S-05):** the `DELETE /api/sessions/[id]` endpoint and the owner-scoped `sessions_delete_own` RLS policy already exist (added by S-05's explicit-abandon flow, fully open — not scoped to in-progress rows). S-07's remaining scope is editing a logged session's fields only; do not re-implement delete.
-- **Status:** proposed
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -242,3 +242,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **S-04: User can add an optional free-text note to a session at the end (or skip it) and see a chart of focus-rating over time on the history view, alongside the existing session list.** — Archived 2026-07-04 → `context/archive/2026-07-04-session-notes-and-chart/`. Lesson: —.
 - **S-05: abandon an in-progress session explicitly via a dashboard button** — Archived 2026-07-07 → `context/archive/2026-07-06-explicit-session-abandon/`. Lesson: —.
 - **S-06: see the live timer countdown in the browser tab title while a session is running** — Archived 2026-07-07 → `context/archive/2026-07-07-tab-title-timer/`. Lesson: —.
+- **S-07: User can delete a logged session from the history list (e.g. a 10-second session started by accident) so it is removed completely from history and from any future focus-rating aggregates. User can also edit a logged session's duration and other captured fields (e.g. correct a count-up session that ran to 3h because the user forgot to stop the clock down to the ~1h that was actually worked). Edits and deletes are scoped to the session's owner via RLS.** — Archived 2026-07-10 → `context/archive/2026-07-08-edit-delete-sessions/`. Lesson: —.
