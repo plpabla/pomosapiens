@@ -52,7 +52,7 @@ Verify: `npm test` (unit + integration green, including L-01 gate and cross-user
 
 ## Implementation Approach
 
-Backend first (Phase 1): a new `editSessionSchema` and a `PUT` handler on the existing `[id].ts` route, independently verifiable via `npm test`. Then the edit UI (Phase 2): a dashboard modal island reusing the EnergyPicker picker-fetch pattern. Then the delete UI (Phase 3): a confirm-guarded control on logged rows reusing the AbandonButton interaction pattern against the existing DELETE endpoint. Delete is separated because it is pure UI wiring over a shipped endpoint and carries independent risk.
+Backend first (Phase 1): a new `editSessionSchema` and a `PUT` handler on the existing `[id].ts` route, independently verifiable via `npm test`. Then the edit UI (Phase 2): a dashboard modal island reusing the EnergyPicker picker-fetch pattern. Then the delete UI (Phase 3): a confirm-guarded control on logged rows reusing the AbandonButton interaction pattern against the existing DELETE endpoint. Delete is separated because it is pure UI wiring over a shipped endpoint and carries independent risk. Finally, browser E2E (Phase 4): happy-path Playwright specs for both edit and delete, kept in a dedicated phase so it runs through the `/10x-e2e` workflow rather than the UI-implementation workflow.
 
 ## Critical Implementation Details
 
@@ -140,11 +140,11 @@ No plausibility window and no `.is("ended_at", null)` guard — those belong to 
 
 ---
 
-## Phase 2: Dashboard edit modal + edit e2e
+## Phase 2: Dashboard edit modal
 
 ### Overview
 
-Add an `EditSessionDialog` island opened from an **Edit** control on completed history rows, and cover the edit happy path with e2e.
+Add an `EditSessionDialog` island opened from an **Edit** control on completed history rows.
 
 ### Changes Required:
 
@@ -164,20 +164,11 @@ Add an `EditSessionDialog` island opened from an **Edit** control on completed h
 
 **Contract**: In the `status === "done"` branch of the row footer, render `<EditSessionDialog ... client:visible />` with the row's fields (use `client:visible`, not `client:load`, so up to 50 rows don't eagerly hydrate ~100 islands on page load) (the dashboard `select` already includes `energy_level`, `duration_seconds`, `focus_rating`, `ended_at`, `timer_mode`, `note`). Extend the SSR `select` to also fetch `topic_id` and `material_format_id` (currently only joined `topic:topics(name)` / `material_format:material_formats(name)` are selected) so the modal can pre-select them. Keep the existing in-progress `AbandonButton` block untouched.
 
-#### 3. Edit e2e spec
-
-**File**: `tests/e2e/session-edit.spec.ts` (new)
-
-**Intent**: Prove editing a logged session's duration through the modal updates the row.
-
-**Contract**: Seed/create a completed session (reuse `tests/e2e/_fixtures/sessions.ts`), open the dashboard, click **Edit** on the row, change the duration field, save, wait for the row to reflect the new duration (`toBeVisible` on the updated value / `waitForResponse` on the PUT). Locators via `getByRole`/`getByLabel`; unique per-run ids; own cleanup. No `waitForTimeout`.
-
 ### Success Criteria:
 
 #### Automated Verification:
 
 - Linting + types pass: `npm run lint`
-- Edit e2e passes: `npm run test:e2e -- session-edit`
 - Full unit/integration suite still green: `npm test`
 
 #### Manual Verification:
@@ -191,11 +182,11 @@ Add an `EditSessionDialog` island opened from an **Edit** control on completed h
 
 ---
 
-## Phase 3: Delete control on logged rows + delete e2e
+## Phase 3: Delete control on logged rows
 
 ### Overview
 
-Expose the existing DELETE endpoint on completed history rows via a confirm-guarded control, and cover the delete happy path with e2e.
+Expose the existing DELETE endpoint on completed history rows via a confirm-guarded control.
 
 ### Changes Required:
 
@@ -215,9 +206,42 @@ Expose the existing DELETE endpoint on completed history rows via a confirm-guar
 
 **Contract**: In the `status === "done"` footer (next to `EditSessionDialog`), render `<DeleteSessionButton sessionId={session.id} client:visible />` (`client:visible` for the same hydration reason as `EditSessionDialog`). In-progress `AbandonButton` block unchanged.
 
-#### 3. Delete e2e spec
+### Success Criteria:
 
-**File**: `tests/e2e/session-edit.spec.ts` (extend) or `tests/e2e/session-delete.spec.ts` (new)
+#### Automated Verification:
+
+- Linting + types pass: `npm run lint`
+- Full suite green: `npm test`
+
+#### Manual Verification:
+
+- A completed row shows **Delete**; clicking requires a confirm step before removal.
+- Confirming removes the row from history and from the focus-rating chart after reload.
+- Deleting is not possible cross-user (covered by existing DELETE ownership scope; spot-check that the control only appears on the owner's own rows).
+
+**Implementation Note**: After completing this phase and all automated verification passes, pause for manual confirmation.
+
+---
+
+## Phase 4: E2E tests for edit + delete
+
+### Overview
+
+Cover the edit and delete happy paths at the browser level with Playwright specs, once the Phase 2/3 UI is in place. Run this phase through the `/10x-e2e` workflow (risk → seed test + rules → generate → review against the five anti-patterns → verify), not the UI-implementation workflow.
+
+### Changes Required:
+
+#### 1. Edit e2e spec
+
+**File**: `tests/e2e/session-edit.spec.ts` (new)
+
+**Intent**: Prove editing a logged session's duration through the modal updates the row.
+
+**Contract**: Seed/create a completed session (reuse `tests/e2e/_fixtures/sessions.ts`), open the dashboard, click **Edit** on the row, change the duration field, save, wait for the row to reflect the new duration (`toBeVisible` on the updated value / `waitForResponse` on the PUT). Locators via `getByRole`/`getByLabel`; unique per-run ids; own cleanup. No `waitForTimeout`.
+
+#### 2. Delete e2e spec
+
+**File**: `tests/e2e/session-delete.spec.ts` (new)
 
 **Intent**: Prove deleting a logged row removes it from history.
 
@@ -228,16 +252,16 @@ Expose the existing DELETE endpoint on completed history rows via a confirm-guar
 #### Automated Verification:
 
 - Linting + types pass: `npm run lint`
-- Delete e2e passes: `npm run test:e2e -- session-delete` (or the extended edit spec)
-- Full suite green: `npm test`
+- Edit e2e passes: `npm run test:e2e -- session-edit`
+- Delete e2e passes: `npm run test:e2e -- session-delete`
+- Full unit/integration suite still green: `npm test`
 
 #### Manual Verification:
 
-- A completed row shows **Delete**; clicking requires a confirm step before removal.
-- Confirming removes the row from history and from the focus-rating chart after reload.
-- Deleting is not possible cross-user (covered by existing DELETE ownership scope; spot-check that the control only appears on the owner's own rows).
+- Both specs pass against a locally running app on a clean re-run (no cross-test state leakage).
+- Specs use accessibility-first locators and wait on state, not timeouts (spot-check against the five anti-patterns).
 
-**Implementation Note**: After completing this phase and all automated verification passes, pause for manual confirmation.
+**Implementation Note**: This phase depends on Phase 2 and Phase 3 UI being complete. Drive it with the `/10x-e2e` skill.
 
 ---
 
@@ -295,31 +319,43 @@ None. No schema change — RLS `sessions_update_own` / `sessions_delete_own` alr
 - [x] 1.6 Owner `PUT` with new `duration_seconds` returns `{ ok: true }` and row duration matches after reload — d3cdfe7
 - [x] 1.7 `PUT` to an in-progress session returns 404 — d3cdfe7
 
-### Phase 2: Dashboard edit modal + edit e2e
+### Phase 2: Dashboard edit modal
 
 #### Automated
 
 - [ ] 2.1 Linting + types pass: `npm run lint`
-- [ ] 2.2 Edit e2e passes: `npm run test:e2e -- session-edit`
-- [ ] 2.3 Full unit/integration suite still green: `npm test`
+- [ ] 2.2 Full unit/integration suite still green: `npm test`
 
 #### Manual
 
-- [ ] 2.4 Completed row shows Edit; opening pre-fills all current values
-- [ ] 2.5 Changing duration and saving updates displayed duration (and chart if rating changed)
-- [ ] 2.6 Changing topic/format/energy/rating/note persists after reload
-- [ ] 2.7 In-progress rows show only Abandon (no Edit)
+- [ ] 2.3 Completed row shows Edit; opening pre-fills all current values
+- [ ] 2.4 Changing duration and saving updates displayed duration (and chart if rating changed)
+- [ ] 2.5 Changing topic/format/energy/rating/note persists after reload
+- [ ] 2.6 In-progress rows show only Abandon (no Edit)
 
-### Phase 3: Delete control on logged rows + delete e2e
+### Phase 3: Delete control on logged rows
 
 #### Automated
 
 - [ ] 3.1 Linting + types pass: `npm run lint`
-- [ ] 3.2 Delete e2e passes: `npm run test:e2e -- session-delete`
-- [ ] 3.3 Full suite green: `npm test`
+- [ ] 3.2 Full suite green: `npm test`
 
 #### Manual
 
-- [ ] 3.4 Completed row shows Delete requiring a confirm step before removal
-- [ ] 3.5 Confirming removes the row from history and chart after reload
-- [ ] 3.6 Deleting is not possible cross-user; the Delete control only appears on the owner's own rows
+- [ ] 3.3 Completed row shows Delete requiring a confirm step before removal
+- [ ] 3.4 Confirming removes the row from history and chart after reload
+- [ ] 3.5 Deleting is not possible cross-user; the Delete control only appears on the owner's own rows
+
+### Phase 4: E2E tests for edit + delete
+
+#### Automated
+
+- [ ] 4.1 Linting + types pass: `npm run lint`
+- [ ] 4.2 Edit e2e passes: `npm run test:e2e -- session-edit`
+- [ ] 4.3 Delete e2e passes: `npm run test:e2e -- session-delete`
+- [ ] 4.4 Full unit/integration suite still green: `npm test`
+
+#### Manual
+
+- [ ] 4.5 Both specs pass on a clean re-run (no cross-test state leakage)
+- [ ] 4.6 Specs use accessibility-first locators and wait on state, not timeouts

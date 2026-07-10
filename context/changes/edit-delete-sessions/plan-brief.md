@@ -41,11 +41,12 @@ New `PUT` handler on the existing `[id].ts` route: SELECT the row's `started_at`
 | Phase                                   | What it delivers                                | Key risk                                                        |
 | --------------------------------------- | ----------------------------------------------- | --------------------------------------------------------------- |
 | 1. Edit endpoint + schema + backend tests | `PUT` + `editSessionSchema`, unit + integration | Column-scope slip (L-01) or writing generated `duration_seconds` |
-| 2. Edit modal + edit e2e                | Dashboard edit dialog                           | Pre-fill/persist correctness across six fields                  |
-| 3. Delete control + delete e2e          | Confirm-guarded delete on logged rows           | Accidental deletion; only UI wiring (endpoint shipped)          |
+| 2. Edit modal                           | Dashboard edit dialog                           | Pre-fill/persist correctness across six fields                  |
+| 3. Delete control                       | Confirm-guarded delete on logged rows           | Accidental deletion; only UI wiring (endpoint shipped)          |
+| 4. E2E tests (edit + delete)            | Playwright happy-path specs, via `/10x-e2e`     | Flaky locators/timing; depends on Phase 2/3 UI being complete   |
 
-**Prerequisites:** S-01 (shipped). DELETE endpoint + RLS already present.
-**Estimated effort:** ~2–3 sessions across 3 phases.
+**Prerequisites:** S-01 (shipped). DELETE endpoint + RLS already present. Phase 4 depends on Phase 2/3.
+**Estimated effort:** ~3–4 sessions across 4 phases.
 
 ## Open Risks & Assumptions
 
