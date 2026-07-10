@@ -191,7 +191,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Implemented                             |
 | S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Implemented                             |
 | S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Implemented                             |
-| S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history      | no                    | Waits on S-01; parallel with S-02..S-06 |
+| S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history      | no                    | Implemented                             |
 
 ## Open Roadmap Questions
 
