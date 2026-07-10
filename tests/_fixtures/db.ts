@@ -5,6 +5,7 @@ export interface SessionRow {
   user_id: string;
   started_at: string;
   ended_at: string | null;
+  duration_seconds: number | null;
   energy_level: "low" | "medium" | "high";
   focus_rating: number | null;
   note: string | null;
@@ -32,7 +33,7 @@ export async function readSession(id: string): Promise<SessionRow> {
   const { data, error } = await supabase
     .from("sessions")
     .select(
-      "id, user_id, started_at, ended_at, energy_level, focus_rating, note, topic_id, material_format_id, timer_mode, planned_focus_seconds, planned_break_seconds",
+      "id, user_id, started_at, ended_at, duration_seconds, energy_level, focus_rating, note, topic_id, material_format_id, timer_mode, planned_focus_seconds, planned_break_seconds",
     )
     .eq("id", id)
     .single();
