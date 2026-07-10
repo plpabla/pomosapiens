@@ -284,16 +284,16 @@ None. No schema change — RLS `sessions_update_own` / `sessions_delete_own` alr
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npm run lint`
-- [x] 1.2 Unit tests pass: `npm test -- tests/unit/schemas/session.test.ts`
-- [x] 1.3 Integration tests pass: `npm test -- tests/integration/api/sessions.edit.test.ts`
-- [x] 1.4 Full suite green: `npm test`
-- [x] 1.5 Linting passes: `npm run lint`
+- [x] 1.1 Type checking passes: `npm run lint` — d3cdfe7
+- [x] 1.2 Unit tests pass: `npm test -- tests/unit/schemas/session.test.ts` — d3cdfe7
+- [x] 1.3 Integration tests pass: `npm test -- tests/integration/api/sessions.edit.test.ts` — d3cdfe7
+- [x] 1.4 Full suite green: `npm test` — d3cdfe7
+- [x] 1.5 Linting passes: `npm run lint` — d3cdfe7
 
 #### Manual
 
-- [x] 1.6 Owner `PUT` with new `duration_seconds` returns `{ ok: true }` and row duration matches after reload
-- [x] 1.7 `PUT` to an in-progress session returns 404
+- [x] 1.6 Owner `PUT` with new `duration_seconds` returns `{ ok: true }` and row duration matches after reload — d3cdfe7
+- [x] 1.7 `PUT` to an in-progress session returns 404 — d3cdfe7
 
 ### Phase 2: Dashboard edit modal + edit e2e
 
