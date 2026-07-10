@@ -339,14 +339,14 @@ None. No schema change — RLS `sessions_update_own` / `sessions_delete_own` alr
 
 #### Automated
 
-- [x] 3.1 Linting + types pass: `npm run lint`
-- [x] 3.2 Full suite green: `npm test`
+- [x] 3.1 Linting + types pass: `npm run lint` — b490efd
+- [x] 3.2 Full suite green: `npm test` — b490efd
 
 #### Manual
 
-- [x] 3.3 Completed row shows Delete requiring a confirm step before removal
-- [x] 3.4 Confirming removes the row from history and chart after reload
-- [x] 3.5 Deleting is not possible cross-user; the Delete control only appears on the owner's own rows
+- [x] 3.3 Completed row shows Delete requiring a confirm step before removal — b490efd
+- [x] 3.4 Confirming removes the row from history and chart after reload — b490efd
+- [x] 3.5 Deleting is not possible cross-user; the Delete control only appears on the owner's own rows — b490efd
 
 ### Phase 4: E2E tests for edit + delete
 
