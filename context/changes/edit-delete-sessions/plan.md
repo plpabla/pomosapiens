@@ -221,6 +221,8 @@ Expose the existing DELETE endpoint on completed history rows via a confirm-guar
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause for manual confirmation.
 
+**Scope extension (found in manual verification):** `EditSessionDialog` and `DeleteSessionButton` were originally two independent `client:visible` islands, so neither could see the other's state. That let a user open Delete's confirm step while Edit's trigger stayed visible and clickable, which read as confusing/contradictory UI. Fixed by introducing `src/components/dashboard/CompletedSessionActions.tsx` — a single island that composes both, hiding the `EditSessionDialog` trigger while `DeleteSessionButton` is in `confirming`/`submitting` phase. `DeleteSessionButton` gained an optional `onPhaseChange` callback (test-first, `tests/unit/dashboard/DeleteSessionButton.test.tsx`) to report its phase upward; `CompletedSessionActions` itself is covered by `tests/unit/dashboard/CompletedSessionActions.test.tsx`. `dashboard.astro`'s completed-row footer now renders `CompletedSessionActions` instead of `EditSessionDialog` + `DeleteSessionButton` directly. `EditSessionDialog.tsx` itself was not modified.
+
 ---
 
 ## Phase 4: E2E tests for edit + delete
@@ -323,28 +325,28 @@ None. No schema change — RLS `sessions_update_own` / `sessions_delete_own` alr
 
 #### Automated
 
-- [x] 2.1 Linting + types pass: `npm run lint`
-- [x] 2.2 Full unit/integration suite still green: `npm test`
+- [x] 2.1 Linting + types pass: `npm run lint` — bc7714c
+- [x] 2.2 Full unit/integration suite still green: `npm test` — bc7714c
 
 #### Manual
 
-- [x] 2.3 Completed row shows Edit; opening pre-fills all current values
-- [x] 2.4 Changing duration and saving updates displayed duration (and chart if rating changed)
-- [x] 2.5 Changing topic/format/energy/rating/note persists after reload
-- [x] 2.6 In-progress rows show only Abandon (no Edit)
+- [x] 2.3 Completed row shows Edit; opening pre-fills all current values — bc7714c
+- [x] 2.4 Changing duration and saving updates displayed duration (and chart if rating changed) — bc7714c
+- [x] 2.5 Changing topic/format/energy/rating/note persists after reload — bc7714c
+- [x] 2.6 In-progress rows show only Abandon (no Edit) — bc7714c
 
 ### Phase 3: Delete control on logged rows
 
 #### Automated
 
-- [ ] 3.1 Linting + types pass: `npm run lint`
-- [ ] 3.2 Full suite green: `npm test`
+- [x] 3.1 Linting + types pass: `npm run lint`
+- [x] 3.2 Full suite green: `npm test`
 
 #### Manual
 
-- [ ] 3.3 Completed row shows Delete requiring a confirm step before removal
-- [ ] 3.4 Confirming removes the row from history and chart after reload
-- [ ] 3.5 Deleting is not possible cross-user; the Delete control only appears on the owner's own rows
+- [x] 3.3 Completed row shows Delete requiring a confirm step before removal
+- [x] 3.4 Confirming removes the row from history and chart after reload
+- [x] 3.5 Deleting is not possible cross-user; the Delete control only appears on the owner's own rows
 
 ### Phase 4: E2E tests for edit + delete
 

@@ -5,7 +5,7 @@ import type { Database } from "@/db/database.types";
 import { Card } from "@/components/ui/card";
 import FocusRatingChart from "@/components/dashboard/FocusRatingChart";
 import AbandonButton from "@/components/dashboard/AbandonButton";
-import EditSessionDialog from "@/components/dashboard/EditSessionDialog";
+import CompletedSessionActions from "@/components/dashboard/CompletedSessionActions";
 import LocalDateTime from "@/components/dashboard/LocalDateTime";
 
 const { user } = Astro.locals;
@@ -185,19 +185,17 @@ const energyColorClass: Record<string, string> = {
                       </div>
                     )}
                     {status === "done" && (
-                      <div class="flex justify-end">
-                        <EditSessionDialog
-                          id={session.id}
-                          startedAt={session.started_at}
-                          durationSeconds={session.duration_seconds ?? 0}
-                          energyLevel={session.energy_level}
-                          topicId={session.topic_id}
-                          materialFormatId={session.material_format_id}
-                          focusRating={session.focus_rating}
-                          note={session.note}
-                          client:visible
-                        />
-                      </div>
+                      <CompletedSessionActions
+                        id={session.id}
+                        startedAt={session.started_at}
+                        durationSeconds={session.duration_seconds ?? 0}
+                        energyLevel={session.energy_level}
+                        topicId={session.topic_id}
+                        materialFormatId={session.material_format_id}
+                        focusRating={session.focus_rating}
+                        note={session.note}
+                        client:visible
+                      />
                     )}
                   </Card>
                 </li>
