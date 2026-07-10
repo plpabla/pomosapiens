@@ -359,5 +359,5 @@ None. No schema change — RLS `sessions_update_own` / `sessions_delete_own` alr
 
 #### Manual
 
-- [ ] 4.5 Both specs pass on a clean re-run (no cross-test state leakage)
-- [ ] 4.6 Specs use accessibility-first locators and wait on state, not timeouts
+- [x] 4.5 Both specs pass on a clean re-run (no cross-test state leakage) — 0c6f032
+- [x] 4.6 Specs use accessibility-first locators and wait on state, not timeouts — 0c6f032

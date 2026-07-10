@@ -1,7 +1,7 @@
 ---
 change_id: edit-delete-sessions
 title: Edit a logged session's fields or delete it from history
-status: implementing
+status: implemented
 created: 2026-07-08
 updated: 2026-07-10
 archived_at: null
