@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ServerError } from "@/components/auth/ServerError";
 import { cn } from "@/lib/utils";
+import { fetchJson } from "@/lib/api/fetchJson";
 
 type EnergyLevel = "low" | "medium" | "high";
 
@@ -91,23 +92,18 @@ export default function EditSessionDialog(props: Props) {
     const trimmedNote = note.trim();
 
     try {
-      const res = await fetch(`/api/sessions/${props.id}`, {
+      await fetchJson(`/api/sessions/${props.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           duration_seconds: durationSeconds,
           energy_level: energy,
           topic_id: topicId,
           material_format_id: materialFormatId,
           focus_rating: rating,
           note: trimmedNote === "" ? null : trimmedNote,
-        }),
+        },
+        fallbackError: "Failed to save changes",
       });
-
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(body.error ?? "Failed to save changes");
-      }
 
       window.location.reload();
     } catch (err) {

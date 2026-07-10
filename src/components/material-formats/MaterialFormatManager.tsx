@@ -4,23 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ServerError } from "@/components/auth/ServerError";
+import { fetchJson } from "@/lib/api/fetchJson";
 
 interface MaterialFormat {
   id: string;
   name: string;
   owner_id: string | null;
   archived_at: string | null;
-}
-
-async function apiFetch(url: string, method: string, body?: object) {
-  const res = await fetch(url, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: body !== undefined ? JSON.stringify(body) : undefined,
-  });
-  const data = (await res.json()) as { error?: string } & Record<string, unknown>;
-  if (!res.ok) throw new Error(data.error ?? "Request failed");
-  return data;
 }
 
 export function MaterialFormatManager() {
@@ -60,12 +50,10 @@ export function MaterialFormatManager() {
     setAddError(null);
     setAddSubmitting(true);
     try {
-      const data = (await apiFetch("/api/material-formats", "POST", { name: addName })) as {
-        id: string;
-        name: string;
-        owner_id: string;
-        archived_at: null;
-      };
+      const data = await fetchJson<{ id: string; name: string; owner_id: string; archived_at: null }>(
+        "/api/material-formats",
+        { method: "POST", body: { name: addName } },
+      );
       setFormats((prev) => [...prev, { id: data.id, name: data.name, owner_id: data.owner_id, archived_at: null }]);
       setAddOpen(false);
       setAddName("");
@@ -83,7 +71,7 @@ export function MaterialFormatManager() {
     const prev = formats;
     setFormats((fs) => fs.map((f) => (f.id === renameId ? { ...f, name: renameName.trim() } : f)));
     try {
-      await apiFetch(`/api/material-formats/${renameId}`, "PATCH", { name: renameName });
+      await fetchJson(`/api/material-formats/${renameId}`, { method: "PATCH", body: { name: renameName } });
       setRenameId(null);
       setRenameName("");
     } catch (e) {
@@ -100,7 +88,7 @@ export function MaterialFormatManager() {
     const archivedAt = new Date().toISOString();
     setFormats((fs) => fs.map((f) => (f.id === id ? { ...f, archived_at: archivedAt } : f)));
     try {
-      await apiFetch(`/api/material-formats/${id}`, "PATCH", { archived_at: archivedAt });
+      await fetchJson(`/api/material-formats/${id}`, { method: "PATCH", body: { archived_at: archivedAt } });
     } catch (e) {
       setFormats(prev);
       setActionError(e instanceof Error ? e.message : "Failed to archive format");
@@ -112,7 +100,7 @@ export function MaterialFormatManager() {
     const prev = formats;
     setFormats((fs) => fs.map((f) => (f.id === id ? { ...f, archived_at: null } : f)));
     try {
-      await apiFetch(`/api/material-formats/${id}`, "PATCH", { archived_at: null });
+      await fetchJson(`/api/material-formats/${id}`, { method: "PATCH", body: { archived_at: null } });
     } catch (e) {
       setFormats(prev);
       setActionError(e instanceof Error ? e.message : "Failed to unarchive format");

@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServerError } from "@/components/auth/ServerError";
+import { fetchJson } from "@/lib/api/fetchJson";
 
 interface Preset {
   slot: 1 | 2 | 3;
@@ -72,13 +73,10 @@ export default function PresetManager() {
 
     setRow(index, { submitting: true, error: null });
     try {
-      const res = await fetch(`/api/user-presets/${preset.slot}`, {
+      await fetchJson(`/api/user-presets/${preset.slot}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ focus_seconds: focusSec, break_seconds: breakSec }),
+        body: { focus_seconds: focusSec, break_seconds: breakSec },
       });
-      const data = (await res.json()) as { error?: string };
-      if (!res.ok) throw new Error(data.error ?? "Request failed");
       setPresets((prev) =>
         prev.map((p, i) => (i === index ? { ...p, focus_seconds: focusSec, break_seconds: breakSec } : p)),
       );

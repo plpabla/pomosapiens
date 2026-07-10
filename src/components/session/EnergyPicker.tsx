@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ServerError } from "@/components/auth/ServerError";
 import ModePicker from "@/components/session/ModePicker";
 import { cn } from "@/lib/utils";
+import { fetchJson } from "@/lib/api/fetchJson";
 
 type EnergyLevel = "low" | "medium" | "high";
 type Mode = "preset_1" | "preset_2" | "preset_3" | "count_up";
@@ -137,25 +138,18 @@ export default function EnergyPicker() {
     const selectedPreset = mode === "count_up" ? null : presets.find((p) => `preset_${p.slot}` === mode);
 
     try {
-      const res = await fetch("/api/sessions", {
+      const data = await fetchJson<{ id: string }>("/api/sessions", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           energy_level: energy,
           topic_id: topicId ?? null,
           material_format_id: materialFormatId ?? null,
           timer_mode: mode,
           planned_focus_seconds: selectedPreset?.focus_seconds ?? null,
           planned_break_seconds: selectedPreset?.break_seconds ?? null,
-        }),
+        },
+        fallbackError: "Failed to start session",
       });
-
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(body.error ?? "Failed to start session");
-      }
-
-      const data = (await res.json()) as { id: string };
       window.location.assign("/session/" + data.id);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");

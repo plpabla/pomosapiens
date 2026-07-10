@@ -609,14 +609,14 @@ None — no data or schema changes. Each phase is a self-contained commit and a 
 
 #### Automated
 
-- [ ] 1.1 Lint passes: `npm run lint`
-- [ ] 1.2 Build passes: `npm run build`
-- [ ] 1.3 Unit tests pass: `npm test`
-- [ ] 1.4 Affected e2e pass (abandon/delete/edit/capture)
+- [x] 1.1 Lint passes: `npm run lint`
+- [x] 1.2 Build passes: `npm run build`
+- [x] 1.3 Unit tests pass: `npm test`
+- [x] 1.4 Affected e2e pass (abandon/delete/edit/capture)
 
 #### Manual
 
-- [ ] 1.5 CRUD + start/abandon/delete succeed; error messages unchanged on forced failure
+- [x] 1.5 CRUD + start/abandon/delete succeed; error messages unchanged on forced failure
 
 ### Phase 2: F4 — shared types + time math
 
