@@ -352,10 +352,10 @@ None. No schema change — RLS `sessions_update_own` / `sessions_delete_own` alr
 
 #### Automated
 
-- [ ] 4.1 Linting + types pass: `npm run lint`
-- [ ] 4.2 Edit e2e passes: `npm run test:e2e -- session-edit`
-- [ ] 4.3 Delete e2e passes: `npm run test:e2e -- session-delete`
-- [ ] 4.4 Full unit/integration suite still green: `npm test`
+- [x] 4.1 Linting + types pass: `npm run lint`
+- [x] 4.2 Edit e2e passes: `npm run test:e2e -- session-edit`
+- [x] 4.3 Delete e2e passes: `npm run test:e2e -- session-delete`
+- [x] 4.4 Full unit/integration suite still green: `npm test`
 
 #### Manual
 
