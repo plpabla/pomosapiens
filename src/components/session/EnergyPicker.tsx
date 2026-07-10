@@ -91,9 +91,18 @@ export default function EnergyPicker() {
 
   useEffect(() => {
     void Promise.all([
-      fetch("/api/topics").then((r) => r.json() as Promise<{ topics: Topic[] }>),
-      fetch("/api/material-formats").then((r) => r.json() as Promise<{ formats: MaterialFormat[] }>),
-      fetch("/api/user-presets").then((r) => r.json() as Promise<{ presets: Preset[] }>),
+      fetch("/api/topics").then((r) => {
+        if (!r.ok) throw new Error("Failed to load topics");
+        return r.json() as Promise<{ topics: Topic[] }>;
+      }),
+      fetch("/api/material-formats").then((r) => {
+        if (!r.ok) throw new Error("Failed to load material formats");
+        return r.json() as Promise<{ formats: MaterialFormat[] }>;
+      }),
+      fetch("/api/user-presets").then((r) => {
+        if (!r.ok) throw new Error("Failed to load presets");
+        return r.json() as Promise<{ presets: Preset[] }>;
+      }),
     ])
       .then(([topicsData, formatsData, presetsData]) => {
         setTopics(topicsData.topics.filter((t) => t.archived_at === null));

@@ -265,6 +265,8 @@ Cover the edit and delete happy paths at the browser level with Playwright specs
 
 **Implementation Note**: This phase depends on Phase 2 and Phase 3 UI being complete. Drive it with the `/10x-e2e` skill.
 
+**Addendum (commit 79d4fe2)**: Adding these two Phase-4 specs raised parallel-worker CPU contention that surfaced pre-existing hydration-race flakes in `tests/e2e/session-abandon.spec.ts` and `tests/e2e/session-capture.spec.ts`; both were stabilized (retry-wrapped click / bumped timeout) in the same commit. No business-logic change — test-infra only.
+
 ---
 
 ## Testing Strategy
