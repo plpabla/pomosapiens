@@ -5,6 +5,7 @@ import type { Database } from "@/db/database.types";
 import { Card } from "@/components/ui/card";
 import FocusRatingChart from "@/components/dashboard/FocusRatingChart";
 import AbandonButton from "@/components/dashboard/AbandonButton";
+import EditSessionDialog from "@/components/dashboard/EditSessionDialog";
 import LocalDateTime from "@/components/dashboard/LocalDateTime";
 
 const { user } = Astro.locals;
@@ -14,7 +15,16 @@ type SessionRow = Database["public"]["Tables"]["sessions"]["Row"];
 
 type SessionListItem = Pick<
   SessionRow,
-  "id" | "started_at" | "energy_level" | "duration_seconds" | "focus_rating" | "ended_at" | "timer_mode" | "note"
+  | "id"
+  | "started_at"
+  | "energy_level"
+  | "duration_seconds"
+  | "focus_rating"
+  | "ended_at"
+  | "timer_mode"
+  | "note"
+  | "topic_id"
+  | "material_format_id"
 > & {
   topic: { name: string } | null;
   material_format: { name: string } | null;
@@ -39,7 +49,7 @@ if (!supabase) {
   const { data, error } = await supabase
     .from("sessions")
     .select(
-      "id, started_at, energy_level, duration_seconds, focus_rating, ended_at, timer_mode, note, topic:topics(name), material_format:material_formats(name)",
+      "id, started_at, energy_level, duration_seconds, focus_rating, ended_at, timer_mode, note, topic_id, material_format_id, topic:topics(name), material_format:material_formats(name)",
     )
     .eq("user_id", user.id)
     .order("started_at", { ascending: false })
@@ -172,6 +182,21 @@ const energyColorClass: Record<string, string> = {
                     {status === "in_progress" && (
                       <div class="flex justify-end">
                         <AbandonButton sessionId={session.id} client:load />
+                      </div>
+                    )}
+                    {status === "done" && (
+                      <div class="flex justify-end">
+                        <EditSessionDialog
+                          id={session.id}
+                          startedAt={session.started_at}
+                          durationSeconds={session.duration_seconds ?? 0}
+                          energyLevel={session.energy_level}
+                          topicId={session.topic_id}
+                          materialFormatId={session.material_format_id}
+                          focusRating={session.focus_rating}
+                          note={session.note}
+                          client:visible
+                        />
                       </div>
                     )}
                   </Card>

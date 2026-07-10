@@ -323,15 +323,15 @@ None. No schema change — RLS `sessions_update_own` / `sessions_delete_own` alr
 
 #### Automated
 
-- [ ] 2.1 Linting + types pass: `npm run lint`
-- [ ] 2.2 Full unit/integration suite still green: `npm test`
+- [x] 2.1 Linting + types pass: `npm run lint`
+- [x] 2.2 Full unit/integration suite still green: `npm test`
 
 #### Manual
 
-- [ ] 2.3 Completed row shows Edit; opening pre-fills all current values
-- [ ] 2.4 Changing duration and saving updates displayed duration (and chart if rating changed)
-- [ ] 2.5 Changing topic/format/energy/rating/note persists after reload
-- [ ] 2.6 In-progress rows show only Abandon (no Edit)
+- [x] 2.3 Completed row shows Edit; opening pre-fills all current values
+- [x] 2.4 Changing duration and saving updates displayed duration (and chart if rating changed)
+- [x] 2.5 Changing topic/format/energy/rating/note persists after reload
+- [x] 2.6 In-progress rows show only Abandon (no Edit)
 
 ### Phase 3: Delete control on logged rows
 
