@@ -57,8 +57,8 @@ describe("EditSessionDialog", () => {
     expect(await screen.findByLabelText(/duration/i)).toHaveValue(2);
     expect(screen.getByLabelText(/note/i)).toHaveValue("hi");
     await waitFor(() => {
-      expect(fetch).toHaveBeenCalledWith("/api/topics");
-      expect(fetch).toHaveBeenCalledWith("/api/material-formats");
+      expect(fetch).toHaveBeenCalledWith("/api/topics", expect.anything());
+      expect(fetch).toHaveBeenCalledWith("/api/material-formats", expect.anything());
     });
   });
 

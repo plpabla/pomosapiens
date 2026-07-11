@@ -1,42 +1,13 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import { createClient } from "@/lib/supabase";
-import type { Database } from "@/db/database.types";
-import { Card } from "@/components/ui/card";
 import FocusRatingChart from "@/components/dashboard/FocusRatingChart";
-import AbandonButton from "@/components/dashboard/AbandonButton";
-import CompletedSessionActions from "@/components/dashboard/CompletedSessionActions";
-import LocalDateTime from "@/components/dashboard/LocalDateTime";
+import SessionList from "@/components/session/SessionList";
+import { isRated } from "@/lib/session/format";
+import type { SessionListItem } from "@/lib/types";
 
 const { user } = Astro.locals;
 const supabase = createClient(Astro.request.headers, Astro.cookies);
-
-type SessionRow = Database["public"]["Tables"]["sessions"]["Row"];
-
-type SessionListItem = Pick<
-  SessionRow,
-  | "id"
-  | "started_at"
-  | "energy_level"
-  | "duration_seconds"
-  | "focus_rating"
-  | "ended_at"
-  | "timer_mode"
-  | "note"
-  | "topic_id"
-  | "material_format_id"
-> & {
-  topic: { name: string } | null;
-  material_format: { name: string } | null;
-};
-
-function modeLabel(mode: string | null): string | null {
-  if (mode === "preset_1") return "P1";
-  if (mode === "preset_2") return "P2";
-  if (mode === "preset_3") return "P3";
-  if (mode === "count_up") return "∞";
-  return null;
-}
 
 let sessions: SessionListItem[] = [];
 let dbError: string | null = null;
@@ -61,30 +32,10 @@ if (!supabase) {
   }
 }
 
-function formatDuration(seconds: number) {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
-}
-
-function getStatus(session: { ended_at: string | null }) {
-  return session.ended_at !== null ? "done" : "in_progress";
-}
-
-function isRated(s: SessionListItem): s is SessionListItem & { focus_rating: number } {
-  return s.ended_at !== null && s.focus_rating !== null;
-}
-
 const ratedSessions = sessions
   .filter(isRated)
   .map((s) => ({ started_at: s.started_at, focus_rating: s.focus_rating }))
   .reverse();
-
-const energyColorClass: Record<string, string> = {
-  high: "text-spark",
-  medium: "text-blaze",
-  low: "text-ash",
-};
 ---
 
 <Layout title="Dashboard">
@@ -106,104 +57,7 @@ const energyColorClass: Record<string, string> = {
         <FocusRatingChart sessions={ratedSessions} client:only="react" />
       </div>
 
-      {
-        dbError && (
-          <div class="border-spark/40 bg-crimson/40 text-spark rounded-lg border px-4 py-3 text-sm">{dbError}</div>
-        )
-      }
-
-      {
-        !dbError && sessions.length === 0 && (
-          <Card className="border-charred bg-transparent p-6 shadow-none text-center">
-            <p class="text-ash text-sm">No sessions yet. Start your first one above.</p>
-          </Card>
-        )
-      }
-
-      {
-        !dbError && sessions.length > 0 && (
-          <ul class="space-y-3">
-            {sessions.map((session) => {
-              const status = getStatus(session);
-              const energyClass = energyColorClass[session.energy_level] ?? "text-ash";
-              return (
-                <li>
-                  <Card className="border-charred bg-ember text-off-white gap-2 px-5 py-4 shadow-none">
-                    <div class="flex items-center justify-between">
-                      <LocalDateTime
-                        iso={session.started_at}
-                        className="text-off-white/70 text-sm"
-                        client:only="react"
-                      />
-                      <span class:list={["text-xs font-semibold uppercase", energyClass]}>{session.energy_level}</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                      <span class="text-off-white text-sm">
-                        {status === "done" && session.duration_seconds != null
-                          ? formatDuration(session.duration_seconds)
-                          : "In progress"}
-                      </span>
-                      <span class="text-off-white/80 text-sm">
-                        {status === "done"
-                          ? session.focus_rating != null
-                            ? `★ ${session.focus_rating} / 5`
-                            : "Skipped"
-                          : ""}
-                      </span>
-                    </div>
-                    {(session.topic !== null ||
-                      session.material_format !== null ||
-                      modeLabel(session.timer_mode) !== null) && (
-                      <div class="flex flex-wrap gap-1.5">
-                        {modeLabel(session.timer_mode) !== null && (
-                          <span class="bg-charred text-off-white/80 rounded px-2 py-0.5 text-xs">
-                            {modeLabel(session.timer_mode)}
-                          </span>
-                        )}
-                        {session.topic !== null && (
-                          <span
-                            class="bg-charred text-off-white/80 max-w-[10rem] truncate rounded px-2 py-0.5 text-xs"
-                            title={session.topic.name}
-                          >
-                            {session.topic.name}
-                          </span>
-                        )}
-                        {session.material_format !== null && (
-                          <span
-                            class="bg-charred text-off-white/80 max-w-[10rem] truncate rounded px-2 py-0.5 text-xs"
-                            title={session.material_format.name}
-                          >
-                            {session.material_format.name}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                    {session.note !== null && <p class="text-off-white/70 text-sm">{session.note}</p>}
-                    {status === "in_progress" && (
-                      <div class="flex justify-end">
-                        <AbandonButton sessionId={session.id} client:load />
-                      </div>
-                    )}
-                    {status === "done" && (
-                      <CompletedSessionActions
-                        id={session.id}
-                        startedAt={session.started_at}
-                        durationSeconds={session.duration_seconds ?? 0}
-                        energyLevel={session.energy_level}
-                        topicId={session.topic_id}
-                        materialFormatId={session.material_format_id}
-                        focusRating={session.focus_rating}
-                        note={session.note}
-                        client:visible
-                      />
-                    )}
-                  </Card>
-                </li>
-              );
-            })}
-          </ul>
-        )
-      }
+      <SessionList sessions={sessions} error={dbError} client:load />
     </div>
   </div>
 </Layout>

@@ -3,6 +3,7 @@
 import { render, screen, cleanup, waitFor, fireEvent } from "@testing-library/react";
 import { vi, beforeEach, afterEach, describe, it, expect } from "vitest";
 import EnergyPicker from "@/components/session/EnergyPicker";
+import { stubAudioGlobal } from "../_setup";
 
 const MOCK_PRESETS = [
   { slot: 1, focus_seconds: 1500, break_seconds: 300 },
@@ -91,6 +92,113 @@ describe("EnergyPicker -- picker-init fetch failure (Risk #7)", () => {
       await screen.findByText(/Could not load topics and formats/i);
       expect(screen.getByRole("button", { name: "Medium" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /start/i })).toBeInTheDocument();
+    });
+  });
+});
+
+// Phase 7 characterization -- pins submit-handler behavior (audio prime, payload shape)
+// before extracting useSessionStart/useLastMode/EnergyLevelPicker.
+describe("EnergyPicker -- submit (Phase 7 characterization)", () => {
+  afterEach(() => {
+    cleanup();
+    vi.unstubAllGlobals();
+    localStorage.clear();
+  });
+
+  function stubSubmitFlow(sessionId: string) {
+    const calls: { url: string; init?: RequestInit }[] = [];
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((url: string, init?: RequestInit) => {
+        calls.push({ url, init });
+        if (url.includes("/api/sessions")) {
+          return Promise.resolve(new Response(JSON.stringify({ id: sessionId }), { status: 200 }));
+        }
+        const body = url.includes("topics")
+          ? { topics: [] }
+          : url.includes("material-formats")
+            ? { formats: [] }
+            : { presets: MOCK_PRESETS };
+        return Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
+      }),
+    );
+    return calls;
+  }
+
+  function stubLocationAssign() {
+    const assign = vi.fn();
+    Object.defineProperty(window, "location", { value: { assign }, writable: true });
+    return assign;
+  }
+
+  it("attempts a muted audio prime on submit and still navigates when the prime rejects (L-02 fail-open)", async () => {
+    const assign = stubLocationAssign();
+    stubSubmitFlow("abc-1");
+    const play = vi.fn().mockRejectedValue(new Error("NotAllowedError"));
+    const pause = vi.fn();
+    vi.stubGlobal(
+      "Audio",
+      vi.fn().mockImplementation(function () {
+        return { muted: false, play, pause };
+      }),
+    );
+
+    render(<EnergyPicker />);
+    fireEvent.click(await screen.findByRole("button", { name: "Medium" }));
+    fireEvent.click(screen.getByRole("button", { name: /start/i }));
+
+    await waitFor(() => {
+      expect(assign).toHaveBeenCalledWith("/session/abc-1");
+    });
+    expect(play).toHaveBeenCalledTimes(1);
+    expect(pause).not.toHaveBeenCalled();
+  });
+
+  it("submits the expected payload for a preset mode", async () => {
+    const assign = stubLocationAssign();
+    const calls = stubSubmitFlow("abc-2");
+    stubAudioGlobal();
+
+    render(<EnergyPicker />);
+    fireEvent.click(await screen.findByRole("button", { name: "Low" }));
+    fireEvent.click(screen.getByRole("button", { name: /start/i }));
+
+    await waitFor(() => {
+      expect(assign).toHaveBeenCalledWith("/session/abc-2");
+    });
+    const sessionCall = calls.find((c) => c.url === "/api/sessions");
+    expect(sessionCall).toBeDefined();
+    const body = JSON.parse(sessionCall?.init?.body as string) as Record<string, unknown>;
+    expect(body).toEqual({
+      energy_level: "low",
+      topic_id: null,
+      material_format_id: null,
+      timer_mode: "preset_1",
+      planned_focus_seconds: 1500,
+      planned_break_seconds: 300,
+    });
+  });
+
+  it("submits null planned durations for count-up mode", async () => {
+    const assign = stubLocationAssign();
+    const calls = stubSubmitFlow("abc-3");
+    stubAudioGlobal();
+    localStorage.setItem("pomosapiens.last_mode", "count_up");
+
+    render(<EnergyPicker />);
+    fireEvent.click(await screen.findByRole("button", { name: "High" }));
+    fireEvent.click(screen.getByRole("button", { name: /start/i }));
+
+    await waitFor(() => {
+      expect(assign).toHaveBeenCalledWith("/session/abc-3");
+    });
+    const sessionCall = calls.find((c) => c.url === "/api/sessions");
+    expect(sessionCall).toBeDefined();
+    const body = JSON.parse(sessionCall?.init?.body as string) as Record<string, unknown>;
+    expect(body).toMatchObject({
+      timer_mode: "count_up",
+      planned_focus_seconds: null,
+      planned_break_seconds: null,
     });
   });
 });

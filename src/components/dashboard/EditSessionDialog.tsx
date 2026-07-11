@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,8 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ServerError } from "@/components/auth/ServerError";
 import { cn } from "@/lib/utils";
-
-type EnergyLevel = "low" | "medium" | "high";
+import { fetchJson } from "@/lib/api/fetchJson";
+import { minutesFromSeconds, secondsFromMinutes } from "@/lib/time";
+import { ENERGY_LEVELS, triggerClass, TopicSelect, MaterialFormatSelect } from "@/components/session/CatalogSelects";
+import { useTopicsAndFormats } from "@/lib/session/useCatalog";
+import type { EnergyLevel } from "@/lib/types";
 
 interface Props {
   id: string;
@@ -21,34 +24,11 @@ interface Props {
   note: string | null;
 }
 
-interface Topic {
-  id: string;
-  name: string;
-  archived_at: string | null;
-}
-
-interface MaterialFormat {
-  id: string;
-  name: string;
-  archived_at: string | null;
-}
-
-const NONE = "__none__";
-
-const ENERGY_LEVELS: { value: EnergyLevel; label: string }[] = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-];
-
 export default function EditSessionDialog(props: Props) {
   const [open, setOpen] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [formats, setFormats] = useState<MaterialFormat[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const { topics, formats, loadError } = useTopicsAndFormats({ enabled: open });
 
-  const [minutes, setMinutes] = useState(String(Math.round(props.durationSeconds / 60)));
+  const [minutes, setMinutes] = useState(String(minutesFromSeconds(props.durationSeconds)));
   const [durationDirty, setDurationDirty] = useState(false);
   const [energy, setEnergy] = useState<EnergyLevel>(props.energyLevel);
   const [topicId, setTopicId] = useState<string | null>(props.topicId);
@@ -59,55 +39,27 @@ export default function EditSessionDialog(props: Props) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!open || loaded) return;
-    void Promise.all([
-      fetch("/api/topics").then((r) => {
-        if (!r.ok) throw new Error("Failed to load topics");
-        return r.json() as Promise<{ topics: Topic[] }>;
-      }),
-      fetch("/api/material-formats").then((r) => {
-        if (!r.ok) throw new Error("Failed to load material formats");
-        return r.json() as Promise<{ formats: MaterialFormat[] }>;
-      }),
-    ])
-      .then(([topicsData, formatsData]) => {
-        setTopics(topicsData.topics.filter((t) => t.archived_at === null));
-        setFormats(formatsData.formats.filter((f) => f.archived_at === null));
-        setLoadError(null);
-        setLoaded(true);
-      })
-      .catch(() => {
-        setLoadError("Could not load topics and formats.");
-      });
-  }, [open, loaded]);
-
   async function handleSave() {
     if (submitting) return;
     setSubmitting(true);
     setError(null);
 
-    const durationSeconds = durationDirty ? Number(minutes) * 60 : props.durationSeconds;
+    const durationSeconds = durationDirty ? secondsFromMinutes(Number(minutes)) : props.durationSeconds;
     const trimmedNote = note.trim();
 
     try {
-      const res = await fetch(`/api/sessions/${props.id}`, {
+      await fetchJson(`/api/sessions/${props.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        body: {
           duration_seconds: durationSeconds,
           energy_level: energy,
           topic_id: topicId,
           material_format_id: materialFormatId,
           focus_rating: rating,
           note: trimmedNote === "" ? null : trimmedNote,
-        }),
+        },
+        fallbackError: "Failed to save changes",
       });
-
-      if (!res.ok) {
-        const body = (await res.json().catch(() => ({}))) as { error?: string };
-        throw new Error(body.error ?? "Failed to save changes");
-      }
 
       window.location.reload();
     } catch (err) {
@@ -116,12 +68,10 @@ export default function EditSessionDialog(props: Props) {
     }
   }
 
-  const triggerClass = "w-full border-charred bg-ember text-off-white hover:bg-ember focus:ring-0";
-
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (next) return;
-    setMinutes(String(Math.round(props.durationSeconds / 60)));
+    setMinutes(String(minutesFromSeconds(props.durationSeconds)));
     setDurationDirty(false);
     setEnergy(props.energyLevel);
     setTopicId(props.topicId);
@@ -181,46 +131,17 @@ export default function EditSessionDialog(props: Props) {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor={`edit-topic-${props.id}`}>Topic</Label>
-            <Select
-              value={topicId ?? NONE}
-              onValueChange={(v) => {
-                setTopicId(v === NONE ? null : v);
-              }}
-            >
-              <SelectTrigger id={`edit-topic-${props.id}`} aria-label="Topic" className={triggerClass}>
-                <SelectValue placeholder="No topic" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>No topic</SelectItem>
-                {topics.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <TopicSelect id={`edit-topic-${props.id}`} value={topicId} onChange={setTopicId} topics={topics} />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label htmlFor={`edit-format-${props.id}`}>Material format</Label>
-            <Select
-              value={materialFormatId ?? NONE}
-              onValueChange={(v) => {
-                setMaterialFormatId(v === NONE ? null : v);
-              }}
-            >
-              <SelectTrigger id={`edit-format-${props.id}`} aria-label="Material format" className={triggerClass}>
-                <SelectValue placeholder="No format" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>No format</SelectItem>
-                {formats.map((f) => (
-                  <SelectItem key={f.id} value={f.id}>
-                    {f.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MaterialFormatSelect
+              id={`edit-format-${props.id}`}
+              value={materialFormatId}
+              onChange={setMaterialFormatId}
+              formats={formats}
+            />
           </div>
 
           <div className="flex flex-col gap-2">

@@ -103,4 +103,89 @@ describe("PresetManager", () => {
       expect(screen.getAllByRole("button", { name: /save/i })).toHaveLength(3);
     });
   });
+
+  describe("client-side validation bounds", () => {
+    beforeEach(() => {
+      vi.stubGlobal(
+        "fetch",
+        vi.fn().mockImplementation(() => Promise.resolve(makeGetResponse())),
+      );
+    });
+
+    it("rejects focus below 1 minute without calling the PUT endpoint", async () => {
+      const mockFetch = vi.fn().mockImplementation(() => Promise.resolve(makeGetResponse()));
+      vi.stubGlobal("fetch", mockFetch);
+
+      render(<PresetManager />);
+      await screen.findAllByRole("button", { name: /save/i });
+
+      const focusInputs = screen.getAllByLabelText(/focus/i);
+      fireEvent.change(focusInputs[0], { target: { value: "0" } });
+      fireEvent.click(screen.getAllByRole("button", { name: /save/i })[0]);
+
+      await screen.findByText("Focus must be between 1 and 240 minutes.");
+      expect(mockFetch).toHaveBeenCalledTimes(1); // only the initial GET
+    });
+
+    it("rejects focus above 240 minutes", async () => {
+      render(<PresetManager />);
+      await screen.findAllByRole("button", { name: /save/i });
+
+      const focusInputs = screen.getAllByLabelText(/focus/i);
+      fireEvent.change(focusInputs[0], { target: { value: "300" } });
+      fireEvent.click(screen.getAllByRole("button", { name: /save/i })[0]);
+
+      await screen.findByText("Focus must be between 1 and 240 minutes.");
+    });
+
+    it("rejects break below 0 minutes", async () => {
+      render(<PresetManager />);
+      await screen.findAllByRole("button", { name: /save/i });
+
+      const breakInputs = screen.getAllByLabelText(/break/i);
+      fireEvent.change(breakInputs[0], { target: { value: "-5" } });
+      fireEvent.click(screen.getAllByRole("button", { name: /save/i })[0]);
+
+      await screen.findByText("Break must be between 0 and 60 minutes.");
+    });
+
+    it("rejects break above 60 minutes", async () => {
+      render(<PresetManager />);
+      await screen.findAllByRole("button", { name: /save/i });
+
+      const breakInputs = screen.getAllByLabelText(/break/i);
+      fireEvent.change(breakInputs[0], { target: { value: "90" } });
+      fireEvent.click(screen.getAllByRole("button", { name: /save/i })[0]);
+
+      await screen.findByText("Break must be between 0 and 60 minutes.");
+    });
+  });
+
+  describe("optimistic success update", () => {
+    it("disables Save again after a successful save (row reflects the new saved values)", async () => {
+      const mockFetch = vi
+        .fn()
+        .mockImplementationOnce(() => Promise.resolve(makeGetResponse()))
+        .mockImplementationOnce(() =>
+          Promise.resolve(
+            new Response(JSON.stringify({ slot: 1, focus_seconds: 1800, break_seconds: 300 }), { status: 200 }),
+          ),
+        );
+      vi.stubGlobal("fetch", mockFetch);
+
+      render(<PresetManager />);
+      await screen.findAllByRole("button", { name: /save/i });
+
+      const focusInputs = screen.getAllByLabelText(/focus/i);
+      fireEvent.change(focusInputs[0], { target: { value: "30" } });
+      const saveButton = screen.getAllByRole("button", { name: /save/i })[0];
+      expect(saveButton).toBeEnabled();
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(screen.getAllByRole("button", { name: /save/i })[0]).toBeDisabled();
+      });
+      expect(screen.queryByText(/server error|failed/i)).not.toBeInTheDocument();
+    });
+  });
 });
