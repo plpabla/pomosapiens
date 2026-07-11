@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,7 +9,9 @@ import { ServerError } from "@/components/auth/ServerError";
 import { cn } from "@/lib/utils";
 import { fetchJson } from "@/lib/api/fetchJson";
 import { minutesFromSeconds, secondsFromMinutes } from "@/lib/time";
-import type { EnergyLevel, Topic, MaterialFormat } from "@/lib/types";
+import { ENERGY_LEVELS, triggerClass, TopicSelect, MaterialFormatSelect } from "@/components/session/CatalogSelects";
+import { useTopicsAndFormats } from "@/lib/session/useCatalog";
+import type { EnergyLevel } from "@/lib/types";
 
 interface Props {
   id: string;
@@ -22,20 +24,9 @@ interface Props {
   note: string | null;
 }
 
-const NONE = "__none__";
-
-const ENERGY_LEVELS: { value: EnergyLevel; label: string }[] = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-];
-
 export default function EditSessionDialog(props: Props) {
   const [open, setOpen] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [formats, setFormats] = useState<MaterialFormat[]>([]);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const { topics, formats, loadError } = useTopicsAndFormats({ enabled: open });
 
   const [minutes, setMinutes] = useState(String(minutesFromSeconds(props.durationSeconds)));
   const [durationDirty, setDurationDirty] = useState(false);
@@ -47,29 +38,6 @@ export default function EditSessionDialog(props: Props) {
 
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!open || loaded) return;
-    void Promise.all([
-      fetch("/api/topics").then((r) => {
-        if (!r.ok) throw new Error("Failed to load topics");
-        return r.json() as Promise<{ topics: Topic[] }>;
-      }),
-      fetch("/api/material-formats").then((r) => {
-        if (!r.ok) throw new Error("Failed to load material formats");
-        return r.json() as Promise<{ formats: MaterialFormat[] }>;
-      }),
-    ])
-      .then(([topicsData, formatsData]) => {
-        setTopics(topicsData.topics.filter((t) => t.archived_at === null));
-        setFormats(formatsData.formats.filter((f) => f.archived_at === null));
-        setLoadError(null);
-        setLoaded(true);
-      })
-      .catch(() => {
-        setLoadError("Could not load topics and formats.");
-      });
-  }, [open, loaded]);
 
   async function handleSave() {
     if (submitting) return;
@@ -99,8 +67,6 @@ export default function EditSessionDialog(props: Props) {
       setSubmitting(false);
     }
   }
-
-  const triggerClass = "w-full border-charred bg-ember text-off-white hover:bg-ember focus:ring-0";
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
@@ -165,46 +131,17 @@ export default function EditSessionDialog(props: Props) {
 
           <div className="flex flex-col gap-2">
             <Label htmlFor={`edit-topic-${props.id}`}>Topic</Label>
-            <Select
-              value={topicId ?? NONE}
-              onValueChange={(v) => {
-                setTopicId(v === NONE ? null : v);
-              }}
-            >
-              <SelectTrigger id={`edit-topic-${props.id}`} aria-label="Topic" className={triggerClass}>
-                <SelectValue placeholder="No topic" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>No topic</SelectItem>
-                {topics.map((t) => (
-                  <SelectItem key={t.id} value={t.id}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <TopicSelect id={`edit-topic-${props.id}`} value={topicId} onChange={setTopicId} topics={topics} />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label htmlFor={`edit-format-${props.id}`}>Material format</Label>
-            <Select
-              value={materialFormatId ?? NONE}
-              onValueChange={(v) => {
-                setMaterialFormatId(v === NONE ? null : v);
-              }}
-            >
-              <SelectTrigger id={`edit-format-${props.id}`} aria-label="Material format" className={triggerClass}>
-                <SelectValue placeholder="No format" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={NONE}>No format</SelectItem>
-                {formats.map((f) => (
-                  <SelectItem key={f.id} value={f.id}>
-                    {f.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MaterialFormatSelect
+              id={`edit-format-${props.id}`}
+              value={materialFormatId}
+              onChange={setMaterialFormatId}
+              formats={formats}
+            />
           </div>
 
           <div className="flex flex-col gap-2">

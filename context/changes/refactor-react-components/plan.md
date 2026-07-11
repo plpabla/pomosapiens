@@ -622,23 +622,23 @@ None — no data or schema changes. Each phase is a self-contained commit and a 
 
 #### Automated
 
-- [x] 2.1 Lint passes: `npm run lint`
-- [x] 2.2 Build passes: `npm run build`
-- [x] 2.3 Unit tests pass: `npm test`
-- [x] 2.4 Affected e2e pass (capture/edit) — session-edit green; session-capture fails identically pre- and post-refactor (confirmed against baseline 272d385), pre-existing env/timing flake unrelated to Phase 2
+- [x] 2.1 Lint passes: `npm run lint` — 452939c
+- [x] 2.2 Build passes: `npm run build` — 452939c
+- [x] 2.3 Unit tests pass: `npm test` — 452939c
+- [x] 2.4 Affected e2e pass (capture/edit) — session-edit green; session-capture fails identically pre- and post-refactor (confirmed against baseline 272d385), pre-existing env/timing flake unrelated to Phase 2 — 452939c
 
 #### Manual
 
-- [x] 2.5 Preset minutes + edit duration round-trip identically
+- [x] 2.5 Preset minutes + edit duration round-trip identically — 452939c
 
 ### Phase 3: Catalog primitives — useCatalog + CatalogSelects
 
 #### Automated
 
-- [ ] 3.1 Lint passes: `npm run lint`
-- [ ] 3.2 Build passes: `npm run build`
-- [ ] 3.3 Unit tests pass: `npm test`
-- [ ] 3.4 Affected e2e pass (capture/edit)
+- [x] 3.1 Lint passes: `npm run lint`
+- [x] 3.2 Build passes: `npm run build`
+- [x] 3.3 Unit tests pass: `npm test`
+- [x] 3.4 Affected e2e pass (capture/edit)
 
 #### Manual
 

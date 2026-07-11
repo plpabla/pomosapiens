@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useSyncExternalStore } from "react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ServerError } from "@/components/auth/ServerError";
 import ModePicker from "@/components/session/ModePicker";
+import { ENERGY_LEVELS, TopicSelect, MaterialFormatSelect } from "@/components/session/CatalogSelects";
+import { useTopicsAndFormats } from "@/lib/session/useCatalog";
 import { cn } from "@/lib/utils";
 import { fetchJson } from "@/lib/api/fetchJson";
-import type { EnergyLevel, Mode, Topic, MaterialFormat, Preset } from "@/lib/types";
+import type { EnergyLevel, Mode, Preset } from "@/lib/types";
 
 const LAST_MODE_KEY = "pomosapiens.last_mode";
 
@@ -41,14 +42,6 @@ function persistMode(mode: Mode) {
   });
 }
 
-const LEVELS: { value: EnergyLevel; label: string }[] = [
-  { value: "low", label: "Low" },
-  { value: "medium", label: "Medium" },
-  { value: "high", label: "High" },
-];
-
-const NONE = "__none__";
-
 const DEFAULT_PRESETS: Preset[] = [
   { slot: 1, focus_seconds: 25 * 60, break_seconds: 5 * 60 },
   { slot: 2, focus_seconds: 45 * 60, break_seconds: 10 * 60 },
@@ -60,37 +53,27 @@ export default function EnergyPicker() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [topics, setTopics] = useState<Topic[]>([]);
-  const [formats, setFormats] = useState<MaterialFormat[]>([]);
   const [presets, setPresets] = useState<Preset[]>(DEFAULT_PRESETS);
   const [topicId, setTopicId] = useState<string | null>(null);
   const [materialFormatId, setMaterialFormatId] = useState<string | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [presetsLoadError, setPresetsLoadError] = useState<string | null>(null);
+
+  const { topics, formats, loadError: catalogLoadError } = useTopicsAndFormats();
+  const loadError = catalogLoadError ?? presetsLoadError;
 
   const mode = useSyncExternalStore(subscribeMode, getModeSnapshot, getModeServerSnapshot);
 
   useEffect(() => {
-    void Promise.all([
-      fetch("/api/topics").then((r) => {
-        if (!r.ok) throw new Error("Failed to load topics");
-        return r.json() as Promise<{ topics: Topic[] }>;
-      }),
-      fetch("/api/material-formats").then((r) => {
-        if (!r.ok) throw new Error("Failed to load material formats");
-        return r.json() as Promise<{ formats: MaterialFormat[] }>;
-      }),
-      fetch("/api/user-presets").then((r) => {
+    void fetch("/api/user-presets")
+      .then((r) => {
         if (!r.ok) throw new Error("Failed to load presets");
         return r.json() as Promise<{ presets: Preset[] }>;
-      }),
-    ])
-      .then(([topicsData, formatsData, presetsData]) => {
-        setTopics(topicsData.topics.filter((t) => t.archived_at === null));
-        setFormats(formatsData.formats.filter((f) => f.archived_at === null));
+      })
+      .then((presetsData) => {
         setPresets(presetsData.presets);
       })
       .catch(() => {
-        setLoadError("Could not load topics and formats.");
+        setPresetsLoadError("Could not load topics and formats.");
       });
   }, []);
 
@@ -136,8 +119,6 @@ export default function EnergyPicker() {
     }
   }
 
-  const triggerClass = "w-full border-charred bg-ember text-off-white hover:bg-ember focus:ring-0";
-
   return (
     <div className="mx-auto max-w-sm pt-16 text-center">
       <h1 className="text-off-white mb-8 text-2xl font-bold">Choose your energy level</h1>
@@ -149,7 +130,7 @@ export default function EnergyPicker() {
         <ModePicker presets={presets} value={mode} onChange={persistMode} />
 
         <div className="mb-6 flex justify-center gap-4">
-          {LEVELS.map(({ value, label }) => (
+          {ENERGY_LEVELS.map(({ value, label }) => (
             <Button
               key={value}
               type="button"
@@ -169,43 +150,8 @@ export default function EnergyPicker() {
 
         {loadError && <ServerError message={loadError} />}
         <div className="mb-4 flex flex-col gap-3 text-left">
-          <Select
-            value={topicId ?? NONE}
-            onValueChange={(v) => {
-              setTopicId(v === NONE ? null : v);
-            }}
-          >
-            <SelectTrigger aria-label="Topic" className={triggerClass}>
-              <SelectValue placeholder="No topic" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NONE}>No topic</SelectItem>
-              {topics.map((t) => (
-                <SelectItem key={t.id} value={t.id}>
-                  {t.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Select
-            value={materialFormatId ?? NONE}
-            onValueChange={(v) => {
-              setMaterialFormatId(v === NONE ? null : v);
-            }}
-          >
-            <SelectTrigger aria-label="Material format" className={triggerClass}>
-              <SelectValue placeholder="No format" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={NONE}>No format</SelectItem>
-              {formats.map((f) => (
-                <SelectItem key={f.id} value={f.id}>
-                  {f.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <TopicSelect value={topicId} onChange={setTopicId} topics={topics} />
+          <MaterialFormatSelect value={materialFormatId} onChange={setMaterialFormatId} formats={formats} />
         </div>
 
         <ServerError message={error} />
