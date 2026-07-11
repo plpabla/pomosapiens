@@ -588,6 +588,8 @@ full suite (`npm test` + `npm run test:e2e`) once before opening the PR.
 
 Net reduction in hydration entry points on the dashboard (three islands per tile → one `SessionList` island
 boundary). No new client-side data fetching. React Compiler handles memoization — do not add `useMemo`/`useCallback`.
+Note: this consolidation moves the nested `CompletedSessionActions` edit dialog from `client:visible` (lazy)
+to eager hydration with the list; negligible given the 50-row session cap.
 
 ## Migration Notes
 

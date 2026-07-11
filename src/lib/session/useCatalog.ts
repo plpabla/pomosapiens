@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { fetchJson } from "@/lib/api/fetchJson";
 import type { Topic, MaterialFormat } from "@/lib/types";
 
 export function useTopicsAndFormats(options?: { enabled?: boolean }): {
@@ -15,13 +16,9 @@ export function useTopicsAndFormats(options?: { enabled?: boolean }): {
   useEffect(() => {
     if (!enabled || loaded) return;
     void Promise.all([
-      fetch("/api/topics").then((r) => {
-        if (!r.ok) throw new Error("Failed to load topics");
-        return r.json() as Promise<{ topics: Topic[] }>;
-      }),
-      fetch("/api/material-formats").then((r) => {
-        if (!r.ok) throw new Error("Failed to load material formats");
-        return r.json() as Promise<{ formats: MaterialFormat[] }>;
+      fetchJson<{ topics: Topic[] }>("/api/topics", { fallbackError: "Failed to load topics" }),
+      fetchJson<{ formats: MaterialFormat[] }>("/api/material-formats", {
+        fallbackError: "Failed to load material formats",
       }),
     ])
       .then(([topicsData, formatsData]) => {
