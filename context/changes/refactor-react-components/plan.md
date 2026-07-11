@@ -635,23 +635,23 @@ None — no data or schema changes. Each phase is a self-contained commit and a 
 
 #### Automated
 
-- [x] 3.1 Lint passes: `npm run lint`
-- [x] 3.2 Build passes: `npm run build`
-- [x] 3.3 Unit tests pass: `npm test`
-- [x] 3.4 Affected e2e pass (capture/edit)
+- [x] 3.1 Lint passes: `npm run lint` — e2945df
+- [x] 3.2 Build passes: `npm run build` — e2945df
+- [x] 3.3 Unit tests pass: `npm test` — e2945df
+- [x] 3.4 Affected e2e pass (capture/edit) — e2945df
 
 #### Manual
 
-- [ ] 3.5 Dropdowns + placeholders identical in both consumers; load-error message identical
+- [x] 3.5 Dropdowns + placeholders identical in both consumers; load-error message identical — e2945df
 
 ### Phase 4: F2 — ConfirmActionButton
 
 #### Automated
 
-- [ ] 4.1 Lint passes: `npm run lint`
-- [ ] 4.2 Build passes: `npm run build`
-- [ ] 4.3 Unit tests pass: `npm test`
-- [ ] 4.4 Affected e2e pass (abandon/delete)
+- [x] 4.1 Lint passes: `npm run lint`
+- [x] 4.2 Build passes: `npm run build`
+- [x] 4.3 Unit tests pass: `npm test`
+- [x] 4.4 Affected e2e pass (abandon/delete)
 
 #### Manual
 
