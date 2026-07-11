@@ -687,14 +687,14 @@ None — no data or schema changes. Each phase is a self-contained commit and a 
 
 #### Automated
 
-- [x] 7.1 Characterization tests pass pre- and post-refactor: `npm test`
-- [x] 7.2 Lint passes: `npm run lint`
-- [x] 7.3 Build passes: `npm run build`
-- [x] 7.4 Affected e2e pass (capture)
+- [x] 7.1 Characterization tests pass pre- and post-refactor: `npm test` — ec8b86e
+- [x] 7.2 Lint passes: `npm run lint` — ec8b86e
+- [x] 7.3 Build passes: `npm run build` — ec8b86e
+- [x] 7.4 Affected e2e pass (capture) — ec8b86e
 
 #### Manual
 
-- [ ] 7.5 Mode persistence, selects, Start/navigate, chime on session page, audio-blocked fallback all identical
+- [x] 7.5 Mode persistence, selects, Start/navigate, chime on session page, audio-blocked fallback all identical — ec8b86e
 
 ### Phase 8: PresetManager full internal restructure
 
