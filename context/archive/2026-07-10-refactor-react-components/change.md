@@ -1,10 +1,10 @@
 ---
 change_id: refactor-react-components
 title: Compose session list/tile from reusable components, slim Astro pages to React-only
-status: impl_reviewed
+status: archived
 created: 2026-07-10
 updated: 2026-07-11
-archived_at: null
+archived_at: 2026-07-11T09:37:15Z
 ---
 
 ## Notes
