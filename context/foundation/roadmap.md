@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-07-10
+updated: 2026-07-11
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -27,17 +27,18 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 
 ## At a glance
 
-| ID   | Change ID                          | Outcome (user can …)                                                             | Prerequisites | PRD refs                                              | Status   |
-| ---- | ---------------------------------- | -------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | -------- |
-| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                               | —             | — (US-01 acquisition surface)                         | done     |
-| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                               | —             | NFR (privacy), Access Control                         | done     |
-| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history                  | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done     |
-| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                  | S-01          | FR-007, FR-008, FR-017                                | done     |
-| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session            | S-01          | FR-004, FR-005, FR-010                                | done     |
-| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | done     |
-| S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | done     |
-| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | done     |
-| S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | done     |
+| ID   | Change ID                          | Outcome (user can …)                                                             | Prerequisites | PRD refs                                              | Status      |
+| ---- | ---------------------------------- | -------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | ----------- |
+| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                               | —             | — (US-01 acquisition surface)                         | done        |
+| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                               | —             | NFR (privacy), Access Control                         | done        |
+| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history                  | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done        |
+| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                  | S-01          | FR-007, FR-008, FR-017                                | done        |
+| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session            | S-01          | FR-004, FR-005, FR-010                                | done        |
+| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | done        |
+| S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | done        |
+| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | done        |
+| S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | done        |
+| S-08 | `anonymous-sessions`               | start and complete a focus session without signing in, saved locally in-browser  | S-01          | — (PRD §Non-Goals, flagged "Add as follow up")        | not started |
 
 ## Baseline
 
@@ -179,19 +180,36 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Risk:** Small surface — one or two routes (PATCH and DELETE on `/api/sessions/[id]`; PATCH likely already exists from S-01's focus-rating flow) plus a row-level UI affordance. Primary risk is forgetting that mutations must enforce ownership at the RLS layer, not just at the API layer — the privacy NFR (cross-user leakage) explicitly covers this. Secondary risk: deletion cascading to anything that aggregates sessions (focus-rating chart in S-04) — if S-04 has shipped first, verify the chart re-derives cleanly from current rows. **Scope note (post-S-05):** the `DELETE /api/sessions/[id]` endpoint and the owner-scoped `sessions_delete_own` RLS policy already exist (added by S-05's explicit-abandon flow, fully open — not scoped to in-progress rows). S-07's remaining scope is editing a logged session's fields only; do not re-implement delete.
 - **Status:** done
 
+### S-08: Anonymous / not-signed-in session capture (localStorage-backed)
+
+- **Outcome:** A visitor who has not signed in can start and complete a focus session (energy pick, timer, rating, optional note) directly from `/` without authentication. The session is persisted in the browser's localStorage and shown in a local, session-scoped history view mirroring the signed-in dashboard. No server-side row is created for anonymous sessions.
+- **Change ID:** `anonymous-sessions`
+- **PRD refs:** PRD §Non-Goals — "Anonymous / not-signed-in scenario backed by localStorage" was flagged "Add as follow up" rather than a permanent non-goal. No FR currently covers this; extends US-01's capture loop (FR-006, FR-009, FR-011, FR-012, FR-013) to a non-authenticated context.
+- **Prerequisites:** S-01 (reuses the timer/energy/rating state machine)
+- **Parallel with:** —
+- **Blockers:** —
+- **Unknowns:**
+  - Does an anonymous session migrate into the user's account (localStorage → Supabase row) once they sign up, or stay purely local and get discarded? Materially affects the onboarding value prop. — Owner: project author. Block: no — can ship local-only first and layer merge-on-signup later.
+  - Which downstream features (topic/format tagging from S-02, notes/chart from S-04, edit/delete from S-07) apply to anonymous sessions, or is v1 of this slice capture + basic history only? — Owner: project author. Block: no.
+  - Multi-tab / multi-device consistency: localStorage is per-browser — accepted limitation, or does the UI need to warn about it? — Owner: implementer. Block: no.
+  - Storage cleanup: does local history grow unbounded, or is there a cap (e.g., last N sessions)? — Owner: implementer. Block: no.
+- **Risk:** Introduces a second persistence path (localStorage) parallel to the Supabase-backed one, doubling the places session state can live and diverge. The main hazard is silent drift between the two paths — e.g., a history or chart component that only reads from Supabase and quietly ignores anonymous sessions. Keep the first cut thin (capture + local history only); treat feature parity with S-02/S-04/S-07 as separate follow-on work rather than bundling it into this slice.
+- **Status:** not started
+
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                          | Suggested issue title                                         | Ready for `/10x-plan` | Notes                                   |
-| ---------- | ---------------------------------- | ------------------------------------------------------------- | --------------------- | --------------------------------------- |
-| S-00       | `landing-page`                     | Landing page — hero + value prop + sign-up CTA                | yes                   | Implemented                             |
-| F-01       | `sessions-data-foundation`         | Sessions data foundation — table + per-user RLS               | yes                   | Implemented                             |
-| S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)            | no                    | Implemented                             |
-| S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Implemented                             |
-| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Implemented                             |
-| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Implemented                             |
-| S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Implemented                             |
-| S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Implemented                             |
-| S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history      | no                    | Implemented                             |
+| Roadmap ID | Change ID                          | Suggested issue title                                         | Ready for `/10x-plan` | Notes                                     |
+| ---------- | ---------------------------------- | ------------------------------------------------------------- | --------------------- | ----------------------------------------- |
+| S-00       | `landing-page`                     | Landing page — hero + value prop + sign-up CTA                | yes                   | Implemented                               |
+| F-01       | `sessions-data-foundation`         | Sessions data foundation — table + per-user RLS               | yes                   | Implemented                               |
+| S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)            | no                    | Implemented                               |
+| S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Implemented                               |
+| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Implemented                               |
+| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Implemented                               |
+| S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Implemented                               |
+| S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Implemented                               |
+| S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history      | no                    | Implemented                               |
+| S-08       | `anonymous-localstorage-sessions`  | Anonymous session capture backed by localStorage              | no                    | Parked topic promoted to slice 2026-07-11 |
 
 ## Open Roadmap Questions
 
@@ -200,7 +218,6 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 
 ## Parked
 
-- **Anonymous / not-signed-in scenario backed by localStorage** — Why parked: PRD §Non-Goals — marked "Add as follow up"; v1 requires sign-in for every session. A real follow-up candidate once the signed-in capture loop validates the wedge, but not in the 3-week MVP scope.
 - **Spotify / third-party music-streaming integration** — Why parked: PRD §Non-Goals — adds OAuth scope, third-party player UI, and a category of bugs that would distract from validating the contextual-data insight.
 - **AI-generated animated backgrounds** — Why parked: PRD §Non-Goals — real cost in v1 (image generation, prompt UI, animation pipeline); plain static backgrounds in v1.
 - **Gamification (streaks, achievements, badges, leaderboards)** — Why parked: PRD §Non-Goals — cosmetic and habit-reinforcement features, meaningless until the core capture loop is shown to be sticky.
