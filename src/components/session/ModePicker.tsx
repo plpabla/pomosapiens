@@ -1,13 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-
-type Mode = "preset_1" | "preset_2" | "preset_3" | "count_up";
-
-interface Preset {
-  slot: 1 | 2 | 3;
-  focus_seconds: number;
-  break_seconds: number;
-}
+import { minutesFromSeconds } from "@/lib/time";
+import type { Mode, Preset } from "@/lib/types";
 
 interface Props {
   presets: Preset[];
@@ -19,7 +13,7 @@ export default function ModePicker({ presets, value, onChange }: Props) {
   const chips: { mode: Mode; label: string }[] = [
     ...presets.map((p) => ({
       mode: `preset_${p.slot}`,
-      label: `P${p.slot} ${Math.round(p.focus_seconds / 60)}/${Math.round(p.break_seconds / 60)}`,
+      label: `P${p.slot} ${minutesFromSeconds(p.focus_seconds)}/${minutesFromSeconds(p.break_seconds)}`,
     })),
     { mode: "count_up", label: "Count-up" },
   ];

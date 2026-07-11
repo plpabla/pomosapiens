@@ -8,8 +8,8 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { ServerError } from "@/components/auth/ServerError";
 import { cn } from "@/lib/utils";
 import { fetchJson } from "@/lib/api/fetchJson";
-
-type EnergyLevel = "low" | "medium" | "high";
+import { minutesFromSeconds, secondsFromMinutes } from "@/lib/time";
+import type { EnergyLevel, Topic, MaterialFormat } from "@/lib/types";
 
 interface Props {
   id: string;
@@ -20,18 +20,6 @@ interface Props {
   materialFormatId: string | null;
   focusRating: number | null;
   note: string | null;
-}
-
-interface Topic {
-  id: string;
-  name: string;
-  archived_at: string | null;
-}
-
-interface MaterialFormat {
-  id: string;
-  name: string;
-  archived_at: string | null;
 }
 
 const NONE = "__none__";
@@ -49,7 +37,7 @@ export default function EditSessionDialog(props: Props) {
   const [formats, setFormats] = useState<MaterialFormat[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const [minutes, setMinutes] = useState(String(Math.round(props.durationSeconds / 60)));
+  const [minutes, setMinutes] = useState(String(minutesFromSeconds(props.durationSeconds)));
   const [durationDirty, setDurationDirty] = useState(false);
   const [energy, setEnergy] = useState<EnergyLevel>(props.energyLevel);
   const [topicId, setTopicId] = useState<string | null>(props.topicId);
@@ -88,7 +76,7 @@ export default function EditSessionDialog(props: Props) {
     setSubmitting(true);
     setError(null);
 
-    const durationSeconds = durationDirty ? Number(minutes) * 60 : props.durationSeconds;
+    const durationSeconds = durationDirty ? secondsFromMinutes(Number(minutes)) : props.durationSeconds;
     const trimmedNote = note.trim();
 
     try {
@@ -117,7 +105,7 @@ export default function EditSessionDialog(props: Props) {
   function handleOpenChange(next: boolean) {
     setOpen(next);
     if (next) return;
-    setMinutes(String(Math.round(props.durationSeconds / 60)));
+    setMinutes(String(minutesFromSeconds(props.durationSeconds)));
     setDurationDirty(false);
     setEnergy(props.energyLevel);
     setTopicId(props.topicId);

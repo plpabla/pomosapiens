@@ -4,12 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ServerError } from "@/components/auth/ServerError";
 import { fetchJson } from "@/lib/api/fetchJson";
-
-interface Preset {
-  slot: 1 | 2 | 3;
-  focus_seconds: number;
-  break_seconds: number;
-}
+import { minutesFromSeconds, secondsFromMinutes } from "@/lib/time";
+import type { Preset } from "@/lib/types";
 
 interface RowState {
   focusMin: string;
@@ -19,7 +15,7 @@ interface RowState {
 }
 
 function toMin(seconds: number): string {
-  return String(Math.round(seconds / 60));
+  return String(minutesFromSeconds(seconds));
 }
 
 export default function PresetManager() {
@@ -60,8 +56,8 @@ export default function PresetManager() {
     const preset = presets[index] as Preset | undefined;
     if (row === undefined || preset === undefined) return;
 
-    const focusSec = parseInt(row.focusMin, 10) * 60;
-    const breakSec = parseInt(row.breakMin, 10) * 60;
+    const focusSec = secondsFromMinutes(parseInt(row.focusMin, 10));
+    const breakSec = secondsFromMinutes(parseInt(row.breakMin, 10));
     if (Number.isNaN(focusSec) || focusSec < 60 || focusSec > 4 * 60 * 60) {
       setRow(index, { error: "Focus must be between 1 and 240 minutes." });
       return;

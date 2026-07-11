@@ -5,13 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { ServerError } from "@/components/auth/ServerError";
 import { fetchJson } from "@/lib/api/fetchJson";
-
-interface MaterialFormat {
-  id: string;
-  name: string;
-  owner_id: string | null;
-  archived_at: string | null;
-}
+import type { MaterialFormat } from "@/lib/types";
 
 export function MaterialFormatManager() {
   const [formats, setFormats] = useState<MaterialFormat[]>([]);

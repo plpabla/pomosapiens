@@ -5,9 +5,7 @@ import { ServerError } from "@/components/auth/ServerError";
 import ModePicker from "@/components/session/ModePicker";
 import { cn } from "@/lib/utils";
 import { fetchJson } from "@/lib/api/fetchJson";
-
-type EnergyLevel = "low" | "medium" | "high";
-type Mode = "preset_1" | "preset_2" | "preset_3" | "count_up";
+import type { EnergyLevel, Mode, Topic, MaterialFormat, Preset } from "@/lib/types";
 
 const LAST_MODE_KEY = "pomosapiens.last_mode";
 
@@ -50,25 +48,6 @@ const LEVELS: { value: EnergyLevel; label: string }[] = [
 ];
 
 const NONE = "__none__";
-
-interface Topic {
-  id: string;
-  name: string;
-  archived_at: string | null;
-}
-
-interface MaterialFormat {
-  id: string;
-  name: string;
-  owner_id: string | null;
-  archived_at: string | null;
-}
-
-interface Preset {
-  slot: 1 | 2 | 3;
-  focus_seconds: number;
-  break_seconds: number;
-}
 
 const DEFAULT_PRESETS: Preset[] = [
   { slot: 1, focus_seconds: 25 * 60, break_seconds: 5 * 60 },
