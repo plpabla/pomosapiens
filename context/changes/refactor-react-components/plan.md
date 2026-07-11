@@ -700,10 +700,10 @@ None — no data or schema changes. Each phase is a self-contained commit and a 
 
 #### Automated
 
-- [ ] 8.1 Extended tests pass pre- and post-refactor: `npm test`
-- [ ] 8.2 Lint passes: `npm run lint`
-- [ ] 8.3 Build passes: `npm run build`
-- [ ] 8.4 Affected e2e pass; full suite green before PR
+- [x] 8.1 Extended tests pass pre- and post-refactor: `npm test`
+- [x] 8.2 Lint passes: `npm run lint`
+- [x] 8.3 Build passes: `npm run build`
+- [x] 8.4 Affected e2e pass; full suite green before PR
 
 #### Manual
 
