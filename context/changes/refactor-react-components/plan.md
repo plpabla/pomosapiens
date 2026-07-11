@@ -661,23 +661,23 @@ None — no data or schema changes. Each phase is a self-contained commit and a 
 
 #### Automated
 
-- [x] 5.1 Characterization tests pass pre- and post-refactor: `npm test`
-- [x] 5.2 Lint passes: `npm run lint`
-- [x] 5.3 Build passes: `npm run build`
-- [x] 5.4 Affected e2e pass
+- [x] 5.1 Characterization tests pass pre- and post-refactor: `npm test` — fc2842f
+- [x] 5.2 Lint passes: `npm run lint` — fc2842f
+- [x] 5.3 Build passes: `npm run build` — fc2842f
+- [x] 5.4 Affected e2e pass — fc2842f
 
 #### Manual
 
-- [x] 5.5 Topics + formats CRUD with rollback identical; format Built-in read-only
+- [x] 5.5 Topics + formats CRUD with rollback identical; format Built-in read-only — fc2842f
 
 ### Phase 6: A — dashboard session tile
 
 #### Automated
 
-- [ ] 6.1 Lint passes: `npm run lint`
-- [ ] 6.2 Build passes: `npm run build`
-- [ ] 6.3 Unit tests pass: `npm test`
-- [ ] 6.4 Affected e2e pass (abandon/delete/edit/note/chart)
+- [x] 6.1 Lint passes: `npm run lint`
+- [x] 6.2 Build passes: `npm run build`
+- [x] 6.3 Unit tests pass: `npm test`
+- [x] 6.4 Affected e2e pass (abandon/delete/edit/note/chart)
 
 #### Manual
 
