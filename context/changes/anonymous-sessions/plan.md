@@ -380,18 +380,18 @@ The `{ v: 1, items }` envelope plus client-UUID ids and name-unique topics are d
 
 #### Automated
 
-- [x] 1.1 Unit tests pass: `npm test`
-- [x] 1.2 Type checking and lint pass: `npm run lint`
-- [x] 1.3 Production build succeeds: `npm run build`
+- [x] 1.1 Unit tests pass: `npm test` -- b730dc5
+- [x] 1.2 Type checking and lint pass: `npm run lint` -- b730dc5
+- [x] 1.3 Production build succeeds: `npm run build` -- b730dc5
 
 ### Phase 2: Persistence Seam Refactor (Authed Behavior Unchanged)
 
 #### Automated
 
-- [ ] 2.1 Lint and typecheck pass: `npm run lint`
-- [ ] 2.2 Unit tests pass: `npm test`
-- [ ] 2.3 Production build succeeds: `npm run build`
-- [ ] 2.4 Full existing e2e suite passes unchanged: `npm run test:e2e`
+- [x] 2.1 Lint and typecheck pass: `npm run lint`
+- [x] 2.2 Unit tests pass: `npm test`
+- [x] 2.3 Production build succeeds: `npm run build`
+- [x] 2.4 Full existing e2e suite passes unchanged: `npm run test:e2e`
 
 #### Manual
 

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { fetchJson } from "@/lib/api/fetchJson";
 import type { EnergyLevel, Mode, Preset } from "@/lib/types";
+import type { SessionPersistence } from "@/lib/session/persistence";
 
 interface Params {
   energy: EnergyLevel | null;
@@ -8,9 +8,11 @@ interface Params {
   materialFormatId: string | null;
   mode: Mode;
   presets: Preset[];
+  persistence: SessionPersistence;
+  onStarted: (result: { id: string; startedAtMs: number }) => void;
 }
 
-export function useSessionStart({ energy, topicId, materialFormatId, mode, presets }: Params) {
+export function useSessionStart({ energy, topicId, materialFormatId, mode, presets, persistence, onStarted }: Params) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,19 +39,15 @@ export function useSessionStart({ energy, topicId, materialFormatId, mode, prese
     const selectedPreset = mode === "count_up" ? null : presets.find((p) => `preset_${p.slot}` === mode);
 
     try {
-      const data = await fetchJson<{ id: string }>("/api/sessions", {
-        method: "POST",
-        body: {
-          energy_level: energy,
-          topic_id: topicId ?? null,
-          material_format_id: materialFormatId ?? null,
-          timer_mode: mode,
-          planned_focus_seconds: selectedPreset?.focus_seconds ?? null,
-          planned_break_seconds: selectedPreset?.break_seconds ?? null,
-        },
-        fallbackError: "Failed to start session",
+      const result = await persistence.createSession({
+        energy_level: energy,
+        topic_id: topicId ?? null,
+        material_format_id: materialFormatId ?? null,
+        timer_mode: mode,
+        planned_focus_seconds: selectedPreset?.focus_seconds ?? null,
+        planned_break_seconds: selectedPreset?.break_seconds ?? null,
       });
-      window.location.assign("/session/" + data.id);
+      onStarted(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
       setSubmitting(false);
