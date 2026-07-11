@@ -674,23 +674,23 @@ None — no data or schema changes. Each phase is a self-contained commit and a 
 
 #### Automated
 
-- [x] 6.1 Lint passes: `npm run lint`
-- [x] 6.2 Build passes: `npm run build`
-- [x] 6.3 Unit tests pass: `npm test`
-- [x] 6.4 Affected e2e pass (abandon/delete/edit/note/chart)
+- [x] 6.1 Lint passes: `npm run lint` — 4deafc2
+- [x] 6.2 Build passes: `npm run build` — 4deafc2
+- [x] 6.3 Unit tests pass: `npm test` — 4deafc2
+- [x] 6.4 Affected e2e pass (abandon/delete/edit/note/chart) — 4deafc2
 
 #### Manual
 
-- [ ] 6.5 Tile renders identically; empty + DB-error states; SSR first paint intact
+- [x] 6.5 Tile renders identically; empty + DB-error states; SSR first paint intact — 4deafc2
 
 ### Phase 7: EnergyPicker full internal restructure
 
 #### Automated
 
-- [ ] 7.1 Characterization tests pass pre- and post-refactor: `npm test`
-- [ ] 7.2 Lint passes: `npm run lint`
-- [ ] 7.3 Build passes: `npm run build`
-- [ ] 7.4 Affected e2e pass (capture)
+- [x] 7.1 Characterization tests pass pre- and post-refactor: `npm test`
+- [x] 7.2 Lint passes: `npm run lint`
+- [x] 7.3 Build passes: `npm run build`
+- [x] 7.4 Affected e2e pass (capture)
 
 #### Manual
 
