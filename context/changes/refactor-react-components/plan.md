@@ -648,27 +648,27 @@ None — no data or schema changes. Each phase is a self-contained commit and a 
 
 #### Automated
 
-- [x] 4.1 Lint passes: `npm run lint`
-- [x] 4.2 Build passes: `npm run build`
-- [x] 4.3 Unit tests pass: `npm test`
-- [x] 4.4 Affected e2e pass (abandon/delete)
+- [x] 4.1 Lint passes: `npm run lint` — c850a0f
+- [x] 4.2 Build passes: `npm run build` — c850a0f
+- [x] 4.3 Unit tests pass: `npm test` — c850a0f
+- [x] 4.4 Affected e2e pass (abandon/delete) — c850a0f
 
 #### Manual
 
-- [ ] 4.5 Abandon + delete phases, reload, error, Edit-hides-while-deleting all identical
+- [x] 4.5 Abandon + delete phases, reload, error, Edit-hides-while-deleting all identical — c850a0f
 
 ### Phase 5: F1 — CRUD managers (useCrudResource)
 
 #### Automated
 
-- [ ] 5.1 Characterization tests pass pre- and post-refactor: `npm test`
-- [ ] 5.2 Lint passes: `npm run lint`
-- [ ] 5.3 Build passes: `npm run build`
-- [ ] 5.4 Affected e2e pass
+- [x] 5.1 Characterization tests pass pre- and post-refactor: `npm test`
+- [x] 5.2 Lint passes: `npm run lint`
+- [x] 5.3 Build passes: `npm run build`
+- [x] 5.4 Affected e2e pass
 
 #### Manual
 
-- [ ] 5.5 Topics + formats CRUD with rollback identical; format Built-in read-only
+- [x] 5.5 Topics + formats CRUD with rollback identical; format Built-in read-only
 
 ### Phase 6: A — dashboard session tile
 
