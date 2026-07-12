@@ -59,6 +59,9 @@ export function createCollectionStore<T>({ key, version }: { key: string; versio
       return cache;
     },
     setItems(next: T[]) {
+      // Intentionally unguarded (unlike useLastMode.ts's fail-open persistMode): callers
+      // (session start/end, topic creation) already surface a thrown write as error UI,
+      // and failing open here would silently drop a session with no persisted record.
       localStorage.setItem(key, JSON.stringify({ v: version, items: next }));
       notify();
     },

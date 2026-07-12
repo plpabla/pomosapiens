@@ -229,9 +229,13 @@ The new anon island: compose `SessionStartForm` + `SessionRunner` against local 
 
 **File**: `src/components/Welcome.astro`
 
-**Intent**: Insert the anon capture island into the existing hero layout so the landing page delivers immediate value while keeping the sign-up path. Hero heading, copy, feature cards, and the Sign Up CTA remain.
+**Intent**: Insert the anon capture island into the existing hero layout so the landing page delivers immediate value while keeping the sign-up path. Hero heading, copy, and the Sign Up CTA remain.
 
 **Contract**: `<AnonSessionApp client:load />` placed prominently within the hero section (implementer's layout judgment; the "Work in Progress - stay tuned!" badge should give way to the live capture form). The island container must also host the Phase 4 history below the form.
+
+**Implementation note (post-hoc)**: The three feature cards below the hero copy were removed rather than kept, since the live capture island now demonstrates the value they only described in text, and keeping both would push the Sign Up CTA far down the page. Accepted during impl review (F1) — see `reviews/impl-review.md`.
+
+**Incidental shared-component edits (post-hoc)**: two files outside this phase's listed changes were touched to support it — `CatalogSelects.tsx` (`onValueChange` now ignores Radix's synthetic `""` value emitted for a freshly-created, never-opened select item, exactly the inline-topic-auto-select case) and `FocusRating.tsx` (gained a `fullHeight?` prop, forwarded from `SessionRunner`, so the embedded hero-island runner doesn't force `min-h-screen`). Both are authed-safe (select values are always UUIDs; `fullHeight` defaults to today's behavior). Accepted during impl review (F3) — see `reviews/impl-review.md`.
 
 ### Success Criteria:
 
