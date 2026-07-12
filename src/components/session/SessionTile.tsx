@@ -10,9 +10,10 @@ import type { SessionListItem } from "@/lib/types";
 
 interface Props {
   session: SessionListItem;
+  readOnly?: boolean;
 }
 
-export default function SessionTile({ session }: Props) {
+export default function SessionTile({ session, readOnly = false }: Props) {
   const status = getStatus(session);
   const energyClass = energyColorClass[session.energy_level] ?? "text-ash";
 
@@ -32,12 +33,12 @@ export default function SessionTile({ session }: Props) {
       </div>
       <SessionTags session={session} />
       {session.note !== null && <p className="text-off-white/70 text-sm">{session.note}</p>}
-      {status === "in_progress" && (
+      {status === "in_progress" && !readOnly && (
         <div className="flex justify-end">
           <AbandonButton sessionId={session.id} />
         </div>
       )}
-      {status === "done" && (
+      {status === "done" && !readOnly && (
         <CompletedSessionActions
           id={session.id}
           startedAt={session.started_at}

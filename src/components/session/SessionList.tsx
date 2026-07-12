@@ -5,9 +5,10 @@ import type { SessionListItem } from "@/lib/types";
 interface Props {
   sessions: SessionListItem[];
   error: string | null;
+  readOnly?: boolean;
 }
 
-export default function SessionList({ sessions, error }: Props) {
+export default function SessionList({ sessions, error, readOnly = false }: Props) {
   if (error) {
     return <div className="border-spark/40 bg-crimson/40 text-spark rounded-lg border px-4 py-3 text-sm">{error}</div>;
   }
@@ -24,7 +25,7 @@ export default function SessionList({ sessions, error }: Props) {
     <ul className="space-y-3">
       {sessions.map((session) => (
         <li key={session.id}>
-          <SessionTile session={session} />
+          <SessionTile session={session} readOnly={readOnly} />
         </li>
       ))}
     </ul>

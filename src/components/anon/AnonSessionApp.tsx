@@ -1,13 +1,17 @@
 import { useState } from "react";
 import SessionStartForm from "@/components/session/SessionStartForm";
 import SessionRunner from "@/components/session/SessionRunner";
+import SessionList from "@/components/session/SessionList";
+import FocusRatingChart from "@/components/dashboard/FocusRatingChart";
 import InlineTopicCreate from "@/components/anon/InlineTopicCreate";
 import { useLocalTopics } from "@/lib/local/localTopics";
 import { useLocalSessions, type LocalSession } from "@/lib/local/localSessions";
 import { LOCAL_DEFAULT_FORMATS } from "@/lib/local/localCatalog";
 import { localPersistence } from "@/lib/local/localPersistence";
+import { toSessionListItems } from "@/lib/local/localSessionList";
 import { useSessionStart } from "@/lib/session/useSessionStart";
 import { useLastMode } from "@/lib/session/useLastMode";
+import { isRated } from "@/lib/session/format";
 import { DEFAULT_PRESETS } from "@/lib/timer/preset-defaults";
 import type { EnergyLevel } from "@/lib/types";
 
@@ -93,32 +97,49 @@ export default function AnonSessionApp() {
     );
   }
 
+  const historyItems = toSessionListItems(sessions, topics);
+  const ratedSessions = historyItems
+    .filter(isRated)
+    .map((s) => ({ started_at: s.started_at, focus_rating: s.focus_rating }))
+    .reverse();
+
   return (
-    <SessionStartForm
-      presets={[...DEFAULT_PRESETS]}
-      topics={[...topics]}
-      formats={LOCAL_DEFAULT_FORMATS}
-      mode={mode}
-      onModeChange={persistMode}
-      energy={energy}
-      onEnergyChange={setEnergy}
-      topicId={topicId}
-      onTopicChange={setTopicId}
-      materialFormatId={materialFormatId}
-      onFormatChange={setMaterialFormatId}
-      loadError={null}
-      submitError={error}
-      submitting={submitting}
-      onSubmit={(e) => {
-        void handleSubmit(e);
-      }}
-      topicSlot={
-        <InlineTopicCreate
-          onCreated={(topic) => {
-            setTopicId(topic.id);
-          }}
-        />
-      }
-    />
+    <>
+      <SessionStartForm
+        presets={[...DEFAULT_PRESETS]}
+        topics={[...topics]}
+        formats={LOCAL_DEFAULT_FORMATS}
+        mode={mode}
+        onModeChange={persistMode}
+        energy={energy}
+        onEnergyChange={setEnergy}
+        topicId={topicId}
+        onTopicChange={setTopicId}
+        materialFormatId={materialFormatId}
+        onFormatChange={setMaterialFormatId}
+        loadError={null}
+        submitError={error}
+        submitting={submitting}
+        onSubmit={(e) => {
+          void handleSubmit(e);
+        }}
+        topicSlot={
+          <InlineTopicCreate
+            onCreated={(topic) => {
+              setTopicId(topic.id);
+            }}
+          />
+        }
+      />
+      {historyItems.length > 0 && (
+        <div className="mx-auto mt-8 max-w-2xl text-left">
+          <h2 className="text-off-white mb-4 text-xl font-semibold">History</h2>
+          <div className="mb-6">
+            <FocusRatingChart sessions={ratedSessions} />
+          </div>
+          <SessionList readOnly sessions={historyItems} error={null} />
+        </div>
+      )}
+    </>
   );
 }

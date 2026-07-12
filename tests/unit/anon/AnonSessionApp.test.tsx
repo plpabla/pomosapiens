@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import AnonSessionApp from "@/components/anon/AnonSessionApp";
 import { useFocusTimer } from "@/lib/timer/useFocusTimer";
-import { createLocalSession, LOCAL_SESSIONS_KEY } from "@/lib/local/localSessions";
+import { createLocalSession, endLocalSession, LOCAL_SESSIONS_KEY } from "@/lib/local/localSessions";
 import { stubAudioGlobal } from "../_setup";
 
 vi.mock("@/lib/timer/useFocusTimer");
@@ -112,5 +112,39 @@ describe("AnonSessionApp", () => {
     // the (unopened) dropdown.
     await new Promise((resolve) => setTimeout(resolve, 20));
     expect(screen.getByRole("combobox", { name: "Topic" })).toHaveTextContent("Deep Work");
+  });
+
+  describe("local history", () => {
+    it("does not render a history section when there are no local sessions", () => {
+      render(<AnonSessionApp />);
+
+      expect(screen.queryByText(/★ \d \/ 5/)).not.toBeInTheDocument();
+      expect(screen.queryByRole("heading", { name: /history/i })).not.toBeInTheDocument();
+    });
+
+    it("shows a read-only history entry for a completed session, with no mutation controls", () => {
+      const row = createLocalSession({
+        energy_level: "high",
+        topic_id: null,
+        material_format_id: null,
+        timer_mode: "preset_1",
+        planned_focus_seconds: 1500,
+        planned_break_seconds: 300,
+      });
+      endLocalSession(row.id, {
+        focus_rating: 5,
+        ended_at: new Date(Date.parse(row.started_at) + 1_500_000).toISOString(),
+        note: "great focus",
+      });
+
+      render(<AnonSessionApp />);
+
+      expect(screen.getByRole("heading", { name: /history/i })).toBeInTheDocument();
+      expect(screen.getByText("★ 5 / 5")).toBeInTheDocument();
+      expect(screen.getByText("great focus")).toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /edit/i })).not.toBeInTheDocument();
+      expect(screen.queryByRole("button", { name: /abandon/i })).not.toBeInTheDocument();
+    });
   });
 });
