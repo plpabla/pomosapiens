@@ -401,17 +401,17 @@ The `{ v: 1, items }` envelope plus client-UUID ids and name-unique topics are d
 
 #### Automated
 
-- [x] 3.1 Lint and typecheck pass: `npm run lint`
-- [x] 3.2 Unit tests pass: `npm test`
-- [x] 3.3 Production build succeeds: `npm run build`
+- [x] 3.1 Lint and typecheck pass: `npm run lint` -- 73989a3
+- [x] 3.2 Unit tests pass: `npm test` -- 73989a3
+- [x] 3.3 Production build succeeds: `npm run build` -- 73989a3
 
 #### Manual
 
-- [ ] 3.4 Anon full loop works on `/` (inline topic, energy/format/mode, start, stop early, chime, rate + note)
-- [ ] 3.5 Mid-session refresh resumes the running timer
-- [ ] 3.6 Duplicate inline topic name shows inline error
-- [ ] 3.7 Signed-in visit to `/` still redirects to `/dashboard`
-- [ ] 3.8 Storage-blocked visit degrades gracefully (error message, no crash)
+- [x] 3.4 Anon full loop works on `/` (inline topic, energy/format/mode, start, stop early, chime, rate + note) -- 73989a3
+- [x] 3.5 Mid-session refresh resumes the running timer -- 73989a3
+- [x] 3.6 Duplicate inline topic name shows inline error -- 73989a3
+- [x] 3.7 Signed-in visit to `/` still redirects to `/dashboard` -- 73989a3
+- [x] 3.8 Storage-blocked visit degrades gracefully (error message, no crash) -- 73989a3
 
 ### Phase 4: Local History View
 
