@@ -3,6 +3,7 @@ import "../styles/global.css";
 import Banner from "@/components/Banner.astro";
 import Topbar from "@/components/Topbar.astro";
 import { missingConfigs } from "@/lib/config-status";
+import { PUBLIC_GA_MEASUREMENT_ID } from "astro:env/client";
 
 interface Props {
   title?: string;
@@ -14,6 +15,25 @@ const { title = "PomoSapiens" } = Astro.props;
 <!doctype html>
 <html lang="en">
   <head>
+    {
+      PUBLIC_GA_MEASUREMENT_ID && (
+        <>
+          <script
+            async
+            is:inline
+            src={`https://www.googletagmanager.com/gtag/js?id=${PUBLIC_GA_MEASUREMENT_ID}`}
+          />
+          <script is:inline define:vars={{ gaId: PUBLIC_GA_MEASUREMENT_ID }}>
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+              dataLayer.push(arguments);
+            }
+            gtag("js", new Date());
+            gtag("config", gaId);
+          </script>
+        </>
+      )
+    }
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
