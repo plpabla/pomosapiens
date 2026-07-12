@@ -38,7 +38,7 @@ function toRunnerState(row: LocalSession): RunnerState {
 export default function AnonSessionApp() {
   const sessions = useLocalSessions();
   const topics = useLocalTopics();
-  const [energy, setEnergy] = useState<EnergyLevel | null>(null);
+  const [energy, setEnergy] = useState<EnergyLevel | null>("medium");
   const [topicId, setTopicId] = useState<string | null>(null);
   const [materialFormatId, setMaterialFormatId] = useState<string | null>(null);
   const [mode, persistMode] = useLastMode();
@@ -63,7 +63,7 @@ export default function AnonSessionApp() {
   const activeRow = startedSessionId ? (sessions.find((s) => s.id === startedSessionId) ?? null) : null;
 
   function resetForm() {
-    setEnergy(null);
+    setEnergy("medium");
     setTopicId(null);
     setMaterialFormatId(null);
     setStartedSessionId(null);

@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, fireEvent } from "@testing-library/react";
 import SessionTile from "@/components/session/SessionTile";
 import type { SessionListItem } from "@/lib/types";
 
@@ -29,10 +29,39 @@ const IN_PROGRESS_SESSION: SessionListItem = {
   duration_seconds: null,
 };
 
-describe("SessionTile readOnly", () => {
-  it("shows abandon/edit/delete actions by default", () => {
+describe("SessionTile 🍅 badge", () => {
+  it("renders 🍅 as plain text next to the duration for a completed session", () => {
     render(<SessionTile session={DONE_SESSION} />);
-    expect(screen.getByRole("button", { name: /delete/i })).toBeInTheDocument();
+    const timeRow = screen.getByText(/25 min\./);
+    expect(timeRow.textContent).toContain("🍅");
+  });
+
+  it("does not wrap the 🍅 in a chip element", () => {
+    const { container } = render(<SessionTile session={DONE_SESSION} />);
+    const chips = Array.from(container.querySelectorAll(".bg-charred"));
+    expect(chips.every((chip) => !chip.textContent.includes("🍅"))).toBe(true);
+  });
+
+  it("shows no 🍅 for an in-progress session", () => {
+    render(<SessionTile session={IN_PROGRESS_SESSION} />);
+    const timeRow = screen.getByText("In progress");
+    expect(timeRow.textContent).not.toContain("🍅");
+  });
+
+  it("renders 🍅 per 20-min block for a longer session", () => {
+    render(<SessionTile session={{ ...DONE_SESSION, duration_seconds: 2400 }} />);
+    const timeRow = screen.getByText(/40 min\./);
+    expect(timeRow.textContent).toContain("🍅🍅");
+  });
+});
+
+describe("SessionTile readOnly", () => {
+  it("exposes edit/delete through the actions menu by default", () => {
+    render(<SessionTile session={DONE_SESSION} />);
+    // Radix's DropdownMenuTrigger opens on pointerdown, not click.
+    fireEvent.pointerDown(screen.getByRole("button", { name: /more actions/i }));
+    expect(screen.getByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Delete" })).toBeInTheDocument();
   });
 
   it("hides the abandon button in readOnly mode for an in-progress session", () => {
@@ -40,9 +69,10 @@ describe("SessionTile readOnly", () => {
     expect(screen.queryByRole("button", { name: /abandon/i })).not.toBeInTheDocument();
   });
 
-  it("hides edit/delete actions in readOnly mode for a done session", () => {
+  it("hides the actions menu in readOnly mode for a done session", () => {
     render(<SessionTile session={DONE_SESSION} readOnly />);
-    expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /edit/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /more actions/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Edit" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Delete" })).not.toBeInTheDocument();
   });
 });

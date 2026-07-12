@@ -1,15 +1,10 @@
-export function modeLabel(mode: string | null): string | null {
-  if (mode === "preset_1") return "P1";
-  if (mode === "preset_2") return "P2";
-  if (mode === "preset_3") return "P3";
-  if (mode === "count_up") return "∞";
-  return null;
+export function tomatoCount(durationSeconds: number): number {
+  return Math.floor(durationSeconds / 1200);
 }
 
 export function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  const minutes = Math.floor(seconds / 60);
+  return `${String(minutes)} min.`;
 }
 
 export function getStatus(session: { ended_at: string | null }): "done" | "in_progress" {

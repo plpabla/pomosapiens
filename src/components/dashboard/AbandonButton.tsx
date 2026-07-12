@@ -10,6 +10,8 @@ export default function AbandonButton({ sessionId }: Props) {
     <ConfirmActionButton
       label="Abandon"
       pendingLabel="Abandoning..."
+      fullWidth
+      icon={<span aria-hidden="true">⊘</span>}
       onConfirm={async () => {
         await fetchJson(`/api/sessions/${sessionId}`, {
           method: "DELETE",

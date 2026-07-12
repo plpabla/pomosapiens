@@ -8,7 +8,7 @@ import { DEFAULT_PRESETS } from "@/lib/timer/preset-defaults";
 import type { EnergyLevel, Preset } from "@/lib/types";
 
 export default function EnergyPicker() {
-  const [energy, setEnergy] = useState<EnergyLevel | null>(null);
+  const [energy, setEnergy] = useState<EnergyLevel | null>("medium");
   const [presets, setPresets] = useState<Preset[]>([...DEFAULT_PRESETS]);
   const [topicId, setTopicId] = useState<string | null>(null);
   const [materialFormatId, setMaterialFormatId] = useState<string | null>(null);

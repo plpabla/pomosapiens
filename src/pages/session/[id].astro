@@ -47,13 +47,14 @@ const breakSeconds = mode === "count_up" ? null : (data.planned_break_seconds ??
 ---
 
 <Layout title="Session">
-  <div class="bg-cosmic min-h-screen">
+  <div class="bg-cosmic flex flex-1 flex-col items-center justify-center">
     <SessionRunner
       sessionId={data.id}
       startedAtMs={startedAtMs}
       focusSeconds={focusSeconds}
       mode={mode}
       breakSeconds={breakSeconds}
+      fullHeight={false}
       client:load
     />
   </div>

@@ -1,8 +1,10 @@
 ---
 import "../styles/global.css";
 import Banner from "@/components/Banner.astro";
+import GoogleAnalytics from "@/components/GoogleAnalytics.astro";
 import Topbar from "@/components/Topbar.astro";
 import { missingConfigs } from "@/lib/config-status";
+import { PUBLIC_GA_MEASUREMENT_ID } from "astro:env/client";
 
 interface Props {
   title?: string;
@@ -14,12 +16,13 @@ const { title = "PomoSapiens" } = Astro.props;
 <!doctype html>
 <html lang="en">
   <head>
+    {PUBLIC_GA_MEASUREMENT_ID && <GoogleAnalytics measurementId={PUBLIC_GA_MEASUREMENT_ID} />}
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
     <title>{title}</title>
   </head>
-  <body>
+  <body class="flex min-h-screen flex-col">
     {
       missingConfigs.map((cfg) => (
         <Banner variant="error">
@@ -46,6 +49,5 @@ const { title = "PomoSapiens" } = Astro.props;
   body {
     margin: 0;
     width: 100%;
-    height: 100%;
   }
 </style>

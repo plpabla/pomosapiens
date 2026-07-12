@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ServerError } from "@/components/auth/ServerError";
 import { cn } from "@/lib/utils";
 import { fetchJson } from "@/lib/api/fetchJson";
@@ -22,10 +22,12 @@ interface Props {
   materialFormatId: string | null;
   focusRating: number | null;
   note: string | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export default function EditSessionDialog(props: Props) {
-  const [open, setOpen] = useState(false);
+  const { open } = props;
   const { topics, formats, loadError } = useTopicsAndFormats({ enabled: open });
 
   const [minutes, setMinutes] = useState(String(minutesFromSeconds(props.durationSeconds)));
@@ -69,7 +71,7 @@ export default function EditSessionDialog(props: Props) {
   }
 
   function handleOpenChange(next: boolean) {
-    setOpen(next);
+    props.onOpenChange(next);
     if (next) return;
     setMinutes(String(minutesFromSeconds(props.durationSeconds)));
     setDurationDirty(false);
@@ -83,11 +85,6 @@ export default function EditSessionDialog(props: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          Edit
-        </Button>
-      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit session</DialogTitle>

@@ -93,7 +93,7 @@ describe("AnonSessionApp", () => {
     await waitFor(() => {
       expect(screen.getByRole("heading", { name: /choose your energy level/i })).toBeInTheDocument();
     });
-    expect(screen.getByRole("button", { name: /start/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /start/i })).toBeEnabled();
   });
 
   it("auto-selects a topic created inline, showing its name in the Topic select, and keeps it selected", async () => {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ServerError } from "@/components/auth/ServerError";
+import { cn } from "@/lib/utils";
 
 type Phase = "idle" | "confirming" | "submitting";
 
@@ -14,6 +15,9 @@ interface Props {
   pendingLabel: string;
   onConfirm: () => Promise<void>;
   onPhaseChange?: (phase: Phase) => void;
+  /** Render the idle action as a full-width button with an optional leading icon. */
+  fullWidth?: boolean;
+  icon?: React.ReactNode;
 }
 
 export default function ConfirmActionButton({
@@ -22,6 +26,8 @@ export default function ConfirmActionButton({
   pendingLabel,
   onConfirm,
   onPhaseChange,
+  fullWidth = false,
+  icon,
 }: Props) {
   const [phase, setPhase] = useState<Phase>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -44,15 +50,17 @@ export default function ConfirmActionButton({
 
   const submitting = phase === "submitting";
   return (
-    <div className="flex flex-col items-end gap-2">
+    <div className={cn("flex flex-col gap-2", fullWidth ? "items-stretch" : "items-end")}>
       {phase === "idle" ? (
         <ActionButton
           variant="outline"
+          className={cn(fullWidth && "w-full")}
           onClick={() => {
             setError(null);
             setPhase("confirming");
           }}
         >
+          {icon}
           {label}
         </ActionButton>
       ) : (

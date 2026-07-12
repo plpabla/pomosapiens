@@ -23,14 +23,13 @@ const DONE_SESSION: SessionListItem = {
 };
 
 describe("SessionList readOnly", () => {
-  it("forwards readOnly to tiles, hiding mutation actions", () => {
+  it("forwards readOnly to tiles, hiding the mutation actions menu", () => {
     render(<SessionList sessions={[DONE_SESSION]} error={null} readOnly />);
-    expect(screen.queryByRole("button", { name: /delete/i })).not.toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: /edit/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /more actions/i })).not.toBeInTheDocument();
   });
 
-  it("shows mutation actions when readOnly is omitted", () => {
+  it("shows the mutation actions menu when readOnly is omitted", () => {
     render(<SessionList sessions={[DONE_SESSION]} error={null} />);
-    expect(screen.getByRole("button", { name: /delete/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /more actions/i })).toBeInTheDocument();
   });
 });

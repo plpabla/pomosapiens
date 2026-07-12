@@ -1,6 +1,26 @@
 import "@testing-library/jest-dom/vitest";
 import { vi, afterEach } from "vitest";
 
+// jsdom has no PointerEvent constructor, so Testing Library's fireEvent.pointerDown/Up
+// fall back to a plain Event with `button`/`ctrlKey` left undefined. Radix's dropdown-menu
+// (and other Radix primitives) open on pointerdown and gate on `event.button === 0`, so
+// without this polyfill their triggers never open in jsdom tests.
+if (typeof PointerEvent === "undefined") {
+  class PointerEventPolyfill extends MouseEvent {
+    pointerId?: number;
+    pointerType?: string;
+    isPrimary?: boolean;
+
+    constructor(type: string, params: PointerEventInit = {}) {
+      super(type, params);
+      this.pointerId = params.pointerId;
+      this.pointerType = params.pointerType;
+      this.isPrimary = params.isPrimary;
+    }
+  }
+  window.PointerEvent = PointerEventPolyfill as unknown as typeof PointerEvent;
+}
+
 export interface AudioMock {
   play: ReturnType<typeof vi.fn>;
   pause: ReturnType<typeof vi.fn>;

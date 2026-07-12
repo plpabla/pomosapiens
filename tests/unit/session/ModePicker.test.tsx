@@ -24,24 +24,24 @@ afterEach(() => {
 describe("ModePicker", () => {
   it("renders four chips: three presets and count-up", () => {
     render(<ModePicker presets={PRESETS} value="preset_1" onChange={vi.fn()} />);
-    expect(screen.getByRole("button", { name: /P1/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /P2/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /P3/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "25 / 5" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "45 / 10" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "90 / 15" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /Count-up/i })).toBeInTheDocument();
   });
 
   it("shows focus/break minutes in preset chip labels (25/5, 45/10, 90/15)", () => {
     render(<ModePicker presets={PRESETS} value="preset_1" onChange={vi.fn()} />);
-    expect(screen.getByRole("button", { name: /25\/5/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /45\/10/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /90\/15/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "25 / 5" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "45 / 10" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "90 / 15" })).toBeInTheDocument();
   });
 
   it("marks the selected chip with aria-pressed=true, others false", () => {
     render(<ModePicker presets={PRESETS} value="preset_2" onChange={vi.fn()} />);
-    expect(screen.getByRole("button", { name: /P2/i })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: /P1/i })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("button", { name: /P3/i })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "45 / 10" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "25 / 5" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "90 / 15" })).toHaveAttribute("aria-pressed", "false");
     expect(screen.getByRole("button", { name: /Count-up/i })).toHaveAttribute("aria-pressed", "false");
   });
 
@@ -52,18 +52,18 @@ describe("ModePicker", () => {
     expect(onChange).toHaveBeenCalledWith("count_up");
   });
 
-  it("calls onChange with 'preset_3' when P3 chip is clicked", () => {
+  it("calls onChange with 'preset_3' when the 90 / 15 chip is clicked", () => {
     const onChange = vi.fn();
     render(<ModePicker presets={PRESETS} value="preset_1" onChange={onChange} />);
-    fireEvent.click(screen.getByRole("button", { name: /P3/i }));
+    fireEvent.click(screen.getByRole("button", { name: "90 / 15" }));
     expect(onChange).toHaveBeenCalledWith("preset_3");
   });
 
-  it("deselects P1 and selects P2 after clicking P2 (bug 9.1 regression)", () => {
+  it("deselects 25 / 5 and selects 45 / 10 after clicking it (bug 9.1 regression)", () => {
     render(<ControlledModePicker initialValue="preset_1" />);
-    expect(screen.getByRole("button", { name: /P1/i })).toHaveAttribute("aria-pressed", "true");
-    fireEvent.click(screen.getByRole("button", { name: /P2/i }));
-    expect(screen.getByRole("button", { name: /P1/i })).toHaveAttribute("aria-pressed", "false");
-    expect(screen.getByRole("button", { name: /P2/i })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "25 / 5" })).toHaveAttribute("aria-pressed", "true");
+    fireEvent.click(screen.getByRole("button", { name: "45 / 10" }));
+    expect(screen.getByRole("button", { name: "25 / 5" })).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByRole("button", { name: "45 / 10" })).toHaveAttribute("aria-pressed", "true");
   });
 });
