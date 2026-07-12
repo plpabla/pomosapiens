@@ -55,7 +55,10 @@ test("dashboard Edit modal: changing duration and note on a logged session persi
     await page.waitForLoadState("load");
 
     await expect(page.getByText("12 min.")).toBeVisible();
-    await expect(page.getByText(noteText)).toBeVisible();
+    // Scoped to the session-history <ul> -- Astro's dev toolbar intermittently
+    // renders island props (including raw session JSON) elsewhere in the DOM,
+    // and an unscoped getByText can strict-mode-collide with that dump.
+    await expect(page.getByRole("list").getByText(noteText)).toBeVisible();
     await expect(page.getByText("5 min.")).not.toBeVisible();
   } finally {
     await context.close();

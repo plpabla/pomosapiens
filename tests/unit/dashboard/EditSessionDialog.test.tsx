@@ -1,6 +1,14 @@
+import { useState } from "react";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { render, screen, fireEvent, cleanup, waitFor } from "@testing-library/react";
 import EditSessionDialog from "@/components/dashboard/EditSessionDialog";
+
+// EditSessionDialog is a controlled component (open/onOpenChange required); this
+// harness owns that state so tests can render it open without a built-in trigger.
+function ControlledDialog(props: Omit<Parameters<typeof EditSessionDialog>[0], "open" | "onOpenChange">) {
+  const [open, setOpen] = useState(true);
+  return <EditSessionDialog {...props} open={open} onOpenChange={setOpen} />;
+}
 
 const reload = vi.fn();
 Object.defineProperty(window, "location", {
@@ -48,10 +56,8 @@ afterEach(() => {
 });
 
 describe("EditSessionDialog", () => {
-  it("renders an Edit trigger and opens a dialog pre-filled with current values", async () => {
-    render(<EditSessionDialog {...baseProps} durationSeconds={90} />);
-
-    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
+  it("renders open, pre-filled with current values", async () => {
+    render(<ControlledDialog {...baseProps} durationSeconds={90} />);
 
     // 90s → 2 min displayed; note pre-filled; pickers fetched
     expect(await screen.findByLabelText(/duration/i)).toHaveValue(2);
@@ -65,9 +71,8 @@ describe("EditSessionDialog", () => {
   it("submits the original durationSeconds when the duration field is untouched (dirty-bit)", async () => {
     const fetchMock = stubFetch();
     vi.stubGlobal("fetch", fetchMock);
-    render(<EditSessionDialog {...baseProps} durationSeconds={90} />);
+    render(<ControlledDialog {...baseProps} durationSeconds={90} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
     await screen.findByLabelText(/duration/i);
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
@@ -91,9 +96,8 @@ describe("EditSessionDialog", () => {
   it("submits minutes*60 when the duration field is edited", async () => {
     const fetchMock = stubFetch();
     vi.stubGlobal("fetch", fetchMock);
-    render(<EditSessionDialog {...baseProps} durationSeconds={1500} />);
+    render(<ControlledDialog {...baseProps} durationSeconds={1500} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
     const durationInput = await screen.findByLabelText(/duration/i);
     fireEvent.change(durationInput, { target: { value: "10" } });
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
@@ -106,9 +110,8 @@ describe("EditSessionDialog", () => {
   it("keeps a sub-minute session's original duration when untouched (no rounding to 0)", async () => {
     const fetchMock = stubFetch();
     vi.stubGlobal("fetch", fetchMock);
-    render(<EditSessionDialog {...baseProps} durationSeconds={10} />);
+    render(<ControlledDialog {...baseProps} durationSeconds={10} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
     await screen.findByLabelText(/duration/i);
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
 
@@ -128,9 +131,8 @@ describe("EditSessionDialog", () => {
         return Promise.resolve(new Response(JSON.stringify(body), { status: 200 }));
       }),
     );
-    render(<EditSessionDialog {...baseProps} />);
+    render(<ControlledDialog {...baseProps} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Edit" }));
     await screen.findByLabelText(/duration/i);
     fireEvent.click(screen.getByRole("button", { name: /save/i }));
 

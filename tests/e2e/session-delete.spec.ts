@@ -44,11 +44,13 @@ test("dashboard Delete control: confirming removes a logged session and hides it
     // The actions menu is a client:visible island -- the kebab DOM node exists (and is
     // clickable) before React hydration attaches its handler, so retry opening the menu
     // until the Delete item actually appears rather than assuming the first click landed.
+    // The menu itself is portaled to the document body (Radix DropdownMenu), so query its
+    // items at page scope rather than within the row, same as the confirm dialog below.
     await expect(async () => {
       await targetRow.getByRole("button", { name: "More actions" }).click();
-      await expect(targetRow.getByRole("menuitem", { name: "Delete" })).toBeVisible({ timeout: 1_000 });
+      await expect(page.getByRole("menuitem", { name: "Delete" })).toBeVisible({ timeout: 1_000 });
     }).toPass({ timeout: 10_000 });
-    await targetRow.getByRole("menuitem", { name: "Delete" }).click();
+    await page.getByRole("menuitem", { name: "Delete" }).click();
 
     // A confirm dialog gates the destructive action; it is portaled to the document body,
     // so query it at page scope rather than within the row.

@@ -42,7 +42,8 @@ describe("CompletedSessionActions", () => {
     expect(screen.queryByRole("menuitem", { name: "Edit" })).not.toBeInTheDocument();
     expect(screen.queryByRole("menuitem", { name: "Delete" })).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+    // Radix's DropdownMenuTrigger opens on pointerdown, not click.
+    fireEvent.pointerDown(screen.getByRole("button", { name: /more actions/i }));
 
     expect(screen.getByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Delete" })).toBeInTheDocument();
@@ -51,7 +52,8 @@ describe("CompletedSessionActions", () => {
   it("gates the Delete menu item behind a confirm dialog and does not delete on open", () => {
     render(<CompletedSessionActions {...baseProps} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+    // Radix's DropdownMenuTrigger opens on pointerdown, not click.
+    fireEvent.pointerDown(screen.getByRole("button", { name: /more actions/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }));
 
     expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -62,7 +64,8 @@ describe("CompletedSessionActions", () => {
   it("issues DELETE and reloads when the confirm dialog is confirmed", async () => {
     render(<CompletedSessionActions {...baseProps} />);
 
-    fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+    // Radix's DropdownMenuTrigger opens on pointerdown, not click.
+    fireEvent.pointerDown(screen.getByRole("button", { name: /more actions/i }));
     fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }));
 
     const dialog = screen.getByRole("dialog");

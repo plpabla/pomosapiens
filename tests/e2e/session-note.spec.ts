@@ -51,7 +51,10 @@ test("session note: entered on rating screen is saved and shown on dashboard his
     await page.getByRole("button", { name: "Go to dashboard" }).click();
     await page.waitForURL("**/dashboard");
 
-    await expect(page.getByText(noteText)).toBeVisible();
+    // Scoped to the session-history <ul> -- Astro's dev toolbar intermittently
+    // renders island props (including raw session JSON) elsewhere in the DOM,
+    // and an unscoped getByText can strict-mode-collide with that dump.
+    await expect(page.getByRole("list").getByText(noteText)).toBeVisible();
   } finally {
     await context.close();
     await fixture.cleanup();

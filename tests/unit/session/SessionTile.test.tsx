@@ -58,7 +58,8 @@ describe("SessionTile 🍅 badge", () => {
 describe("SessionTile readOnly", () => {
   it("exposes edit/delete through the actions menu by default", () => {
     render(<SessionTile session={DONE_SESSION} />);
-    fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+    // Radix's DropdownMenuTrigger opens on pointerdown, not click.
+    fireEvent.pointerDown(screen.getByRole("button", { name: /more actions/i }));
     expect(screen.getByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
     expect(screen.getByRole("menuitem", { name: "Delete" })).toBeInTheDocument();
   });
