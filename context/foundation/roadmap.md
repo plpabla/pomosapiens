@@ -27,19 +27,21 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 
 ## At a glance
 
-| ID   | Change ID                          | Outcome (user can …)                                                             | Prerequisites | PRD refs                                              | Status      |
-| ---- | ---------------------------------- | -------------------------------------------------------------------------------- | ------------- | ----------------------------------------------------- | ----------- |
-| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                               | —             | — (US-01 acquisition surface)                         | done        |
-| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                               | —             | NFR (privacy), Access Control                         | done        |
-| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history                  | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done        |
-| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                  | S-01          | FR-007, FR-008, FR-017                                | done        |
-| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session            | S-01          | FR-004, FR-005, FR-010                                | done        |
-| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time        | S-01          | FR-014, FR-016                                        | done        |
-| S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | done        |
-| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | done        |
-| S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | done        |
-| S-08 | `anonymous-sessions`               | start and complete a focus session without signing in, with topic/format/preset tagging, saved locally in-browser | S-01          | — (PRD §Non-Goals, flagged "Add as follow up")        | done |
+| ID   | Change ID                          | Outcome (user can …)                                                                                               | Prerequisites | PRD refs                                              | Status      |
+| ---- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------- | ----------------------------------------------------- | ----------- |
+| S-00 | `landing-page`                     | see a landing page with value prop and sign-up CTA                                                                 | —             | — (US-01 acquisition surface)                         | done        |
+| F-01 | `sessions-data-foundation`         | (foundation) sessions data model with per-user RLS                                                                 | —             | NFR (privacy), Access Control                         | done        |
+| S-01 | `first-session-capture-loop`       | log first energy-gated session end-to-end and see it in history                                                    | F-01          | US-01, FR-006, FR-009, FR-011, FR-012, FR-013, FR-015 | done        |
+| S-02 | `categorize-sessions-topic-format` | manage topics and tag each session with topic + material format                                                    | S-01          | FR-007, FR-008, FR-017                                | done        |
+| S-03 | `timer-presets-and-modes`          | edit the three preset slots and choose count-up vs preset per session                                              | S-01          | FR-004, FR-005, FR-010                                | done        |
+| S-04 | `session-notes-and-chart`          | add a free-text note to a session and view a focus-rating chart over time                                          | S-01          | FR-014, FR-016                                        | done        |
+| S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                                                   | S-01          | FR-012 (extends stop-early to dashboard level)        | done        |
+| S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running                                   | S-01          | FR-018                                                | done        |
+| S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely                                   | S-01          | — (gap; extends FR-015 history list)                  | done        |
+| S-08 | `anonymous-sessions`               | start and complete a focus session without signing in, with topic/format/preset tagging, saved locally in-browser  | S-01          | — (PRD §Non-Goals, flagged "Add as follow up")        | done        |
 | S-09 | `anonymous-session-sync`           | have locally-stored anonymous sessions, topics, formats, and presets merged into their account after signing in/up | S-08          | — (PRD §Non-Goals, flagged "Add as follow up")        | not started |
+| S-10 | `continue-session-past-end`        | choose to keep working past a session's scheduled end, converting it to count-up without losing the original start time | S-03          | — (gap; extends FR-011, FR-005)                       | not started |
+| S-11 | `reopen-running-session`           | return to an in-progress session from the dashboard after its tab/window was closed                                | S-05          | — (gap; extends FR-015)                               | not started |
 
 ## Baseline
 
@@ -213,21 +215,54 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Risk:** This is the harder half of what was originally scoped as one S-08 slice — reconciling two persistence backends after the fact, guarding against unique-constraint violations and duplicate imports on the merge path. If effort assessment at `/10x-plan` time shows this is disproportionately costly relative to its value, it is safe to leave parked: S-08 already ships a complete, functional anonymous experience without it.
 - **Status:** not started
 
+### S-10: Continue session past its scheduled end
+
+- **Outcome:** When a preset session reaches its scheduled end (focus phase completes and the auto focus→break transition, or the timer, would normally fire), the user can tap "I'm still working" / "Continue" instead of stopping. The session converts to count-up mode and keeps running from its original `started_at` (elapsed time is preserved, not reset), so the user is not forced out of flow state at an arbitrary preset boundary. When they eventually do stop, the normal end-of-session flow (rating, note, history) applies as usual, and the session is recorded as having run in count-up mode for its total elapsed duration.
+- **Change ID:** `continue-session-past-end`
+- **PRD refs:** No new PRD FR — extends FR-011 (auto focus→break transition) and FR-005 (count-up mode, delivered by S-03). Gap identified from real use, tracked in Parked ("Contiue timer" / "Continue focus") before promotion.
+- **Prerequisites:** S-03 (count-up mode must exist — this slice converts a running preset session into one)
+- **Parallel with:** S-02, S-04, S-06, S-07
+- **Blockers:** —
+- **Unknowns:**
+  - Trigger point — does "Continue" appear only at the moment the focus phase would auto-transition to break, or also at break-end, or as a persistent option throughout the running timer? — Owner: project author. Block: no.
+  - Whether the audible end-of-focus cue (S-01) still fires when "Continue" is available, so the decision point is noticeable. — Owner: implementer. Block: no.
+  - History / dashboard display — how a session that started as a preset and converted to count-up mid-flight should be labeled (e.g. does the 🍅 badge / duration display reflect the original preset or the final count-up total?). — Owner: implementer (decided at `/10x-plan` time). Block: no.
+  - Whether "Continue" is offered on break-phase end too, or focus-phase end only. — Owner: project author. Block: no.
+- **Risk:** Touches the core timer state machine established in S-01 and extended by S-03's count-up mode. The main hazard is a session's `timer_mode` changing mid-flight — any code that assumes a session's mode is fixed for its lifetime (e.g. save logic, S-05's abandon flow, S-06's tab-title timer) needs re-checking against this new transition. Must not break the existing auto focus→break transition or explicit stop-early/abandon paths for sessions that don't use "Continue".
+- **Status:** not started
+
+### S-11: Re-open a running session from the dashboard
+
+- **Outcome:** A dashboard row for an in-progress session (no `ended_at`) shows a "Resume" control that takes the user back to that session's `/session/[id]` page, correctly redrawing the running timer via S-01's `started_at`-based reconciliation. Today, once the session tab/window is closed, its UUID is lost and the dashboard only lets the user see that a session is running or abandon it — there is no way back into it. Ended sessions are unaffected; this only adds a control to in-progress rows.
+- **Change ID:** `reopen-running-session`
+- **PRD refs:** No new PRD FR — extends FR-015 (history list) with a dashboard-level control for in-progress sessions, in the same spirit as S-05's abandon button. Gap discovered from real use: session URLs contain a UUID with no other way to recover it once the page is closed.
+- **Prerequisites:** S-05 (established the dashboard's row-level control pattern for in-progress sessions and the abandoned-guard on `/session/[id]`)
+- **Parallel with:** S-02, S-04, S-06, S-07, S-10 (coordinate with S-10 if both touch `session/[id].astro` in the same window)
+- **Blockers:** —
+- **Unknowns:**
+  - UI affordance — a "Resume" link/button on the row, or making the whole in-progress row clickable? — Owner: implementer. Block: no.
+  - Nothing in v1 prevents multiple in-progress sessions existing at once (no single-active-session guarantee); this slice does not add that guarantee, so each in-progress row gets its own independent "Resume" link. — Owner: project author. Block: no.
+  - Whether reopening needs any additional state check beyond what S-01's load-time reconciliation and S-05's abandoned-guard already provide. — Owner: implementer. Block: no.
+- **Risk:** Small, additive UI change — one new link on dashboard rows, reusing the existing `/session/[id]` route and S-01's timer-resilience reconciliation to redraw elapsed/remaining time correctly on reopen. Primary risk is ownership and state correctness: the link must only ever navigate to sessions the current user owns (already enforced by RLS) and must not resurrect an abandoned or already-ended session's running-timer UI — reuse S-05's abandoned-guard on `/session/[id]` rather than re-deriving it.
+- **Status:** not started
+
 ## Backlog Handoff
 
-| Roadmap ID | Change ID                          | Suggested issue title                                         | Ready for `/10x-plan` | Notes                                     |
-| ---------- | ---------------------------------- | ------------------------------------------------------------- | --------------------- | ----------------------------------------- |
-| S-00       | `landing-page`                     | Landing page — hero + value prop + sign-up CTA                | yes                   | Implemented                               |
-| F-01       | `sessions-data-foundation`         | Sessions data foundation — table + per-user RLS               | yes                   | Implemented                               |
-| S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)            | no                    | Implemented                               |
-| S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format   | no                    | Implemented                               |
-| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker | no                    | Implemented                               |
-| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                         | no                    | Implemented                               |
-| S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon       | no                    | Implemented                               |
-| S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running           | no                    | Implemented                               |
-| S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history      | no                    | Implemented                               |
-| S-08       | `anonymous-sessions`               | Anonymous session capture backed by localStorage (sessions, topics, formats, presets) | no        | Parked topic promoted to slice 2026-07-11; split from combined S-08 via `/10x-frame` 2026-07-11 — this row is capture-only, sync moved to S-09 |
-| S-09       | `anonymous-session-sync`           | Merge anonymous local data into account on sign-in/sign-up     | no                    | Split out of original S-08 scope via `/10x-frame` 2026-07-11; see `context/changes/anonymous-sessions/frame.md` |
+| Roadmap ID | Change ID                          | Suggested issue title                                                                 | Ready for `/10x-plan` | Notes                                                                                                           |
+| ---------- | ---------------------------------- | ------------------------------------------------------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------------- |
+| S-00       | `landing-page`                     | Landing page — hero + value prop + sign-up CTA                                        | yes                   | Implemented                                                                                                     |
+| F-01       | `sessions-data-foundation`         | Sessions data foundation — table + per-user RLS                                       | yes                   | Implemented                                                                                                     |
+| S-01       | `first-session-capture-loop`       | First end-to-end session capture loop (north star)                                    | no                    | Implemented                                                                                                     |
+| S-02       | `categorize-sessions-topic-format` | Topic management plus per-session topic and material format                           | no                    | Implemented                                                                                                     |
+| S-03       | `timer-presets-and-modes`          | Editable timer presets, count-up, and per-session mode picker                         | no                    | Implemented                                                                                                     |
+| S-04       | `session-notes-and-chart`          | Session notes plus focus-rating chart                                                 | no                    | Implemented                                                                                                     |
+| S-05       | `explicit-session-abandon`         | Explicit abandon button; remove time-based auto-abandon                               | no                    | Implemented                                                                                                     |
+| S-06       | `tab-title-timer`                  | Tab title shows live timer while session is running                                   | no                    | Implemented                                                                                                     |
+| S-07       | `edit-delete-sessions`             | Edit a logged session's fields or delete it from history                              | no                    | Implemented                                                                                                     |
+| S-08       | `anonymous-sessions`               | Anonymous session capture backed by localStorage (sessions, topics, formats, presets) | no                    | Implemented                                                                                                     |
+| S-09       | `anonymous-session-sync`           | Merge anonymous local data into account on sign-in/sign-up                            | no                    | Split out of original S-08 scope via `/10x-frame` 2026-07-11; see `context/changes/anonymous-sessions/frame.md` |
+| S-10       | `continue-session-past-end`        | Continue past a session's scheduled end, converting it to count-up                    | no                    | Promoted from Parked ("Contiue timer" / "Continue focus") 2026-07-12                                            |
+| S-11       | `reopen-running-session`           | Resume an in-progress session from the dashboard                                      | no                    | Promoted from Parked ("Re-open running session from a dashboard") 2026-07-12                                    |
 
 ## Open Roadmap Questions
 
@@ -248,7 +283,6 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Admin user-facing UI** — Why parked: Access Control describes the Admin role conceptually ("not exposed in normal user-facing UI"; "assigned out-of-band"). No FR demands v1 admin tooling — the project owner inspects user records via Supabase Studio.
 - **Account-merging UI** — Why parked: Open Roadmap Question #1; defer until real-user friction surfaces.
 - **Account deletion (GDPR right to erasure)** — User can permanently delete their account and all associated data (sessions, topics, profile) from within the app, satisfying GDPR Art. 17. Why parked: requires a hard-delete or anonymisation cascade across all user-owned tables, a confirmation UX with a mandatory re-auth step, and a Supabase Auth user deletion call -- non-trivial work that has no impact on the MVP capture loop. Revisit once the product has real users who may invoke their erasure right.
-- **Contiue timer** - when session is closed, user can click "I'm still working" and the counter continues - it helps to protect the flow state. Why parked: It is an extension of MVP
 - **Auto-resume running session on app open** — when a signed-in user opens the app and has an in-progress session (no `ended_at`), redirect them straight to that session's page so they can interact with it (rate, stop early, abandon), instead of only seeing it listed on the dashboard. Pairs with a single-active-session guarantee: starting a new session must be blocked while one is already running, so it is not possible to run multiple sessions in parallel for the same user. Motivation: today, if the user closes the tab mid-session there is no way to reopen and finish that exact session from the dashboard. Why parked: outside MVP scope; revisit after S-01..S-04 land.
 - **Web Notifications API fallback for focus-end chime** — request `Notification.requestPermission()` inside the "Start session" click and, if granted, fire a system notification at focus-end alongside (or instead of) the `<audio>` chime. Motivation: when the user refreshes the session page mid-session, the reloaded document has no transient user activation and browsers block unmuted `<audio>.play()` at fire-time -- so the chime is silent even though the timer works. A Notification does not require gesture at fire-time and survives refresh, tab-switch, and minimised windows. Why parked: MVP already ships an audible chime on the happy path (no refresh); the refresh-without-interaction hole is real but narrow. Revisit after MVP to close it. Also consider pairing with a purely-visual fallback (S-06 tab-title timer + favicon swap + full-screen "Focus done" banner) that requires no permission.
   **Another option** to consider is to show popup on the page after refresh - it will request user' interaction and unlocks chime (right?)
@@ -259,8 +293,6 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Move the time badges to sit directly above the "Start" button.
   - Make counter clock much bigger
   - Why parked: cosmetic, low-risk polish with no PRD FR backing; bundle into one small change once picked up rather than trickling in as one-offs.
-- **Re-open running session from a dashboard** - right now if the session window is closed we have no chance to re-open it (as URL contains UUID which is just lost). From dashboard we can only see it is running or we can abandon it. It would be useful just to return to that session. It should be allowed only for running sessions though (In progress state)
-- **Continue focus** - when the session is finished, user can pick also an option to continue - in that case, current session is converted to count-up session and continued (session start time remains as it was). This is needed to protect user' focus and not force him to take a break.
 - **Server-side ownership validation of `topic_id` / `material_format_id` on session writes** — the session write schemas (`createSessionSchema`, and the planned `editSessionSchema` for S-07) validate `topic_id` / `material_format_id` as well-formed UUIDs only, not that the referenced topic/format belongs to the caller. Postgres FK checks bypass RLS, so a user could associate their own session with another user's topic/format UUID (they still can't read that row's name via RLS, so the leak is narrow). Fix would add an owner-scoped existence check (or a trigger/RLS `WITH CHECK`) on both write paths — `POST /api/sessions` and `PUT /api/sessions/[id]`. Why parked: pre-existing behavior shared by the create path, not introduced by S-07; the privacy impact is limited (no cross-user data is readable). Surfaced during the S-07 (`edit-delete-sessions`) plan review; tighten across both write paths together, outside MVP.
 
 ## Bugs to be fixed
