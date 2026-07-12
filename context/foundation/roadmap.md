@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-07-11
+updated: 2026-07-12
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -38,7 +38,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-05 | `explicit-session-abandon`         | abandon an in-progress session explicitly via a dashboard button                 | S-01          | FR-012 (extends stop-early to dashboard level)        | done        |
 | S-06 | `tab-title-timer`                  | see the live timer countdown in the browser tab title while a session is running | S-01          | FR-018                                                | done        |
 | S-07 | `edit-delete-sessions`             | edit a logged session's duration/fields or delete an accidental session entirely | S-01          | — (gap; extends FR-015 history list)                  | done        |
-| S-08 | `anonymous-sessions`               | start and complete a focus session without signing in, with topic/format/preset tagging, saved locally in-browser | S-01          | — (PRD §Non-Goals, flagged "Add as follow up")        | not started |
+| S-08 | `anonymous-sessions`               | start and complete a focus session without signing in, with topic/format/preset tagging, saved locally in-browser | S-01          | — (PRD §Non-Goals, flagged "Add as follow up")        | done |
 | S-09 | `anonymous-session-sync`           | have locally-stored anonymous sessions, topics, formats, and presets merged into their account after signing in/up | S-08          | — (PRD §Non-Goals, flagged "Add as follow up")        | not started |
 
 ## Baseline
@@ -195,7 +195,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Storage cleanup: does local history grow unbounded, or is there a cap (e.g., last N sessions)? — Owner: implementer. Block: no.
   - Local key/ID scheme for topics/material_formats/presets (name-keyed vs. client-generated UUID) — decided here because it directly determines the merge algorithm S-09 will need. — Owner: implementer (decided at `/10x-plan` time). Block: no.
 - **Risk:** Introduces a second persistence path (localStorage) parallel to the Supabase-backed one, now spanning four tables (sessions, topics, material_formats, user_presets) instead of one, doubling the places state can live and diverge. The main hazard is silent drift between the two paths — e.g., a history or chart component that only reads from Supabase and quietly ignores anonymous sessions. Migrate-on-signup was split out to S-09 specifically to keep this slice's scope to capture + local persistence only (see `context/changes/anonymous-sessions/frame.md` for the full reframing rationale).
-- **Status:** not started
+- **Status:** done
 
 ### S-09: Sync locally-stored anonymous data into account on sign-in/sign-up
 
@@ -278,3 +278,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **S-05: abandon an in-progress session explicitly via a dashboard button** — Archived 2026-07-07 → `context/archive/2026-07-06-explicit-session-abandon/`. Lesson: —.
 - **S-06: see the live timer countdown in the browser tab title while a session is running** — Archived 2026-07-07 → `context/archive/2026-07-07-tab-title-timer/`. Lesson: —.
 - **S-07: User can delete a logged session from the history list (e.g. a 10-second session started by accident) so it is removed completely from history and from any future focus-rating aggregates. User can also edit a logged session's duration and other captured fields (e.g. correct a count-up session that ran to 3h because the user forgot to stop the clock down to the ~1h that was actually worked). Edits and deletes are scoped to the session's owner via RLS.** — Archived 2026-07-10 → `context/archive/2026-07-08-edit-delete-sessions/`. Lesson: —.
+- **S-08: A visitor who has not signed in can start and complete a focus session (energy pick, timer, rating, optional note) directly from `/` without authentication, including topic/material-format tagging (S-02) and timer preset selection (S-03) — all backed by a local equivalent of those tables rather than Supabase. The session, plus any topics/formats/presets the visitor creates or edits, is persisted entirely in the browser's localStorage and shown in a local, session-scoped history view mirroring the signed-in dashboard. No server-side row is created and no synchronization to an account happens in this slice — that is split out to S-09.** — Archived 2026-07-12 → `context/archive/2026-07-11-anonymous-sessions/`. Lesson: —.
