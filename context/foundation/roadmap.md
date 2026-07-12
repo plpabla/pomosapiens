@@ -42,7 +42,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-09 | `anonymous-session-sync`           | have locally-stored anonymous sessions, topics, formats, and presets merged into their account after signing in/up | S-08          | — (PRD §Non-Goals, flagged "Add as follow up")        | not started |
 | S-10 | `continue-session-past-end`        | choose to keep working past a session's scheduled end, converting it to count-up without losing the original start time | S-03          | — (gap; extends FR-011, FR-005)                       | not started |
 | S-11 | `reopen-running-session`           | return to an in-progress session from the dashboard after its tab/window was closed                                | S-05          | — (gap; extends FR-015)                               | not started |
-| S-12 | `ui-improvements`                  | see accurate 🍅 time badges, correct stop-button wording, a pre-selected energy default, relocated badges, and a bigger timer clock | S-03          | — (cosmetic; no FR)                                   | not started |
+| S-12 | `ui-improvements`                  | see accurate 🍅 time badges, correct stop-button wording, a pre-selected energy default, relocated badges, and a bigger timer clock | S-03          | — (cosmetic; no FR)                                   | done |
 
 ## Baseline
 
@@ -259,7 +259,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - Whether defaulting energy to "Medium" changes the "energy required" behavior (FR-009) now that a value is always pre-selected, or whether the user must still actively confirm it. — Owner: project author. Block: no.
   - How the 🍅 time badge renders for count-up (∞) sessions — keep the ∞ symbol, or show a running tomato count? — Owner: implementer. Block: no.
 - **Risk:** Five independent, low-risk cosmetic changes with no schema or API impact — pure frontend. The only coordination risk is touching the same files (`dashboard.astro`, `session/[id].astro`) as S-10 / S-11 if picked up in the same window.
-- **Status:** not started
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -320,3 +320,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **S-06: see the live timer countdown in the browser tab title while a session is running** — Archived 2026-07-07 → `context/archive/2026-07-07-tab-title-timer/`. Lesson: —.
 - **S-07: User can delete a logged session from the history list (e.g. a 10-second session started by accident) so it is removed completely from history and from any future focus-rating aggregates. User can also edit a logged session's duration and other captured fields (e.g. correct a count-up session that ran to 3h because the user forgot to stop the clock down to the ~1h that was actually worked). Edits and deletes are scoped to the session's owner via RLS.** — Archived 2026-07-10 → `context/archive/2026-07-08-edit-delete-sessions/`. Lesson: —.
 - **S-08: A visitor who has not signed in can start and complete a focus session (energy pick, timer, rating, optional note) directly from `/` without authentication, including topic/material-format tagging (S-02) and timer preset selection (S-03) — all backed by a local equivalent of those tables rather than Supabase. The session, plus any topics/formats/presets the visitor creates or edits, is persisted entirely in the browser's localStorage and shown in a local, session-scoped history view mirroring the signed-in dashboard. No server-side row is created and no synchronization to an account happens in this slice — that is split out to S-09.** — Archived 2026-07-12 → `context/archive/2026-07-11-anonymous-sessions/`. Lesson: —.
+- **S-12: User sees five small polish changes bundled together: session-history badges show actual time as 🍅 (one per 20 min) instead of P1/P2/P3/∞; the stop control on a count-up session reads "Stop" instead of "Stop early" (there's no "early" without a fixed duration); the pre-session energy picker defaults to "Medium" instead of requiring an explicit pick; the time badges sit directly above the "Start" button; and the running-timer clock face is noticeably bigger.** — Archived 2026-07-12 → `context/archive/2026-07-12-ui-improvements/`. Lesson: —.
