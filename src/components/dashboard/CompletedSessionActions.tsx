@@ -1,6 +1,7 @@
 import { useState } from "react";
 import EditSessionDialog from "@/components/dashboard/EditSessionDialog";
-import DeleteSessionButton from "@/components/dashboard/DeleteSessionButton";
+import SessionActionsMenu from "@/components/dashboard/SessionActionsMenu";
+import DeleteSessionDialog from "@/components/dashboard/DeleteSessionDialog";
 
 type EnergyLevel = "low" | "medium" | "high";
 
@@ -16,28 +17,34 @@ interface Props {
 }
 
 export default function CompletedSessionActions(props: Props) {
-  const [deleting, setDeleting] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   return (
-    <div className="flex justify-end gap-2">
-      {!deleting && (
-        <EditSessionDialog
-          id={props.id}
-          startedAt={props.startedAt}
-          durationSeconds={props.durationSeconds}
-          energyLevel={props.energyLevel}
-          topicId={props.topicId}
-          materialFormatId={props.materialFormatId}
-          focusRating={props.focusRating}
-          note={props.note}
-        />
-      )}
-      <DeleteSessionButton
-        sessionId={props.id}
-        onPhaseChange={(phase) => {
-          setDeleting(phase !== "idle");
+    <>
+      <SessionActionsMenu
+        onEdit={() => {
+          setEditOpen(true);
+        }}
+        onDelete={() => {
+          setDeleteOpen(true);
         }}
       />
-    </div>
+
+      <EditSessionDialog
+        id={props.id}
+        startedAt={props.startedAt}
+        durationSeconds={props.durationSeconds}
+        energyLevel={props.energyLevel}
+        topicId={props.topicId}
+        materialFormatId={props.materialFormatId}
+        focusRating={props.focusRating}
+        note={props.note}
+        open={editOpen}
+        onOpenChange={setEditOpen}
+      />
+
+      <DeleteSessionDialog sessionId={props.id} open={deleteOpen} onOpenChange={setDeleteOpen} />
+    </>
   );
 }

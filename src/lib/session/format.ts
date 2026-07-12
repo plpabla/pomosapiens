@@ -3,9 +3,8 @@ export function tomatoCount(durationSeconds: number): number {
 }
 
 export function formatDuration(seconds: number): string {
-  const m = Math.floor(seconds / 60);
-  const s = seconds % 60;
-  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  const minutes = Math.floor(seconds / 60);
+  return `${String(minutes)} min.`;
 }
 
 export function getStatus(session: { ended_at: string | null }): "done" | "in_progress" {

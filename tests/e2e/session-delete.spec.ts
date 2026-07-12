@@ -1,9 +1,8 @@
 // session-delete.spec.ts
-// Risk: the confirm-guarded Delete control on a completed history row must remove the
-//   session through DELETE /api/sessions/[id] and RLS, and while confirming, the
-//   composed CompletedSessionActions island must hide the row's Edit trigger (Phase 3
-//   scope-extension fix) so a user can't open Edit on a row mid-delete. An untouched
-//   sibling session proves the delete is scoped to the target row only.
+// Risk: the actions-menu Delete on a completed history row must remove the session through
+//   DELETE /api/sessions/[id] and RLS, and the destructive action must be gated behind a
+//   confirm dialog (opening the dialog must not delete anything). An untouched sibling
+//   session proves the delete is scoped to the target row only.
 // Seed: tests/e2e/seed.spec.ts
 // Plan: context/changes/edit-delete-sessions/plan.md Phase 4, risk 2 (session-delete)
 import { test, expect } from "@playwright/test";
@@ -41,22 +40,24 @@ test("dashboard Delete control: confirming removes a logged session and hides it
     const controlRow = page.getByRole("listitem").filter({ hasText: "★ 5 / 5" });
     await expect(targetRow).toBeVisible();
     await expect(controlRow).toBeVisible();
-    await expect(targetRow.getByRole("button", { name: "Edit" })).toBeVisible();
 
-    // The Delete control is a client:visible island -- the DOM node exists (and is
-    // clickable) before React hydration attaches its handler, so retry the click
-    // until the confirm step actually appears rather than assuming the first click landed.
+    // The actions menu is a client:visible island -- the kebab DOM node exists (and is
+    // clickable) before React hydration attaches its handler, so retry opening the menu
+    // until the Delete item actually appears rather than assuming the first click landed.
     await expect(async () => {
-      await targetRow.getByRole("button", { name: "Delete" }).click();
-      await expect(targetRow.getByRole("button", { name: "Confirm?" })).toBeVisible({ timeout: 1_000 });
+      await targetRow.getByRole("button", { name: "More actions" }).click();
+      await expect(targetRow.getByRole("menuitem", { name: "Delete" })).toBeVisible({ timeout: 1_000 });
     }).toPass({ timeout: 10_000 });
-    // Confirming hides the Edit trigger for this row -- prevents opening Edit while it's
-    // mid-delete (the coordination bug fixed by CompletedSessionActions in Phase 3).
-    await expect(targetRow.getByRole("button", { name: "Edit" })).toHaveCount(0);
+    await targetRow.getByRole("menuitem", { name: "Delete" }).click();
+
+    // A confirm dialog gates the destructive action; it is portaled to the document body,
+    // so query it at page scope rather than within the row.
+    const confirmDialog = page.getByRole("dialog");
+    await expect(confirmDialog).toBeVisible();
 
     const [deleteResponse] = await Promise.all([
       page.waitForResponse((res) => res.request().method() === "DELETE" && res.url().includes("/api/sessions/")),
-      targetRow.getByRole("button", { name: "Confirm?" }).click(),
+      confirmDialog.getByRole("button", { name: "Delete" }).click(),
     ]);
     expect(deleteResponse.ok()).toBe(true);
     await page.waitForLoadState("load");

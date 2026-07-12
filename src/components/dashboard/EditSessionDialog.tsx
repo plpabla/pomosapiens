@@ -22,10 +22,15 @@ interface Props {
   materialFormatId: string | null;
   focusRating: number | null;
   note: string | null;
+  /** When provided, the dialog is controlled and the built-in Edit trigger is not rendered. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export default function EditSessionDialog(props: Props) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  // Controlled when a parent passes `open`; internalOpen stays false in that mode.
+  const open = props.open ?? internalOpen;
   const { topics, formats, loadError } = useTopicsAndFormats({ enabled: open });
 
   const [minutes, setMinutes] = useState(String(minutesFromSeconds(props.durationSeconds)));
@@ -69,7 +74,8 @@ export default function EditSessionDialog(props: Props) {
   }
 
   function handleOpenChange(next: boolean) {
-    setOpen(next);
+    if (props.onOpenChange) props.onOpenChange(next);
+    else setInternalOpen(next);
     if (next) return;
     setMinutes(String(minutesFromSeconds(props.durationSeconds)));
     setDurationDirty(false);
@@ -83,11 +89,13 @@ export default function EditSessionDialog(props: Props) {
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="outline" size="sm">
-          Edit
-        </Button>
-      </DialogTrigger>
+      {props.open === undefined && (
+        <DialogTrigger asChild>
+          <Button variant="outline" size="sm">
+            Edit
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Edit session</DialogTitle>

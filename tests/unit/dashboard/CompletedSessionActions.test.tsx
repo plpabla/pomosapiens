@@ -1,6 +1,12 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { render, screen, fireEvent, cleanup } from "@testing-library/react";
+import { render, screen, fireEvent, cleanup, waitFor, within } from "@testing-library/react";
 import CompletedSessionActions from "@/components/dashboard/CompletedSessionActions";
+
+const reload = vi.fn();
+Object.defineProperty(window, "location", {
+  value: { reload },
+  writable: true,
+});
 
 const baseProps = {
   id: "s1",
@@ -14,6 +20,7 @@ const baseProps = {
 };
 
 beforeEach(() => {
+  reload.mockClear();
   vi.stubGlobal(
     "fetch",
     vi.fn((url: string) => {
@@ -29,28 +36,43 @@ afterEach(() => {
 });
 
 describe("CompletedSessionActions", () => {
-  it("renders both Edit and Delete controls initially", () => {
+  it("keeps Edit and Delete hidden until the actions menu is opened", () => {
     render(<CompletedSessionActions {...baseProps} />);
 
-    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Delete" })).toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Edit" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("menuitem", { name: "Delete" })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+
+    expect(screen.getByRole("menuitem", { name: "Edit" })).toBeInTheDocument();
+    expect(screen.getByRole("menuitem", { name: "Delete" })).toBeInTheDocument();
   });
 
-  it("hides the Edit button while the delete confirmation is showing", () => {
+  it("gates the Delete menu item behind a confirm dialog and does not delete on open", () => {
     render(<CompletedSessionActions {...baseProps} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
+    fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }));
 
-    expect(screen.queryByRole("button", { name: "Edit" })).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Confirm?" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.getByText(/delete session\?/i)).toBeInTheDocument();
+    expect(fetch).not.toHaveBeenCalledWith("/api/sessions/s1", expect.objectContaining({ method: "DELETE" }));
   });
 
-  it("shows the Edit button again after the delete confirmation is cancelled", () => {
+  it("issues DELETE and reloads when the confirm dialog is confirmed", async () => {
     render(<CompletedSessionActions {...baseProps} />);
 
-    fireEvent.click(screen.getByRole("button", { name: "Delete" }));
-    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    fireEvent.click(screen.getByRole("button", { name: /more actions/i }));
+    fireEvent.click(screen.getByRole("menuitem", { name: "Delete" }));
 
-    expect(screen.getByRole("button", { name: "Edit" })).toBeInTheDocument();
+    const dialog = screen.getByRole("dialog");
+    fireEvent.click(within(dialog).getByRole("button", { name: "Delete" }));
+
+    await waitFor(() => {
+      expect(fetch).toHaveBeenCalledWith("/api/sessions/s1", expect.objectContaining({ method: "DELETE" }));
+    });
+    await waitFor(() => {
+      expect(reload).toHaveBeenCalled();
+    });
   });
 });

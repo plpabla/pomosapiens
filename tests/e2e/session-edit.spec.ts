@@ -30,15 +30,17 @@ test("dashboard Edit modal: changing duration and note on a logged session persi
     await page.goto("/dashboard");
     await page.waitForLoadState("networkidle");
 
-    await expect(page.getByText("05:00")).toBeVisible();
+    await expect(page.getByText("5 min.")).toBeVisible();
 
-    // The Edit trigger is a client:visible island -- the DOM node exists (and is
-    // clickable) before React hydration attaches its handler, so retry the click
-    // until the dialog actually opens rather than assuming the first click landed.
+    // The actions menu is a client:visible island -- the kebab DOM node exists (and is
+    // clickable) before React hydration attaches its handler, so retry opening the menu
+    // until the Edit item appears rather than assuming the first click landed.
     await expect(async () => {
-      await page.getByRole("button", { name: "Edit" }).click();
-      await expect(page.getByRole("heading", { name: "Edit session" })).toBeVisible({ timeout: 1_000 });
+      await page.getByRole("button", { name: "More actions" }).click();
+      await expect(page.getByRole("menuitem", { name: "Edit" })).toBeVisible({ timeout: 1_000 });
     }).toPass({ timeout: 10_000 });
+    await page.getByRole("menuitem", { name: "Edit" }).click();
+    await expect(page.getByRole("heading", { name: "Edit session" })).toBeVisible();
     await expect(page.getByLabel("Duration (minutes)")).toHaveValue("5");
 
     const noteText = `e2e-edit-note-${now}`;
@@ -52,9 +54,9 @@ test("dashboard Edit modal: changing duration and note on a logged session persi
     expect(putResponse.ok()).toBe(true);
     await page.waitForLoadState("load");
 
-    await expect(page.getByText("12:00")).toBeVisible();
+    await expect(page.getByText("12 min.")).toBeVisible();
     await expect(page.getByText(noteText)).toBeVisible();
-    await expect(page.getByText("05:00")).not.toBeVisible();
+    await expect(page.getByText("5 min.")).not.toBeVisible();
   } finally {
     await context.close();
     await fixture.cleanup();
