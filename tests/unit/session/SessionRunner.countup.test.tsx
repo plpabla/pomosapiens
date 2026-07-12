@@ -32,4 +32,15 @@ describe("SessionRunner count_up mode rendering", () => {
     expect(screen.getByText("00:03")).toBeInTheDocument();
     expect(screen.queryByText("00:57")).not.toBeInTheDocument();
   });
+
+  it("shows a 'Stop' button (not 'Stop early') in count_up mode", () => {
+    render(<SessionRunner sessionId="x" startedAtMs={0} focusSeconds={60} mode="count_up" />);
+    expect(screen.getByRole("button", { name: "Stop" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /stop early/i })).not.toBeInTheDocument();
+  });
+
+  it("shows a 'Stop early' button in preset mode", () => {
+    render(<SessionRunner sessionId="x" startedAtMs={0} focusSeconds={60} mode="preset" />);
+    expect(screen.getByRole("button", { name: /stop early/i })).toBeInTheDocument();
+  });
 });

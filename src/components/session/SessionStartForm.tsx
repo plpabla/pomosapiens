@@ -47,8 +47,6 @@ export default function SessionStartForm({
     <div className="mx-auto max-w-sm pt-16 text-center">
       <h1 className="text-off-white mb-8 text-2xl font-bold">Choose your energy level</h1>
       <form onSubmit={onSubmit}>
-        <ModePicker presets={presets} value={mode} onChange={onModeChange} />
-
         <EnergyLevelPicker value={energy} onChange={onEnergyChange} />
 
         {loadError && <ServerError message={loadError} />}
@@ -57,6 +55,8 @@ export default function SessionStartForm({
           {topicSlot}
           <MaterialFormatSelect value={materialFormatId} onChange={onFormatChange} formats={formats} />
         </div>
+
+        <ModePicker presets={presets} value={mode} onChange={onModeChange} />
 
         <ServerError message={submitError} />
         <Button

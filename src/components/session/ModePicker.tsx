@@ -13,7 +13,7 @@ export default function ModePicker({ presets, value, onChange }: Props) {
   const chips: { mode: Mode; label: string }[] = [
     ...presets.map((p) => ({
       mode: `preset_${p.slot}`,
-      label: `P${p.slot} ${minutesFromSeconds(p.focus_seconds)}/${minutesFromSeconds(p.break_seconds)}`,
+      label: `${minutesFromSeconds(p.focus_seconds)} / ${minutesFromSeconds(p.break_seconds)}`,
     })),
     { mode: "count_up", label: "Count-up" },
   ];

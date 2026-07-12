@@ -37,25 +37,25 @@ describe("EnergyPicker -- mode init (bug 9.1 regression)", () => {
     stubFetchOk();
     render(<EnergyPicker />);
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /P2/i })).toHaveAttribute("aria-pressed", "true");
-      expect(screen.getByRole("button", { name: /P1/i })).toHaveAttribute("aria-pressed", "false");
+      expect(screen.getByRole("button", { name: "45 / 10" })).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByRole("button", { name: "25 / 5" })).toHaveAttribute("aria-pressed", "false");
     });
   });
 
   it("clicking a chip deselects the previous chip and persists the new mode to localStorage", async () => {
-    // This pins the bug: state was already 'preset_2' from localStorage but DOM showed P1 (SSR),
-    // so clicking P2 was a no-op — DOM never updated.
+    // This pins the bug: state was already 'preset_2' from localStorage but DOM showed the P1 chip (SSR),
+    // so clicking the P2 chip was a no-op — DOM never updated.
     // The fix (useSyncExternalStore + persistMode) writes to localStorage on every click,
     // which triggers a fresh snapshot read and re-render.
     localStorage.setItem("pomosapiens.last_mode", "preset_2");
     stubFetchOk();
     render(<EnergyPicker />);
     await waitFor(() => {
-      expect(screen.getByRole("button", { name: /P2/i })).toHaveAttribute("aria-pressed", "true");
+      expect(screen.getByRole("button", { name: "45 / 10" })).toHaveAttribute("aria-pressed", "true");
     });
-    fireEvent.click(screen.getByRole("button", { name: /P1/i }));
-    expect(screen.getByRole("button", { name: /P1/i })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByRole("button", { name: /P2/i })).toHaveAttribute("aria-pressed", "false");
+    fireEvent.click(screen.getByRole("button", { name: "25 / 5" }));
+    expect(screen.getByRole("button", { name: "25 / 5" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByRole("button", { name: "45 / 10" })).toHaveAttribute("aria-pressed", "false");
     expect(localStorage.getItem("pomosapiens.last_mode")).toBe("preset_1");
   });
 });

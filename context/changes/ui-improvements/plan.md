@@ -189,27 +189,27 @@ Four independent one-to-two-line cosmetic edits.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npm run lint`
-- [x] 1.2 Unit tests pass: `npm test`
-- [x] 1.3 New unit test covers `tomatoCount` boundaries and `SessionTags` rendering (done ≥20min / done <20min / in-progress)
+- [x] 1.1 Type checking passes: `npm run lint` — 75cabb0
+- [x] 1.2 Unit tests pass: `npm test` — 75cabb0
+- [x] 1.3 New unit test covers `tomatoCount` boundaries and `SessionTile` tomato-text rendering (done ≥20min / done <20min / in-progress); `SessionTags` pared down to topic/format chips only — 75cabb0
 
 #### Manual
 
-- [x] 1.4 Signed-in dashboard shows correct 🍅 counts across varying lengths incl. count-up
-- [x] 1.5 Anonymous history shows the same 🍅 badges
-- [x] 1.6 Completed sessions under 20 min and in-progress rows show no time badge
+- [x] 1.4 Signed-in dashboard shows correct 🍅 counts across varying lengths incl. count-up — 75cabb0
+- [x] 1.5 Anonymous history shows the same 🍅 badges — 75cabb0
+- [x] 1.6 Completed sessions under 20 min and in-progress rows show no time badge — 75cabb0
 
 ### Phase 2: stop wording, energy default, layout, clock size
 
 #### Automated
 
-- [ ] 2.1 Type checking / linting passes: `npm run lint`
-- [ ] 2.2 Unit tests pass: `npm test`
-- [ ] 2.3 E2E suite passes: `npm run test:e2e`
+- [x] 2.1 Type checking / linting passes: `npm run lint`
+- [x] 2.2 Unit tests pass: `npm test`
+- [x] 2.3 E2E suite passes: `npm run test:e2e`
 
 #### Manual
 
-- [ ] 2.4 Count-up shows "Stop"; preset shows "Stop early"
-- [ ] 2.5 Both clocks larger and no overflow on narrow viewport
-- [ ] 2.6 Pre-session loads with Medium highlighted and Start enabled; changing energy works
-- [ ] 2.7 Time-badge chips render directly above the Start button
+- [x] 2.4 Count-up shows "Stop"; preset shows "Stop early"
+- [x] 2.5 Both clocks larger and no overflow on narrow viewport
+- [x] 2.6 Pre-session loads with Medium highlighted and Start enabled; changing energy works
+- [x] 2.7 Time-badge chips render directly above the Start button

@@ -126,10 +126,12 @@ export default function SessionRunner({
       <div
         className={cn("flex flex-col items-center justify-center gap-8 p-4 text-center", fullHeight && "min-h-screen")}
       >
-        <div className="text-off-white font-mono text-7xl font-bold tabular-nums">{formatTime(display)}</div>
+        <div className="text-off-white font-mono text-8xl font-bold tabular-nums sm:text-9xl">
+          {formatTime(display)}
+        </div>
         <p className="text-ash text-sm tracking-widest uppercase">{label}</p>
         <Button variant="outline" onClick={stopEarly} className="border-charred text-ash hover:text-off-white mt-4">
-          Stop early
+          {mode === "count_up" ? "Stop" : "Stop early"}
         </Button>
       </div>
     );
@@ -140,7 +142,9 @@ export default function SessionRunner({
       <div
         className={cn("flex flex-col items-center justify-center gap-8 p-4 text-center", fullHeight && "min-h-screen")}
       >
-        <div className="text-off-white font-mono text-7xl font-bold tabular-nums">{formatTime(breakRemaining)}</div>
+        <div className="text-off-white font-mono text-8xl font-bold tabular-nums sm:text-9xl">
+          {formatTime(breakRemaining)}
+        </div>
         <p className="text-ash text-sm tracking-widest uppercase">Break</p>
         <Button
           variant="outline"
