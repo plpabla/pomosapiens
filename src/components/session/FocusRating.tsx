@@ -13,6 +13,9 @@ interface FocusRatingProps {
   onStartNewSession: () => void;
   onTakeBreak: () => void;
   onGoToDashboard: () => void;
+  /** See SessionRunner's `fullHeight` -- forwarded here since this screen is
+   * rendered by SessionRunner for the rating/saved steps. */
+  fullHeight?: boolean;
 }
 
 export default function FocusRating({
@@ -22,6 +25,7 @@ export default function FocusRating({
   onStartNewSession,
   onTakeBreak,
   onGoToDashboard,
+  fullHeight = true,
 }: FocusRatingProps) {
   const [screen, setScreen] = useState<"rating" | "saved">("rating");
   const [note, setNote] = useState("");
@@ -62,7 +66,9 @@ export default function FocusRating({
   if (screen === "saved") {
     const hasNote = note.trim() !== "";
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-7 p-4 text-center">
+      <div
+        className={cn("flex flex-col items-center justify-center gap-7 p-4 text-center", fullHeight && "min-h-screen")}
+      >
         <div className="bg-blaze flex size-16 items-center justify-center rounded-full">
           <Check className="text-off-white size-8" strokeWidth={2.5} />
         </div>
@@ -112,7 +118,9 @@ export default function FocusRating({
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4 text-center">
+    <div
+      className={cn("flex flex-col items-center justify-center gap-8 p-4 text-center", fullHeight && "min-h-screen")}
+    >
       <h2 className="text-off-white text-2xl font-bold">How was your focus?</h2>
       <div className="flex w-full max-w-sm flex-col gap-2 text-left">
         <Label htmlFor="session-note" className="text-ash">

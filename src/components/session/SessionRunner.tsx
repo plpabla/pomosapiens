@@ -6,6 +6,8 @@ import { useBreakTimer } from "@/lib/timer/useBreakTimer";
 import { formatTime } from "@/lib/timer/formatTime";
 import { useTabTitle } from "@/lib/timer/useTabTitle";
 import { getRunningTabTitle } from "@/lib/timer/tabTitle";
+import { remotePersistence, type EndSessionArgs } from "@/lib/session/persistence";
+import { cn } from "@/lib/utils";
 
 interface Props {
   sessionId: string;
@@ -13,6 +15,12 @@ interface Props {
   focusSeconds: number;
   mode?: "preset" | "count_up";
   breakSeconds?: number | null;
+  persistEnd?: (args: EndSessionArgs) => Promise<void>;
+  onGoToDashboard?: () => void;
+  onStartNewSession?: () => void;
+  /** Standalone pages want the timer centered in the full viewport; embedded
+   * usage (e.g. the anon landing-page island) should size to its content. */
+  fullHeight?: boolean;
 }
 
 const FOCUS_DONE = ["✅ Focus done!", "⏰ ⏰ ⏰"] as const;
@@ -24,6 +32,14 @@ export default function SessionRunner({
   focusSeconds,
   mode = "preset",
   breakSeconds = null,
+  persistEnd = (args) => remotePersistence.endSession(sessionId, args),
+  onGoToDashboard = () => {
+    window.location.assign("/dashboard");
+  },
+  onStartNewSession = () => {
+    window.location.assign("/session/new");
+  },
+  fullHeight = true,
 }: Props) {
   const { phase, remaining, elapsed, stoppedAtMs, stopEarly, audioRef } = useFocusTimer({
     startedAtMs,
@@ -54,14 +70,14 @@ export default function SessionRunner({
     if (breakDoneWhileHidden) return;
     const audio = audioRef.current;
     if (!audio) {
-      window.location.assign("/dashboard");
+      onGoToDashboard();
       return;
     }
     let gone = false;
     const go = () => {
       if (gone) return;
       gone = true;
-      window.location.assign("/dashboard");
+      onGoToDashboard();
     };
     audio.addEventListener("ended", go, { once: true });
     const timeoutId = setTimeout(go, 5000); // fallback if ended never fires
@@ -69,7 +85,7 @@ export default function SessionRunner({
       clearTimeout(timeoutId);
       audio.removeEventListener("ended", go);
     };
-  }, [breakComplete, breakDoneWhileHidden, audioRef]);
+  }, [breakComplete, breakDoneWhileHidden, audioRef, onGoToDashboard]);
 
   const title = getRunningTabTitle({ phase, internalPhase, mode, remaining, elapsed, breakRemaining });
   const alert =
@@ -81,7 +97,7 @@ export default function SessionRunner({
   const onAlertDismiss =
     breakComplete && breakDoneWhileHidden
       ? () => {
-          window.location.assign("/dashboard");
+          onGoToDashboard();
         }
       : undefined;
   useTabTitle({ title, alert, onAlertDismiss });
@@ -90,21 +106,16 @@ export default function SessionRunner({
     if (stoppedAtMs === null) return;
     setError(null);
 
-    const res = await fetch(`/api/sessions/${sessionId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
+    try {
+      await persistEnd({
         focus_rating: rating,
         ended_at: new Date(stoppedAtMs).toISOString(),
         note,
-      }),
-    });
-
-    if (!res.ok) {
-      const body = (await res.json().catch(() => ({}))) as { error?: string };
-      const message = body.error ?? "Failed to save session";
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to save session";
       setError(message);
-      throw new Error(message);
+      throw err;
     }
   }
 
@@ -112,7 +123,9 @@ export default function SessionRunner({
     const display = mode === "count_up" ? elapsed : remaining;
     const label = mode === "count_up" ? "Count-up session" : "Focus session";
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4 text-center">
+      <div
+        className={cn("flex flex-col items-center justify-center gap-8 p-4 text-center", fullHeight && "min-h-screen")}
+      >
         <div className="text-off-white font-mono text-7xl font-bold tabular-nums">{formatTime(display)}</div>
         <p className="text-ash text-sm tracking-widest uppercase">{label}</p>
         <Button variant="outline" onClick={stopEarly} className="border-charred text-ash hover:text-off-white mt-4">
@@ -124,13 +137,15 @@ export default function SessionRunner({
 
   if (internalPhase === "running_break") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4 text-center">
+      <div
+        className={cn("flex flex-col items-center justify-center gap-8 p-4 text-center", fullHeight && "min-h-screen")}
+      >
         <div className="text-off-white font-mono text-7xl font-bold tabular-nums">{formatTime(breakRemaining)}</div>
         <p className="text-ash text-sm tracking-widest uppercase">Break</p>
         <Button
           variant="outline"
           onClick={() => {
-            window.location.assign("/dashboard");
+            onGoToDashboard();
           }}
           className="border-charred text-ash hover:text-off-white mt-4"
         >
@@ -145,16 +160,13 @@ export default function SessionRunner({
       onSubmit={submitRating}
       error={error}
       canTakeBreak={mode !== "count_up" && breakSeconds !== null && breakSeconds > 0}
-      onStartNewSession={() => {
-        window.location.assign("/session/new");
-      }}
+      onStartNewSession={onStartNewSession}
       onTakeBreak={() => {
         setBreakStartedAtMs(Date.now());
         setInternalPhase("running_break");
       }}
-      onGoToDashboard={() => {
-        window.location.assign("/dashboard");
-      }}
+      onGoToDashboard={onGoToDashboard}
+      fullHeight={fullHeight}
     />
   );
 }

@@ -24,6 +24,12 @@ export function TopicSelect({ value, onChange, topics, id, ariaLabel = "Topic" }
     <Select
       value={value ?? NONE}
       onValueChange={(v) => {
+        // Radix's hidden native <select> (used for HTML form bubbling) fires a
+        // synthetic change with "" when the controlled value points to an item
+        // whose dropdown has never been opened -- e.g. a topic just created and
+        // auto-selected inline. Real "clear" selections use the NONE sentinel,
+        // so "" is never a legitimate user choice.
+        if (v === "") return;
         onChange(v === NONE ? null : v);
       }}
     >
@@ -61,6 +67,8 @@ export function MaterialFormatSelect({
     <Select
       value={value ?? NONE}
       onValueChange={(v) => {
+        // See TopicSelect's onValueChange for why "" must be ignored here.
+        if (v === "") return;
         onChange(v === NONE ? null : v);
       }}
     >
