@@ -4,7 +4,7 @@ import AbandonButton from "@/components/dashboard/AbandonButton";
 import CompletedSessionActions from "@/components/dashboard/CompletedSessionActions";
 import SessionTags from "@/components/session/SessionTags";
 import RatingBadge from "@/components/session/RatingBadge";
-import { formatDuration, getStatus, energyColorClass } from "@/lib/session/format";
+import { formatDuration, getStatus, energyColorClass, tomatoCount } from "@/lib/session/format";
 import { cn } from "@/lib/utils";
 import type { SessionListItem } from "@/lib/types";
 
@@ -16,6 +16,7 @@ interface Props {
 export default function SessionTile({ session, readOnly = false }: Props) {
   const status = getStatus(session);
   const energyClass = energyColorClass[session.energy_level] ?? "text-ash";
+  const tomatoes = status === "done" && session.duration_seconds != null ? tomatoCount(session.duration_seconds) : 0;
 
   return (
     <Card className="border-charred bg-ember text-off-white gap-2 px-5 py-4 shadow-none">
@@ -28,6 +29,7 @@ export default function SessionTile({ session, readOnly = false }: Props) {
           {status === "done" && session.duration_seconds != null
             ? formatDuration(session.duration_seconds)
             : "In progress"}
+          {tomatoes > 0 && ` ${"🍅".repeat(tomatoes)}`}
         </span>
         <RatingBadge status={status} focusRating={session.focus_rating} />
       </div>

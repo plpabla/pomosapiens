@@ -60,11 +60,11 @@ Replace the `P1/P2/P3/∞` mode badge with a tomato count derived from a session
 
 #### 2. Badge rendering
 
-**File**: `src/components/session/SessionTags.tsx`
+**File**: `src/components/session/SessionTile.tsx` (tomato text), `src/components/session/SessionTags.tsx` (unchanged scope, mode label removed)
 
-**Intent**: Render a `🍅` badge from actual duration for completed sessions instead of the mode label; render nothing time-related for in-progress sessions. Keep the topic/format chips unchanged.
+**Intent**: Show `🍅` as plain text next to the duration/time readout for completed sessions instead of the mode label; render nothing time-related for in-progress sessions. `SessionTags` keeps only the topic/format chips — the tomato badge does not live there and is not chip-styled (design revision: originally planned as a `SessionTags` chip; moved next to the time text as plain text per manual review).
 
-**Contract**: Widen the `Props` `Pick` to include `duration_seconds` and `ended_at`. Treat a session as done when `ended_at !== null && duration_seconds != null`; for those, compute `tomatoCount(duration_seconds)` and render one chip containing `"🍅".repeat(count)` **only when `count > 0`** — a completed session under 20 min shows no time badge. Update the early-return empty guard so it accounts for the tomato badge (return `null` only when there's no tomato badge AND no topic AND no format). `SessionTile` already passes the full `session`, so no change there.
+**Contract**: In `SessionTile`, compute `tomatoes = status === "done" && duration_seconds != null ? tomatoCount(duration_seconds) : 0` and append `` `${"🍅".repeat(tomatoes)}` `` (only when `tomatoes > 0`) inside the same `<span>` as the duration/"In progress" text — plain text, no `bg-charred` chip wrapper. `SessionTags`' `Props` `Pick` narrows to `"topic" | "material_format"` only (drop `timer_mode`, `duration_seconds`, `ended_at`); its early-return guard reverts to `topic === null && material_format === null`.
 
 ### Success Criteria:
 
@@ -72,7 +72,7 @@ Replace the `P1/P2/P3/∞` mode badge with a tomato count derived from a session
 
 - Type checking passes: `npm run lint`
 - Unit tests pass: `npm test`
-- New unit test covers `tomatoCount` boundaries (e.g. 300s→0, 1199s→0, 1200s→1, 2400s→2, 5400s→4) and `SessionTags` rendering (done preset ≥20min → 🍅 count, done count-up → 🍅 count, done <20min → no time badge, in-progress → no time badge)
+- New unit test covers `tomatoCount` boundaries (e.g. 300s→0, 1199s→0, 1200s→1, 2400s→2, 5400s→4) and `SessionTile` tomato-text rendering (done ≥20min → 🍅 text next to duration, not chip-styled; done <20min → no time badge; in-progress → no time badge); `SessionTags` rendering pared down to topic/format chips only
 
 #### Manual Verification:
 
@@ -189,15 +189,15 @@ Four independent one-to-two-line cosmetic edits.
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `npm run lint`
-- [ ] 1.2 Unit tests pass: `npm test`
-- [ ] 1.3 New unit test covers `tomatoCount` boundaries and `SessionTags` rendering (done ≥20min / done <20min / in-progress)
+- [x] 1.1 Type checking passes: `npm run lint`
+- [x] 1.2 Unit tests pass: `npm test`
+- [x] 1.3 New unit test covers `tomatoCount` boundaries and `SessionTags` rendering (done ≥20min / done <20min / in-progress)
 
 #### Manual
 
-- [ ] 1.4 Signed-in dashboard shows correct 🍅 counts across varying lengths incl. count-up
-- [ ] 1.5 Anonymous history shows the same 🍅 badges
-- [ ] 1.6 Completed sessions under 20 min and in-progress rows show no time badge
+- [x] 1.4 Signed-in dashboard shows correct 🍅 counts across varying lengths incl. count-up
+- [x] 1.5 Anonymous history shows the same 🍅 badges
+- [x] 1.6 Completed sessions under 20 min and in-progress rows show no time badge
 
 ### Phase 2: stop wording, energy default, layout, clock size
 

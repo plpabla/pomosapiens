@@ -1,9 +1,5 @@
-export function modeLabel(mode: string | null): string | null {
-  if (mode === "preset_1") return "P1";
-  if (mode === "preset_2") return "P2";
-  if (mode === "preset_3") return "P3";
-  if (mode === "count_up") return "∞";
-  return null;
+export function tomatoCount(durationSeconds: number): number {
+  return Math.floor(durationSeconds / 1200);
 }
 
 export function formatDuration(seconds: number): string {

@@ -1,7 +1,7 @@
 ---
 change_id: ui-improvements
 title: UI improvements bundle: badges, stop wording, energy default, bigger clock
-status: planned
+status: implementing
 created: 2026-07-12
 updated: 2026-07-12
 archived_at: null

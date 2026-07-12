@@ -29,6 +29,32 @@ const IN_PROGRESS_SESSION: SessionListItem = {
   duration_seconds: null,
 };
 
+describe("SessionTile 🍅 badge", () => {
+  it("renders 🍅 as plain text next to the duration for a completed session", () => {
+    render(<SessionTile session={DONE_SESSION} />);
+    const timeRow = screen.getByText(/25:00/);
+    expect(timeRow.textContent).toContain("🍅");
+  });
+
+  it("does not wrap the 🍅 in a chip element", () => {
+    const { container } = render(<SessionTile session={DONE_SESSION} />);
+    const chips = Array.from(container.querySelectorAll(".bg-charred"));
+    expect(chips.every((chip) => !chip.textContent.includes("🍅"))).toBe(true);
+  });
+
+  it("shows no 🍅 for an in-progress session", () => {
+    render(<SessionTile session={IN_PROGRESS_SESSION} />);
+    const timeRow = screen.getByText("In progress");
+    expect(timeRow.textContent).not.toContain("🍅");
+  });
+
+  it("renders 🍅 per 20-min block for a longer session", () => {
+    render(<SessionTile session={{ ...DONE_SESSION, duration_seconds: 2400 }} />);
+    const timeRow = screen.getByText(/40:00/);
+    expect(timeRow.textContent).toContain("🍅🍅");
+  });
+});
+
 describe("SessionTile readOnly", () => {
   it("shows abandon/edit/delete actions by default", () => {
     render(<SessionTile session={DONE_SESSION} />);
