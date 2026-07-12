@@ -1,10 +1,10 @@
 ---
 change_id: anonymous-sessions
 title: Anonymous session capture backed by localStorage
-status: impl_reviewed
+status: archived
 created: 2026-07-11
 updated: 2026-07-12
-archived_at: null
+archived_at: 2026-07-12T11:01:06Z
 ---
 
 ## Notes
