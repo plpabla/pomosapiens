@@ -51,6 +51,10 @@ export function endLocalSession(
   store.setItems(store.getItems().map((s) => (s.id === id ? { ...s, ...args } : s)));
 }
 
+export function clearLocalSessions(): void {
+  store.setItems([]);
+}
+
 export function getInProgressSession(): LocalSession | null {
   const open = store.getItems().filter((s) => s.ended_at === null);
   if (open.length === 0) return null;

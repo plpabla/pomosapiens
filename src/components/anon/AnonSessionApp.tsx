@@ -4,6 +4,7 @@ import SessionRunner from "@/components/session/SessionRunner";
 import SessionList from "@/components/session/SessionList";
 import FocusRatingChart from "@/components/dashboard/FocusRatingChart";
 import InlineTopicCreate from "@/components/anon/InlineTopicCreate";
+import ClearHistoryButton from "@/components/anon/ClearHistoryButton";
 import { useLocalTopics } from "@/lib/local/localTopics";
 import { useLocalSessions, type LocalSession } from "@/lib/local/localSessions";
 import { LOCAL_DEFAULT_FORMATS } from "@/lib/local/localCatalog";
@@ -133,7 +134,10 @@ export default function AnonSessionApp() {
       />
       {historyItems.length > 0 && (
         <div className="mx-auto mt-8 max-w-2xl text-left">
-          <h2 className="text-off-white mb-4 text-xl font-semibold">History</h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-off-white text-xl font-semibold">History</h2>
+            <ClearHistoryButton />
+          </div>
           <div className="mb-6">
             <FocusRatingChart sessions={ratedSessions} />
           </div>
