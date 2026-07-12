@@ -417,16 +417,16 @@ The `{ v: 1, items }` envelope plus client-UUID ids and name-unique topics are d
 
 #### Automated
 
-- [x] 4.1 Lint and typecheck pass: `npm run lint`
-- [x] 4.2 Unit tests pass: `npm test`
-- [x] 4.3 Production build succeeds: `npm run build`
+- [x] 4.1 Lint and typecheck pass: `npm run lint` -- 2296869
+- [x] 4.2 Unit tests pass: `npm test` -- 2296869
+- [x] 4.3 Production build succeeds: `npm run build` -- 2296869
 
 #### Manual
 
-- [x] 4.4 History entry renders complete and read-only (no abandon/edit/delete)
-- [x] 4.5 Chart appears with rated sessions, chronological
-- [x] 4.6 Second tab reflects completed session via storage event
-- [x] 4.7 Signed-in dashboard tiles still show action buttons
+- [x] 4.4 History entry renders complete and read-only (no abandon/edit/delete) -- 2296869
+- [x] 4.5 Chart appears with rated sessions, chronological -- 2296869
+- [x] 4.6 Second tab reflects completed session via storage event -- 2296869
+- [x] 4.7 Signed-in dashboard tiles still show action buttons -- 2296869
 
 ### Phase 5: E2E -- Anonymous Fixture and Spec
 
