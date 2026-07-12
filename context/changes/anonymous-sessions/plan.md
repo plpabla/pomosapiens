@@ -432,6 +432,6 @@ The `{ v: 1, items }` envelope plus client-UUID ids and name-unique topics are d
 
 #### Automated
 
-- [ ] 5.1 New spec passes: `npm run test:e2e -- anonymous-capture`
-- [ ] 5.2 Full suite passes: `npm run test:e2e`
-- [ ] 5.3 Lint passes: `npm run lint`
+- [x] 5.1 New spec passes: `npm run test:e2e -- anonymous-capture`
+- [x] 5.2 Full suite passes: `npm run test:e2e`
+- [x] 5.3 Lint passes: `npm run lint`
