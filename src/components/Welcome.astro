@@ -2,6 +2,7 @@
 import { Image } from "astro:assets";
 import Topbar from "@/components/Topbar.astro";
 import heroImage from "@/assets/hero.png";
+import AnonSessionApp from "@/components/anon/AnonSessionApp";
 ---
 
 <div class="bg-cosmic relative min-h-screen w-full overflow-hidden">
@@ -34,20 +35,22 @@ import heroImage from "@/assets/hero.png";
     <Topbar />
 
     <!-- Hero section -->
-    <div class="mx-auto flex max-w-4xl flex-col items-center justify-center px-4 py-24 text-center sm:py-32 lg:py-40">
+    <div
+      class="mx-auto flex max-w-4xl flex-col items-center justify-center px-4 pt-8 pb-24 text-center sm:pt-12 sm:pb-32 lg:pt-16 lg:pb-40"
+    >
       <h1
         class="from-off-white via-blaze to-spark mb-6 bg-gradient-to-r bg-clip-text text-5xl leading-tight font-bold text-transparent sm:text-6xl lg:text-7xl"
       >
         Find the focus that fits you.
       </h1>
-      <div class="border-spark/30 bg-spark/10 text-spark mb-8 rounded-full border px-5 py-2 text-sm font-medium">
-        Work in Progress - stay tuned!
-      </div>
       <p class="text-off-white/70 mb-10 max-w-2xl text-lg sm:text-xl">
         PomoSapiens turns every focus session into a data point. Capture your energy, time of day, material format, and
         topic before you start — then learn which combinations actually produce your best work.
       </p>
-      <div class="flex flex-col items-center gap-3">
+      <div class="w-full">
+        <AnonSessionApp client:load />
+      </div>
+      <div class="mt-8 flex flex-col items-center gap-3">
         <a
           href="/auth/signup"
           class="bg-neon text-off-white hover:bg-blaze inline-flex items-center justify-center rounded-lg px-8 py-3 text-base font-medium transition-colors"
@@ -57,77 +60,6 @@ import heroImage from "@/assets/hero.png";
         <p class="text-off-white/60 text-sm">
           Already have an account?
           <a href="/auth/signin" class="text-spark underline-offset-4 hover:underline">Sign in</a>
-        </p>
-      </div>
-    </div>
-
-    <!-- Feature cards -->
-    <div class="mx-auto grid max-w-4xl grid-cols-1 gap-6 px-4 pb-24 sm:grid-cols-3">
-      <div class="border-charred bg-ember rounded-xl border p-6 backdrop-blur-xl">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="text-blaze mb-4"
-        >
-          <path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"></path>
-          <path d="M9 11V5a3 3 0 0 1 6 0v6"></path>
-          <line x1="12" y1="15" x2="12" y2="18"></line>
-        </svg>
-        <h3 class="text-off-white mb-2 text-lg font-semibold">Capture context, not just time</h3>
-        <p class="text-off-white/60 text-sm leading-relaxed">
-          Log energy, time of day, material format, and topic in seconds — before each session, while it still matters.
-        </p>
-      </div>
-
-      <div class="border-charred bg-ember rounded-xl border p-6 backdrop-blur-xl">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="text-blaze mb-4"
-        >
-          <polygon
-            points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
-          ></polygon>
-        </svg>
-        <h3 class="text-off-white mb-2 text-lg font-semibold">Rate the session honestly</h3>
-        <p class="text-off-white/60 text-sm leading-relaxed">
-          A single self-rated focus score after each Pomodoro — fast enough to actually do, rich enough to compare.
-        </p>
-      </div>
-
-      <div class="border-charred bg-ember rounded-xl border p-6 backdrop-blur-xl">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="text-blaze mb-4"
-        >
-          <line x1="3" y1="20" x2="21" y2="20"></line>
-          <polyline points="3 16 8 11 12 14 17 8 21 12"></polyline>
-        </svg>
-        <h3 class="text-off-white mb-2 text-lg font-semibold">See your own patterns</h3>
-        <p class="text-off-white/60 text-sm leading-relaxed">
-          Discover which contexts correlate with your best focus — not someone else's productivity advice.
         </p>
       </div>
     </div>

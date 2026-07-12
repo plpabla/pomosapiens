@@ -388,22 +388,22 @@ The `{ v: 1, items }` envelope plus client-UUID ids and name-unique topics are d
 
 #### Automated
 
-- [x] 2.1 Lint and typecheck pass: `npm run lint`
-- [x] 2.2 Unit tests pass: `npm test`
-- [x] 2.3 Production build succeeds: `npm run build`
-- [x] 2.4 Full existing e2e suite passes unchanged: `npm run test:e2e`
+- [x] 2.1 Lint and typecheck pass: `npm run lint` -- 4c4be1d
+- [x] 2.2 Unit tests pass: `npm test` -- 4c4be1d
+- [x] 2.3 Production build succeeds: `npm run build` -- 4c4be1d
+- [x] 2.4 Full existing e2e suite passes unchanged: `npm run test:e2e` -- 4c4be1d
 
 #### Manual
 
-- [ ] 2.5 Signed-in capture loop behaviorally identical (start -> run -> stop early -> rate -> dashboard)
+- [x] 2.5 Signed-in capture loop behaviorally identical (start -> run -> stop early -> rate -> dashboard) -- 4c4be1d
 
 ### Phase 3: Anonymous Capture Flow on `/`
 
 #### Automated
 
-- [ ] 3.1 Lint and typecheck pass: `npm run lint`
-- [ ] 3.2 Unit tests pass: `npm test`
-- [ ] 3.3 Production build succeeds: `npm run build`
+- [x] 3.1 Lint and typecheck pass: `npm run lint`
+- [x] 3.2 Unit tests pass: `npm test`
+- [x] 3.3 Production build succeeds: `npm run build`
 
 #### Manual
 

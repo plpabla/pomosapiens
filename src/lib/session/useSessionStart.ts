@@ -50,6 +50,10 @@ export function useSessionStart({ energy, topicId, materialFormatId, mode, prese
       onStarted(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      // The remote path navigates away, unmounting the caller, so this is a
+      // no-op there; the local (anon) path stays mounted and needs this reset
+      // so a second session can be started.
       setSubmitting(false);
     }
   }

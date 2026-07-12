@@ -7,6 +7,7 @@ import { formatTime } from "@/lib/timer/formatTime";
 import { useTabTitle } from "@/lib/timer/useTabTitle";
 import { getRunningTabTitle } from "@/lib/timer/tabTitle";
 import { remotePersistence, type EndSessionArgs } from "@/lib/session/persistence";
+import { cn } from "@/lib/utils";
 
 interface Props {
   sessionId: string;
@@ -17,6 +18,9 @@ interface Props {
   persistEnd?: (args: EndSessionArgs) => Promise<void>;
   onGoToDashboard?: () => void;
   onStartNewSession?: () => void;
+  /** Standalone pages want the timer centered in the full viewport; embedded
+   * usage (e.g. the anon landing-page island) should size to its content. */
+  fullHeight?: boolean;
 }
 
 const FOCUS_DONE = ["✅ Focus done!", "⏰ ⏰ ⏰"] as const;
@@ -35,6 +39,7 @@ export default function SessionRunner({
   onStartNewSession = () => {
     window.location.assign("/session/new");
   },
+  fullHeight = true,
 }: Props) {
   const { phase, remaining, elapsed, stoppedAtMs, stopEarly, audioRef } = useFocusTimer({
     startedAtMs,
@@ -118,7 +123,9 @@ export default function SessionRunner({
     const display = mode === "count_up" ? elapsed : remaining;
     const label = mode === "count_up" ? "Count-up session" : "Focus session";
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4 text-center">
+      <div
+        className={cn("flex flex-col items-center justify-center gap-8 p-4 text-center", fullHeight && "min-h-screen")}
+      >
         <div className="text-off-white font-mono text-7xl font-bold tabular-nums">{formatTime(display)}</div>
         <p className="text-ash text-sm tracking-widest uppercase">{label}</p>
         <Button variant="outline" onClick={stopEarly} className="border-charred text-ash hover:text-off-white mt-4">
@@ -130,7 +137,9 @@ export default function SessionRunner({
 
   if (internalPhase === "running_break") {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-8 p-4 text-center">
+      <div
+        className={cn("flex flex-col items-center justify-center gap-8 p-4 text-center", fullHeight && "min-h-screen")}
+      >
         <div className="text-off-white font-mono text-7xl font-bold tabular-nums">{formatTime(breakRemaining)}</div>
         <p className="text-ash text-sm tracking-widest uppercase">Break</p>
         <Button
@@ -157,6 +166,7 @@ export default function SessionRunner({
         setInternalPhase("running_break");
       }}
       onGoToDashboard={onGoToDashboard}
+      fullHeight={fullHeight}
     />
   );
 }

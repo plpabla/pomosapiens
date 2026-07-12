@@ -48,6 +48,32 @@ describe("useSessionStart persistence injection", () => {
     expect(onStarted).toHaveBeenCalledWith({ id: "s1", startedAtMs: 123 });
   });
 
+  it("resets submitting to false after a successful start, so a caller that stays mounted can submit again", async () => {
+    stubAudioGlobal();
+    const persistence: SessionPersistence = {
+      createSession: vi.fn().mockResolvedValue({ id: "s1", startedAtMs: 123 }),
+      endSession: vi.fn(),
+    };
+
+    const { result } = renderHook(() =>
+      useSessionStart({
+        energy: "medium",
+        topicId: null,
+        materialFormatId: null,
+        mode: "preset_1",
+        presets: PRESETS,
+        persistence,
+        onStarted: vi.fn(),
+      }),
+    );
+
+    await act(async () => {
+      await result.current.handleSubmit(fakeSubmitEvent());
+    });
+
+    expect(result.current.submitting).toBe(false);
+  });
+
   it("sets the error message and does not call onStarted when persistence rejects", async () => {
     stubAudioGlobal();
     const persistence: SessionPersistence = {
