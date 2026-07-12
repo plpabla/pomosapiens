@@ -42,6 +42,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-09 | `anonymous-session-sync`           | have locally-stored anonymous sessions, topics, formats, and presets merged into their account after signing in/up | S-08          | — (PRD §Non-Goals, flagged "Add as follow up")        | not started |
 | S-10 | `continue-session-past-end`        | choose to keep working past a session's scheduled end, converting it to count-up without losing the original start time | S-03          | — (gap; extends FR-011, FR-005)                       | not started |
 | S-11 | `reopen-running-session`           | return to an in-progress session from the dashboard after its tab/window was closed                                | S-05          | — (gap; extends FR-015)                               | not started |
+| S-12 | `ui-improvements`                  | see accurate 🍅 time badges, correct stop-button wording, a pre-selected energy default, relocated badges, and a bigger timer clock | S-03          | — (cosmetic; no FR)                                   | not started |
 
 ## Baseline
 
@@ -246,6 +247,20 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Risk:** Small, additive UI change — one new link on dashboard rows, reusing the existing `/session/[id]` route and S-01's timer-resilience reconciliation to redraw elapsed/remaining time correctly on reopen. Primary risk is ownership and state correctness: the link must only ever navigate to sessions the current user owns (already enforced by RLS) and must not resurrect an abandoned or already-ended session's running-timer UI — reuse S-05's abandoned-guard on `/session/[id]` rather than re-deriving it.
 - **Status:** not started
 
+### S-12: UI improvements bundle
+
+- **Outcome:** User sees five small polish changes bundled together: session-history badges show actual time as 🍅 (one per 20 min) instead of P1/P2/P3/∞; the stop control on a count-up session reads "Stop" instead of "Stop early" (there's no "early" without a fixed duration); the pre-session energy picker defaults to "Medium" instead of requiring an explicit pick; the time badges sit directly above the "Start" button; and the running-timer clock face is noticeably bigger.
+- **Change ID:** `ui-improvements`
+- **PRD refs:** — no direct FR; cosmetic polish bundle promoted from Parked ("UI improvements") 2026-07-12.
+- **Prerequisites:** S-03 (preset badges and count-up stop-button wording were established there)
+- **Parallel with:** S-09, S-10, S-11
+- **Blockers:** —
+- **Unknowns:**
+  - Whether defaulting energy to "Medium" changes the "energy required" behavior (FR-009) now that a value is always pre-selected, or whether the user must still actively confirm it. — Owner: project author. Block: no.
+  - How the 🍅 time badge renders for count-up (∞) sessions — keep the ∞ symbol, or show a running tomato count? — Owner: implementer. Block: no.
+- **Risk:** Five independent, low-risk cosmetic changes with no schema or API impact — pure frontend. The only coordination risk is touching the same files (`dashboard.astro`, `session/[id].astro`) as S-10 / S-11 if picked up in the same window.
+- **Status:** not started
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                          | Suggested issue title                                                                 | Ready for `/10x-plan` | Notes                                                                                                           |
@@ -263,6 +278,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-09       | `anonymous-session-sync`           | Merge anonymous local data into account on sign-in/sign-up                            | no                    | Split out of original S-08 scope via `/10x-frame` 2026-07-11; see `context/changes/anonymous-sessions/frame.md` |
 | S-10       | `continue-session-past-end`        | Continue past a session's scheduled end, converting it to count-up                    | no                    | Promoted from Parked ("Contiue timer" / "Continue focus") 2026-07-12                                            |
 | S-11       | `reopen-running-session`           | Resume an in-progress session from the dashboard                                      | no                    | Promoted from Parked ("Re-open running session from a dashboard") 2026-07-12                                    |
+| S-12       | `ui-improvements`                  | UI improvements bundle — time badges, stop-button wording, energy default, layout, clock size | no                    | Promoted from Parked ("UI improvements") 2026-07-12                                                             |
 
 ## Open Roadmap Questions
 
@@ -286,13 +302,6 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Auto-resume running session on app open** — when a signed-in user opens the app and has an in-progress session (no `ended_at`), redirect them straight to that session's page so they can interact with it (rate, stop early, abandon), instead of only seeing it listed on the dashboard. Pairs with a single-active-session guarantee: starting a new session must be blocked while one is already running, so it is not possible to run multiple sessions in parallel for the same user. Motivation: today, if the user closes the tab mid-session there is no way to reopen and finish that exact session from the dashboard. Why parked: outside MVP scope; revisit after S-01..S-04 land.
 - **Web Notifications API fallback for focus-end chime** — request `Notification.requestPermission()` inside the "Start session" click and, if granted, fire a system notification at focus-end alongside (or instead of) the `<audio>` chime. Motivation: when the user refreshes the session page mid-session, the reloaded document has no transient user activation and browsers block unmuted `<audio>.play()` at fire-time -- so the chime is silent even though the timer works. A Notification does not require gesture at fire-time and survives refresh, tab-switch, and minimised windows. Why parked: MVP already ships an audible chime on the happy path (no refresh); the refresh-without-interaction hole is real but narrow. Revisit after MVP to close it. Also consider pairing with a purely-visual fallback (S-06 tab-title timer + favicon swap + full-screen "Focus done" banner) that requires no permission.
   **Another option** to consider is to show popup on the page after refresh - it will request user' interaction and unlocks chime (right?)
-- **UI improvements** (small cosmetic changes, bundle together when picked up):
-  - Replace the P1 / P2 / P3 / ∞ badges in session history with the actual time show as 🍅 - one per 20 min.
-  - For count-up sessions, the stop button should read "Stop" instead of "Stop early" (there's no "early" concept without a fixed duration).
-  - Default the energy-level picker to "Medium" instead of requiring an explicit pick, to reduce pre-session friction.
-  - Move the time badges to sit directly above the "Start" button.
-  - Make counter clock much bigger
-  - Why parked: cosmetic, low-risk polish with no PRD FR backing; bundle into one small change once picked up rather than trickling in as one-offs.
 - **Server-side ownership validation of `topic_id` / `material_format_id` on session writes** — the session write schemas (`createSessionSchema`, and the planned `editSessionSchema` for S-07) validate `topic_id` / `material_format_id` as well-formed UUIDs only, not that the referenced topic/format belongs to the caller. Postgres FK checks bypass RLS, so a user could associate their own session with another user's topic/format UUID (they still can't read that row's name via RLS, so the leak is narrow). Fix would add an owner-scoped existence check (or a trigger/RLS `WITH CHECK`) on both write paths — `POST /api/sessions` and `PUT /api/sessions/[id]`. Why parked: pre-existing behavior shared by the create path, not introduced by S-07; the privacy impact is limited (no cross-user data is readable). Surfaced during the S-07 (`edit-delete-sessions`) plan review; tighten across both write paths together, outside MVP.
 
 ## Bugs to be fixed
