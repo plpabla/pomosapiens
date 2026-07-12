@@ -4,7 +4,7 @@ import Banner from "@/components/Banner.astro";
 import GoogleAnalytics from "@/components/GoogleAnalytics.astro";
 import Topbar from "@/components/Topbar.astro";
 import { missingConfigs } from "@/lib/config-status";
-import { PUBLIC_GA_MEASUREMENT_ID } from "astro:env/client";
+import { PUBLIC_GA_MEASUREMENT_ID } from "astro:env/server";
 
 interface Props {
   title?: string;
