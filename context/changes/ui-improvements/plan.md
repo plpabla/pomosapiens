@@ -203,13 +203,13 @@ Four independent one-to-two-line cosmetic edits.
 
 #### Automated
 
-- [x] 2.1 Type checking / linting passes: `npm run lint`
-- [x] 2.2 Unit tests pass: `npm test`
-- [x] 2.3 E2E suite passes: `npm run test:e2e`
+- [x] 2.1 Type checking / linting passes: `npm run lint` — 381e077
+- [x] 2.2 Unit tests pass: `npm test` — 381e077
+- [x] 2.3 E2E suite passes: `npm run test:e2e` — 381e077
 
 #### Manual
 
-- [x] 2.4 Count-up shows "Stop"; preset shows "Stop early"
-- [x] 2.5 Both clocks larger and no overflow on narrow viewport
-- [x] 2.6 Pre-session loads with Medium highlighted and Start enabled; changing energy works
-- [x] 2.7 Time-badge chips render directly above the Start button
+- [x] 2.4 Count-up shows "Stop"; preset shows "Stop early" — 381e077
+- [x] 2.5 Both clocks larger and no overflow on narrow viewport — 381e077
+- [x] 2.6 Pre-session loads with Medium highlighted and Start enabled; changing energy works — 381e077
+- [x] 2.7 Time-badge chips render directly above the Start button — 381e077
