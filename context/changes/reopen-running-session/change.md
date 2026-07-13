@@ -1,7 +1,7 @@
 ---
 change_id: reopen-running-session
 title: Resume an in-progress session from the dashboard
-status: implemented
+status: impl_reviewed
 created: 2026-07-13
 updated: 2026-07-13
 archived_at: null

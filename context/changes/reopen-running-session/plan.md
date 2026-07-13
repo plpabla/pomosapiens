@@ -31,7 +31,7 @@ On `/dashboard`, each in-progress session row (any row with `ended_at === null`,
 - No change to `/session/[id]`, `access.ts`, `SessionRunner`, or the abandoned/ended guards — they already do the right thing.
 - No Resume for anonymous/localStorage sessions (no server page exists to resume into).
 - No whole-row-clickable behavior — an explicit Resume button only.
-- No unit/component test — coverage is the single e2e spec.
+- ~~No unit/component test — coverage is the single e2e spec.~~ Revised during implementation: focused unit tests for `ResumeButton` render/navigation and `SessionTile` Resume gating were added alongside the e2e spec (see Testing Strategy below), matching the repo's existing component-test convention.
 
 ## Implementation Approach
 
@@ -115,7 +115,8 @@ Add one Playwright spec that verifies the Resume happy path and the completed-ro
 
 ### Unit Tests:
 
-- None. The change is a single presentational link; the e2e spec covers the behavior that can actually regress (navigation + guard).
+- `tests/unit/dashboard/ResumeButton.test.tsx` (new): render + navigation behavior on click.
+- `tests/unit/session/SessionTile.test.tsx`: added a "SessionTile resume control" describe block covering Resume gating alongside the existing Abandon gating tests.
 
 ### Integration Tests:
 
