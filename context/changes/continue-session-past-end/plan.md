@@ -232,25 +232,25 @@ None. No schema change — `count_up` is an existing `timer_mode` CHECK value, `
 
 #### Automated
 
-- [x] 1.1 Endpoint test: running preset row flips to count_up and nulls both planned_* columns
-- [x] 1.2 Endpoint test: already-ended row returns 409 and is unchanged
-- [x] 1.3 Endpoint test: another user's row is not converted (ownership scoping)
-- [x] 1.4 Type checking passes: `npm run build`
-- [x] 1.5 Linting passes: `npm run lint`
+- [x] 1.1 Endpoint test: running preset row flips to count_up and nulls both planned_* columns — 352a736
+- [x] 1.2 Endpoint test: already-ended row returns 409 and is unchanged — 352a736
+- [x] 1.3 Endpoint test: another user's row is not converted (ownership scoping) — 352a736
+- [x] 1.4 Type checking passes: `npm run build` — 352a736
+- [x] 1.5 Linting passes: `npm run lint` — 352a736
 
 #### Manual
 
-- [x] 1.6 POST on a live running session returns 200; row shows count_up + null planned in Studio
+- [x] 1.6 POST on a live running session returns 200; row shows count_up + null planned in Studio — 352a736
 
 ### Phase 2: Reactive-mode hook refactor
 
 #### Automated
 
-- [ ] 2.1 Unit test: continueAsCountUp resumes running, flips mode, elapsed advances from startedAtMs
-- [ ] 2.2 Unit test: no chime re-fire after continueAsCountUp
-- [ ] 2.3 Existing useFocusTimer suites still pass
-- [ ] 2.4 Type checking passes: `npm run build`
-- [ ] 2.5 Linting passes: `npm run lint`
+- [x] 2.1 Unit test: continueAsCountUp resumes running, flips mode, elapsed advances from startedAtMs
+- [x] 2.2 Unit test: no chime re-fire after continueAsCountUp
+- [x] 2.3 Existing useFocusTimer suites still pass
+- [x] 2.4 Type checking passes: `npm run build`
+- [x] 2.5 Linting passes: `npm run lint`
 
 ### Phase 3: Focus-end affordance + UI wiring
 
