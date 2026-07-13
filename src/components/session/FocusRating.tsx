@@ -10,6 +10,10 @@ interface FocusRatingProps {
   onSubmit: (rating: number | null, note: string | null) => Promise<void>;
   error: string | null;
   canTakeBreak: boolean;
+  canContinue: boolean;
+  onContinue: () => void;
+  /** True while a continue request is in flight; locks rating/continue controls alongside `submitting`. */
+  continuing?: boolean;
   onStartNewSession: () => void;
   onTakeBreak: () => void;
   onGoToDashboard: () => void;
@@ -22,6 +26,9 @@ export default function FocusRating({
   onSubmit,
   error,
   canTakeBreak,
+  canContinue,
+  onContinue,
+  continuing = false,
   onStartNewSession,
   onTakeBreak,
   onGoToDashboard,
@@ -32,6 +39,7 @@ export default function FocusRating({
   const [rating, setRating] = useState<number | null>(null);
   const [justPicked, setJustPicked] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const locked = submitting || continuing;
 
   async function handleRate(n: number) {
     setJustPicked(n);
@@ -122,6 +130,15 @@ export default function FocusRating({
       className={cn("flex flex-col items-center justify-center gap-8 p-4 text-center", fullHeight && "min-h-screen")}
     >
       <h2 className="text-off-white text-2xl font-bold">How was your focus?</h2>
+      {canContinue && (
+        <Button
+          onClick={onContinue}
+          disabled={locked}
+          className="bg-blaze hover:bg-spark text-off-white w-full max-w-sm"
+        >
+          I&apos;m still working
+        </Button>
+      )}
       <div className="flex w-full max-w-sm flex-col gap-2 text-left">
         <Label htmlFor="session-note" className="text-ash">
           Add a note (optional)
@@ -134,14 +151,14 @@ export default function FocusRating({
           }}
           placeholder="What helped or hurt your focus this session?"
           maxLength={500}
-          disabled={submitting}
+          disabled={locked}
         />
       </div>
       <div className="flex gap-3">
         {[1, 2, 3, 4, 5].map((n) => (
           <Button
             key={n}
-            disabled={submitting}
+            disabled={locked}
             onClick={() => void handleRate(n)}
             className={cn(
               "bg-ember border-charred text-off-white hover:bg-blaze h-14 w-14 text-xl font-bold",
@@ -155,7 +172,7 @@ export default function FocusRating({
       <ServerError message={error} />
       <Button
         variant="ghost"
-        disabled={submitting}
+        disabled={locked}
         onClick={() => void handleSkip()}
         className="text-ash hover:text-off-white"
       >

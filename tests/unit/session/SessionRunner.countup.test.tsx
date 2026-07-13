@@ -17,7 +17,11 @@ const BASE_HOOK_RESULT = {
 
 describe("SessionRunner count_up mode rendering", () => {
   beforeEach(() => {
-    mockedHook.mockReturnValue(BASE_HOOK_RESULT);
+    mockedHook.mockImplementation(({ mode = "preset" }) => ({
+      ...BASE_HOOK_RESULT,
+      mode,
+      continueAsCountUp: vi.fn(),
+    }));
     cleanup();
   });
 

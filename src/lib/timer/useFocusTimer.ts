@@ -9,19 +9,22 @@ interface UseFocusTimerOptions {
 
 interface UseFocusTimerResult {
   phase: "running" | "rating";
+  mode: "preset" | "count_up";
   remaining: number;
   elapsed: number;
   stoppedAtMs: number | null;
   stopEarly: () => void;
+  continueAsCountUp: () => void;
   audioRef: React.RefObject<HTMLAudioElement | null>;
 }
 
 export function useFocusTimer({
   startedAtMs,
   focusSeconds,
-  mode = "preset",
+  mode: modeOption = "preset",
 }: UseFocusTimerOptions): UseFocusTimerResult {
   const [phase, setPhase] = useState<"running" | "rating">("running");
+  const [mode, setMode] = useState(modeOption);
   const [now, setNow] = useState(() => Date.now());
   const [stoppedAtMs, setStoppedAtMs] = useState<number | null>(null);
 
@@ -129,8 +132,16 @@ export function useFocusTimer({
     setPhase("rating");
   }
 
+  // Flips a still-running preset session to count-up in place: elapsed is derived
+  // from the unchanged startedAtMs, so total time is preserved with no arithmetic (S-10).
+  function continueAsCountUp() {
+    setMode("count_up");
+    setStoppedAtMs(null);
+    setPhase("running");
+  }
+
   const remaining = focusSeconds - Math.floor((now - startedAtMs) / 1000);
   const elapsed = Math.max(0, Math.floor((now - startedAtMs) / 1000));
 
-  return { phase, remaining, elapsed, stoppedAtMs, stopEarly, audioRef };
+  return { phase, mode, remaining, elapsed, stoppedAtMs, stopEarly, continueAsCountUp, audioRef };
 }

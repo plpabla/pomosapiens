@@ -16,6 +16,9 @@ interface Props {
   mode?: "preset" | "count_up";
   breakSeconds?: number | null;
   persistEnd?: (args: EndSessionArgs) => Promise<void>;
+  persistContinue?: () => Promise<void>;
+  /** Gates the "I'm still working" affordance; the anon flow opts out. */
+  canContinue?: boolean;
   onGoToDashboard?: () => void;
   onStartNewSession?: () => void;
   /** Standalone pages want the timer centered in the full viewport; embedded
@@ -30,9 +33,11 @@ export default function SessionRunner({
   sessionId,
   startedAtMs,
   focusSeconds,
-  mode = "preset",
+  mode: initialMode = "preset",
   breakSeconds = null,
   persistEnd = (args) => remotePersistence.endSession(sessionId, args),
+  persistContinue = () => remotePersistence.continueSession(sessionId),
+  canContinue = true,
   onGoToDashboard = () => {
     window.location.assign("/dashboard");
   },
@@ -41,12 +46,13 @@ export default function SessionRunner({
   },
   fullHeight = true,
 }: Props) {
-  const { phase, remaining, elapsed, stoppedAtMs, stopEarly, audioRef } = useFocusTimer({
+  const { phase, mode, remaining, elapsed, stoppedAtMs, stopEarly, continueAsCountUp, audioRef } = useFocusTimer({
     startedAtMs,
     focusSeconds,
-    mode,
+    mode: initialMode,
   });
   const [error, setError] = useState<string | null>(null);
+  const [continuing, setContinuing] = useState(false);
   const [internalPhase, setInternalPhase] = useState<"rating" | "running_break">("rating");
   const [breakStartedAtMs, setBreakStartedAtMs] = useState<number | null>(null);
   const [breakComplete, setBreakComplete] = useState(false);
@@ -101,6 +107,20 @@ export default function SessionRunner({
         }
       : undefined;
   useTabTitle({ title, alert, onAlertDismiss });
+
+  async function handleContinue() {
+    setError(null);
+    setContinuing(true);
+    try {
+      await persistContinue();
+      continueAsCountUp();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Failed to continue session";
+      setError(message);
+    } finally {
+      setContinuing(false);
+    }
+  }
 
   async function submitRating(rating: number | null, note: string | null) {
     if (stoppedAtMs === null) return;
@@ -164,6 +184,9 @@ export default function SessionRunner({
       onSubmit={submitRating}
       error={error}
       canTakeBreak={mode !== "count_up" && breakSeconds !== null && breakSeconds > 0}
+      canContinue={canContinue && mode === "preset"}
+      onContinue={() => void handleContinue()}
+      continuing={continuing}
       onStartNewSession={onStartNewSession}
       onTakeBreak={() => {
         setBreakStartedAtMs(Date.now());
