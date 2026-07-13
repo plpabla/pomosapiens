@@ -91,6 +91,7 @@ export default function AnonSessionApp() {
         mode={runnerState.mode}
         breakSeconds={runnerState.breakSeconds}
         persistEnd={(args) => localPersistence.endSession(runnerState.sessionId, args)}
+        canContinue={false}
         onGoToDashboard={resetForm}
         onStartNewSession={resetForm}
         fullHeight={false}

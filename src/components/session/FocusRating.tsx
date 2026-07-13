@@ -10,6 +10,8 @@ interface FocusRatingProps {
   onSubmit: (rating: number | null, note: string | null) => Promise<void>;
   error: string | null;
   canTakeBreak: boolean;
+  canContinue: boolean;
+  onContinue: () => void;
   onStartNewSession: () => void;
   onTakeBreak: () => void;
   onGoToDashboard: () => void;
@@ -22,6 +24,8 @@ export default function FocusRating({
   onSubmit,
   error,
   canTakeBreak,
+  canContinue,
+  onContinue,
   onStartNewSession,
   onTakeBreak,
   onGoToDashboard,
@@ -122,6 +126,15 @@ export default function FocusRating({
       className={cn("flex flex-col items-center justify-center gap-8 p-4 text-center", fullHeight && "min-h-screen")}
     >
       <h2 className="text-off-white text-2xl font-bold">How was your focus?</h2>
+      {canContinue && (
+        <Button
+          onClick={onContinue}
+          disabled={submitting}
+          className="bg-blaze hover:bg-spark text-off-white w-full max-w-sm"
+        >
+          I&apos;m still working
+        </Button>
+      )}
       <div className="flex w-full max-w-sm flex-col gap-2 text-left">
         <Label htmlFor="session-note" className="text-ash">
           Add a note (optional)
