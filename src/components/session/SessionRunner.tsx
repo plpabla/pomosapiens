@@ -52,6 +52,7 @@ export default function SessionRunner({
     mode: initialMode,
   });
   const [error, setError] = useState<string | null>(null);
+  const [continuing, setContinuing] = useState(false);
   const [internalPhase, setInternalPhase] = useState<"rating" | "running_break">("rating");
   const [breakStartedAtMs, setBreakStartedAtMs] = useState<number | null>(null);
   const [breakComplete, setBreakComplete] = useState(false);
@@ -109,12 +110,15 @@ export default function SessionRunner({
 
   async function handleContinue() {
     setError(null);
+    setContinuing(true);
     try {
       await persistContinue();
       continueAsCountUp();
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to continue session";
       setError(message);
+    } finally {
+      setContinuing(false);
     }
   }
 
@@ -182,6 +186,7 @@ export default function SessionRunner({
       canTakeBreak={mode !== "count_up" && breakSeconds !== null && breakSeconds > 0}
       canContinue={canContinue && mode === "preset"}
       onContinue={() => void handleContinue()}
+      continuing={continuing}
       onStartNewSession={onStartNewSession}
       onTakeBreak={() => {
         setBreakStartedAtMs(Date.now());

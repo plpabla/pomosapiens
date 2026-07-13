@@ -12,6 +12,8 @@ interface FocusRatingProps {
   canTakeBreak: boolean;
   canContinue: boolean;
   onContinue: () => void;
+  /** True while a continue request is in flight; locks rating/continue controls alongside `submitting`. */
+  continuing?: boolean;
   onStartNewSession: () => void;
   onTakeBreak: () => void;
   onGoToDashboard: () => void;
@@ -26,6 +28,7 @@ export default function FocusRating({
   canTakeBreak,
   canContinue,
   onContinue,
+  continuing = false,
   onStartNewSession,
   onTakeBreak,
   onGoToDashboard,
@@ -36,6 +39,7 @@ export default function FocusRating({
   const [rating, setRating] = useState<number | null>(null);
   const [justPicked, setJustPicked] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const locked = submitting || continuing;
 
   async function handleRate(n: number) {
     setJustPicked(n);
@@ -129,7 +133,7 @@ export default function FocusRating({
       {canContinue && (
         <Button
           onClick={onContinue}
-          disabled={submitting}
+          disabled={locked}
           className="bg-blaze hover:bg-spark text-off-white w-full max-w-sm"
         >
           I&apos;m still working
@@ -147,14 +151,14 @@ export default function FocusRating({
           }}
           placeholder="What helped or hurt your focus this session?"
           maxLength={500}
-          disabled={submitting}
+          disabled={locked}
         />
       </div>
       <div className="flex gap-3">
         {[1, 2, 3, 4, 5].map((n) => (
           <Button
             key={n}
-            disabled={submitting}
+            disabled={locked}
             onClick={() => void handleRate(n)}
             className={cn(
               "bg-ember border-charred text-off-white hover:bg-blaze h-14 w-14 text-xl font-bold",
@@ -168,7 +172,7 @@ export default function FocusRating({
       <ServerError message={error} />
       <Button
         variant="ghost"
-        disabled={submitting}
+        disabled={locked}
         onClick={() => void handleSkip()}
         className="text-ash hover:text-off-white"
       >
