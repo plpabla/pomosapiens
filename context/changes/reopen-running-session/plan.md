@@ -2,12 +2,12 @@
 
 ## Overview
 
-Add a **Resume** control to every in-progress session row on the dashboard, placed next to the existing Abandon button (Resume on the left, Abandon on the right). Tapping it navigates the user back to that session's `/session/[id]` page, where the existing load-time reconciliation redraws the running timer from `started_at`. Today, once a session's tab/window is closed its UUID is lost and the dashboard only lets the user *see* that a session is running or *abandon* it — there is no way back into it. This slice closes that gap with one additive UI element; the route, guards, ownership enforcement, and timer-resilience it depends on already exist.
+Add a **Resume** control to every in-progress session row on the dashboard, placed next to the existing Abandon button (Resume on the left, Abandon on the right). Tapping it navigates the user back to that session's `/session/[id]` page, where the existing load-time reconciliation redraws the running timer from `started_at`. Today, once a session's tab/window is closed its UUID is lost and the dashboard only lets the user _see_ that a session is running or _abandon_ it — there is no way back into it. This slice closes that gap with one additive UI element; the route, guards, ownership enforcement, and timer-resilience it depends on already exist.
 
 ## Current State Analysis
 
 - **In-progress rows already have a gated action block.** [SessionTile.tsx:33](src/components/session/SessionTile.tsx#L33) renders `<AbandonButton sessionId={session.id} />` when `status === "in_progress" && !readOnly`. The Resume control belongs in that exact same block, so status/readonly gating is already solved.
-- **The reopen target already works correctly.** [session/[id].astro](src/pages/session/[id].astro) loads the row scoped by `.eq("id", id).eq("user_id", user.id).maybeSingle()`, then calls `resolveSessionPageAccess` ([access.ts](src/lib/session/access.ts)): a non-ended, owned session is *allowed*; an ended session or a `null` row (cross-user or missing → RLS/ownership) *redirects to `/dashboard`*. No age guard remains (removed per lessons L-05). This is precisely the behavior S-11 needs — reopening only ever lands on a live, owned session; anything else bounces to the dashboard.
+- **The reopen target already works correctly.** [session/[id].astro](src/pages/session/[id].astro) loads the row scoped by `.eq("id", id).eq("user_id", user.id).maybeSingle()`, then calls `resolveSessionPageAccess` ([access.ts](src/lib/session/access.ts)): a non-ended, owned session is _allowed_; an ended session or a `null` row (cross-user or missing → RLS/ownership) _redirects to `/dashboard`_. No age guard remains (removed per lessons L-05). This is precisely the behavior S-11 needs — reopening only ever lands on a live, owned session; anything else bounces to the dashboard.
 - **Timer redraw is free.** [SessionRunner.tsx](src/components/session/SessionRunner.tsx) derives elapsed/remaining from `startedAtMs` on mount and on `visibilitychange` (lessons L-03), so a reopened session shows the correct time with zero new logic.
 - **A mirror test exists.** [session-abandon.spec.ts](tests/e2e/session-abandon.spec.ts) is the shape to copy: seed an in-progress + a completed session, assert control presence/absence by role+name, drive the action, assert the resulting navigation/state. Fixtures: `tests/e2e/_fixtures/auth.ts` (`setupTwoUsers`, `seedAuthCookie`, `cookieFor`) and `tests/e2e/_fixtures/sessions.ts` (`insertSession`).
 - **Anonymous sessions are out of scope.** The `readOnly` prop flags anonymous/localStorage rows; those have no `/session/[id]` server page, so Resume stays behind the existing `!readOnly` gate (same as Abandon).
@@ -152,24 +152,24 @@ None. No data or schema changes; existing in-progress rows immediately gain the 
 
 #### Automated
 
-- [x] 1.1 Linting passes: `npm run lint`
-- [x] 1.2 Production build passes: `npm run build`
+- [x] 1.1 Linting passes: `npm run lint` — 7bdb912
+- [x] 1.2 Production build passes: `npm run build` — 7bdb912
 
 #### Manual
 
-- [x] 1.3 In-progress row shows "Resume" to the left of "Abandon"
-- [x] 1.4 Clicking "Resume" navigates to `/session/[id]` with the running timer at correct elapsed/remaining time
-- [x] 1.5 Completed/rated row shows neither "Resume" nor "Abandon"
-- [x] 1.6 Two in-progress rows each show their own "Resume" linking to their own session
+- [x] 1.3 In-progress row shows "Resume" to the left of "Abandon" — 7bdb912
+- [x] 1.4 Clicking "Resume" navigates to `/session/[id]` with the running timer at correct elapsed/remaining time — 7bdb912
+- [x] 1.5 Completed/rated row shows neither "Resume" nor "Abandon" — 7bdb912
+- [x] 1.6 Two in-progress rows each show their own "Resume" linking to their own session — 7bdb912
 
 ### Phase 2: E2E coverage
 
 #### Automated
 
-- [ ] 2.1 New spec passes: `npm run test:e2e -- session-resume`
-- [ ] 2.2 Full e2e suite still green: `npm run test:e2e`
-- [ ] 2.3 Linting passes: `npm run lint`
+- [x] 2.1 New spec passes: `npm run test:e2e -- session-resume`
+- [x] 2.2 Full e2e suite still green: `npm run test:e2e`
+- [x] 2.3 Linting passes: `npm run lint`
 
 #### Manual
 
-- [ ] 2.4 Spec fails if the Resume link is removed from `SessionTile` (silent-deletion guard)
+- [x] 2.4 Spec fails if the Resume link is removed from `SessionTile` (silent-deletion guard)
