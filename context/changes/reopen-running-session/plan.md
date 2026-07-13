@@ -152,15 +152,15 @@ None. No data or schema changes; existing in-progress rows immediately gain the 
 
 #### Automated
 
-- [ ] 1.1 Linting passes: `npm run lint`
-- [ ] 1.2 Production build passes: `npm run build`
+- [x] 1.1 Linting passes: `npm run lint`
+- [x] 1.2 Production build passes: `npm run build`
 
 #### Manual
 
-- [ ] 1.3 In-progress row shows "Resume" to the left of "Abandon"
-- [ ] 1.4 Clicking "Resume" navigates to `/session/[id]` with the running timer at correct elapsed/remaining time
-- [ ] 1.5 Completed/rated row shows neither "Resume" nor "Abandon"
-- [ ] 1.6 Two in-progress rows each show their own "Resume" linking to their own session
+- [x] 1.3 In-progress row shows "Resume" to the left of "Abandon"
+- [x] 1.4 Clicking "Resume" navigates to `/session/[id]` with the running timer at correct elapsed/remaining time
+- [x] 1.5 Completed/rated row shows neither "Resume" nor "Abandon"
+- [x] 1.6 Two in-progress rows each show their own "Resume" linking to their own session
 
 ### Phase 2: E2E coverage
 

@@ -55,6 +55,24 @@ describe("SessionTile 🍅 badge", () => {
   });
 });
 
+describe("SessionTile resume control", () => {
+  it("shows a Resume button for an in-progress session", () => {
+    render(<SessionTile session={IN_PROGRESS_SESSION} />);
+    expect(screen.getByRole("button", { name: "Resume" })).toBeInTheDocument();
+  });
+
+  it("shows neither Resume nor Abandon for a completed session", () => {
+    render(<SessionTile session={DONE_SESSION} />);
+    expect(screen.queryByRole("button", { name: "Resume" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Abandon" })).not.toBeInTheDocument();
+  });
+
+  it("hides the Resume button in readOnly mode for an in-progress session", () => {
+    render(<SessionTile session={IN_PROGRESS_SESSION} readOnly />);
+    expect(screen.queryByRole("button", { name: "Resume" })).not.toBeInTheDocument();
+  });
+});
+
 describe("SessionTile readOnly", () => {
   it("exposes edit/delete through the actions menu by default", () => {
     render(<SessionTile session={DONE_SESSION} />);

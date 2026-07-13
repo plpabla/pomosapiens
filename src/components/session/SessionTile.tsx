@@ -1,6 +1,6 @@
 import { Card } from "@/components/ui/card";
 import LocalDateTime from "@/components/dashboard/LocalDateTime";
-import AbandonButton from "@/components/dashboard/AbandonButton";
+import InProgressSessionActions from "@/components/dashboard/InProgressSessionActions";
 import SessionTileCorner from "@/components/session/SessionTileCorner";
 import SessionSummaryRow from "@/components/session/SessionSummaryRow";
 import SessionTags from "@/components/session/SessionTags";
@@ -30,7 +30,7 @@ export default function SessionTile({ session, readOnly = false }: Props) {
       <SessionTags session={session} />
       {session.note !== null && <p className="text-off-white/70 text-sm italic">{session.note}</p>}
 
-      {status === "in_progress" && !readOnly && <AbandonButton sessionId={session.id} />}
+      {status === "in_progress" && !readOnly && <InProgressSessionActions sessionId={session.id} />}
     </Card>
   );
 }
