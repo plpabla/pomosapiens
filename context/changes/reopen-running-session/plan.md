@@ -166,10 +166,10 @@ None. No data or schema changes; existing in-progress rows immediately gain the 
 
 #### Automated
 
-- [x] 2.1 New spec passes: `npm run test:e2e -- session-resume`
-- [x] 2.2 Full e2e suite still green: `npm run test:e2e`
-- [x] 2.3 Linting passes: `npm run lint`
+- [x] 2.1 New spec passes: `npm run test:e2e -- session-resume` — 196d938
+- [x] 2.2 Full e2e suite still green: `npm run test:e2e` — 196d938
+- [x] 2.3 Linting passes: `npm run lint` — 196d938
 
 #### Manual
 
-- [x] 2.4 Spec fails if the Resume link is removed from `SessionTile` (silent-deletion guard)
+- [x] 2.4 Spec fails if the Resume link is removed from `SessionTile` (silent-deletion guard) — 196d938
