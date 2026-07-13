@@ -41,7 +41,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-08 | `anonymous-sessions`               | start and complete a focus session without signing in, with topic/format/preset tagging, saved locally in-browser                   | S-01          | — (PRD §Non-Goals, flagged "Add as follow up")        | done        |
 | S-09 | `anonymous-session-sync`           | have locally-stored anonymous sessions, topics, formats, and presets merged into their account after signing in/up                  | S-08          | — (PRD §Non-Goals, flagged "Add as follow up")        | not started |
 | S-10 | `continue-session-past-end`        | choose to keep working past a session's scheduled end, converting it to count-up without losing the original start time             | S-03          | — (gap; extends FR-011, FR-005)                       | not started |
-| S-11 | `reopen-running-session`           | return to an in-progress session from the dashboard after its tab/window was closed                                                 | S-05          | — (gap; extends FR-015)                               | done |
+| S-11 | `reopen-running-session`           | return to an in-progress session from the dashboard after its tab/window was closed                                                 | S-05          | — (gap; extends FR-015)                               | done        |
 | S-12 | `ui-improvements`                  | see accurate 🍅 time badges, correct stop-button wording, a pre-selected energy default, relocated badges, and a bigger timer clock | S-03          | — (cosmetic; no FR)                                   | done        |
 
 ## Baseline
@@ -304,10 +304,6 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   Another option to consider is to show popup on the page after refresh - it will request user' interaction and unlocks chime (right?)
 - **Server-side ownership validation of `topic_id` / `material_format_id` on session writes** — the session write schemas (`createSessionSchema`, and the planned `editSessionSchema` for S-07) validate `topic_id` / `material_format_id` as well-formed UUIDs only, not that the referenced topic/format belongs to the caller. Postgres FK checks bypass RLS, so a user could associate their own session with another user's topic/format UUID (they still can't read that row's name via RLS, so the leak is narrow). Fix would add an owner-scoped existence check (or a trigger/RLS `WITH CHECK`) on both write paths — `POST /api/sessions` and `PUT /api/sessions/[id]`. Why parked: pre-existing behavior shared by the create path, not introduced by S-07; the privacy impact is limited (no cross-user data is readable). Surfaced during the S-07 (`edit-delete-sessions`) plan review; tighten across both write paths together, outside MVP.
 - **Add session manually** it is possible that user wants to track also "unplanned" session - he just started timer on his stopwatch and jumped into deep work. when he is done, he realized he was working for 1h and really wants to add this to his dashboard - why don't we allow that? He can add a session with its start time, duration and other fields and this entry will be visible on a dashboard.
-
-## Bugs to be fixed
-
-### B-00 (placeholder)
 
 ## Done
 
