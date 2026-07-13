@@ -256,13 +256,13 @@ None. No schema change — `count_up` is an existing `timer_mode` CHECK value, `
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `npm run build`
-- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.1 Type checking passes: `npm run build` — 8949487
+- [x] 3.2 Linting passes: `npm run lint` — 8949487
 
 #### Manual
 
-- [x] 3.3 Focus-end shows chime + "I'm still working" alongside rating controls
-- [x] 3.4 Tapping resumes count-up from correct elapsed, "Stop" wording, tab title shows elapsed
-- [x] 3.5 Stopping converted session plays no chime; history records full elapsed total
-- [x] 3.6 Close + reopen mid count-up resumes as count-up from correct elapsed
-- [x] 3.7 Anon landing-page session shows no "I'm still working" button
+- [x] 3.3 Focus-end shows chime + "I'm still working" alongside rating controls — 8949487
+- [x] 3.4 Tapping resumes count-up from correct elapsed, "Stop" wording, tab title shows elapsed — 8949487
+- [x] 3.5 Stopping converted session plays no chime; history records full elapsed total — 8949487
+- [x] 3.6 Close + reopen mid count-up resumes as count-up from correct elapsed — 8949487
+- [x] 3.7 Anon landing-page session shows no "I'm still working" button — 8949487
