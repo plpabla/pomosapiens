@@ -19,6 +19,7 @@ export interface EndSessionArgs {
 export interface SessionPersistence {
   createSession(input: CreateSessionInput): Promise<{ id: string; startedAtMs: number }>;
   endSession(id: string, args: EndSessionArgs): Promise<void>;
+  continueSession?(id: string): Promise<void>;
 }
 
 export const remotePersistence: SessionPersistence = {
@@ -37,6 +38,13 @@ export const remotePersistence: SessionPersistence = {
       method: "PATCH",
       body: args,
       fallbackError: "Failed to save session",
+    });
+  },
+
+  async continueSession(id) {
+    await fetchJson(`/api/sessions/${id}/continue`, {
+      method: "POST",
+      fallbackError: "Failed to continue session",
     });
   },
 };

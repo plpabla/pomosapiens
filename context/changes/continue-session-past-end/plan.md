@@ -232,15 +232,15 @@ None. No schema change — `count_up` is an existing `timer_mode` CHECK value, `
 
 #### Automated
 
-- [ ] 1.1 Endpoint test: running preset row flips to count_up and nulls both planned_* columns
-- [ ] 1.2 Endpoint test: already-ended row returns 409 and is unchanged
-- [ ] 1.3 Endpoint test: another user's row is not converted (ownership scoping)
-- [ ] 1.4 Type checking passes: `npm run build`
-- [ ] 1.5 Linting passes: `npm run lint`
+- [x] 1.1 Endpoint test: running preset row flips to count_up and nulls both planned_* columns
+- [x] 1.2 Endpoint test: already-ended row returns 409 and is unchanged
+- [x] 1.3 Endpoint test: another user's row is not converted (ownership scoping)
+- [x] 1.4 Type checking passes: `npm run build`
+- [x] 1.5 Linting passes: `npm run lint`
 
 #### Manual
 
-- [ ] 1.6 POST on a live running session returns 200; row shows count_up + null planned in Studio
+- [x] 1.6 POST on a live running session returns 200; row shows count_up + null planned in Studio
 
 ### Phase 2: Reactive-mode hook refactor
 

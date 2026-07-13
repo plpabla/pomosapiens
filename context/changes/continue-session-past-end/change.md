@@ -1,7 +1,7 @@
 ---
 change_id: continue-session-past-end
 title: Continue session past its scheduled end
-status: planned
+status: implementing
 created: 2026-07-13
 updated: 2026-07-13
 archived_at: null

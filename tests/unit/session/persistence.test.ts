@@ -93,3 +93,24 @@ describe("remotePersistence.endSession", () => {
     ).rejects.toThrow("Session already ended or not found");
   });
 });
+
+describe("remotePersistence.continueSession", () => {
+  it("POSTs with no body to /api/sessions/{id}/continue", async () => {
+    vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+    await remotePersistence.continueSession?.("s1");
+
+    expect(fetch).toHaveBeenCalledWith(
+      "/api/sessions/s1/continue",
+      expect.objectContaining({ method: "POST", body: undefined }),
+    );
+  });
+
+  it("throws with the server error message when the POST fails", async () => {
+    vi.mocked(fetch).mockResolvedValue(
+      new Response(JSON.stringify({ error: "Session already ended or not found" }), { status: 409 }),
+    );
+
+    await expect(remotePersistence.continueSession?.("s1")).rejects.toThrow("Session already ended or not found");
+  });
+});
