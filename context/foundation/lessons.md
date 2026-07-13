@@ -66,3 +66,15 @@ Prefer explicit state transitions: the `/session/[id]` page should allow any non
 If you encounter the old immutability RLS test or its accompanying comment and are tempted to "fix" a failing delete back to denial, don't -- the reversal was deliberate and user-confirmed, not a regression. This same DELETE capability also substantially delivers S-07 (`edit-delete-sessions`)'s delete half; S-07's remaining scope is narrowed to editing a session's fields only.
 
 **Source:** S-05 `explicit-session-abandon` (`context/changes/explicit-session-abandon/change.md`, `plan.md`).
+
+---
+
+## L-07: Extract sibling controls into a composition component
+
+React component composition, especially tile/row-style components with conditional action blocks (e.g. `SessionTile`, `dashboard/*`). Host components accumulate ad-hoc conditional JSX blocks bundling multiple sibling controls, becoming hard to read and test as more controls are added.
+
+Build compositions of small, reusable components. When a component accumulates conditional UI blocks bundling multiple sibling controls (e.g. Resume + Abandon buttons), extract that block into its own named composition component (e.g. `InProgressSessionActions`) with minimal props, mirroring existing precedent (e.g. `CompletedSessionActions.tsx`).
+
+**Applies to:** plan, implement, impl-review, plan-review
+
+**Source:** `reopen-running-session` Phase 1 -- `SessionTile` grew a second in-progress control (Resume beside Abandon); extracted into `InProgressSessionActions.tsx`, mirroring `dashboard/CompletedSessionActions.tsx`.
