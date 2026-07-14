@@ -1,10 +1,21 @@
 ---
 import Layout from "@/layouts/Layout.astro";
 import EnergyPicker from "@/components/session/EnergyPicker";
+
+const energy = Astro.url.searchParams.get("energy");
+const topic = Astro.url.searchParams.get("topic");
+const format = Astro.url.searchParams.get("format");
+const mode = Astro.url.searchParams.get("mode");
 ---
 
 <Layout title="Start session">
   <div class="bg-cosmic flex-1 p-4">
-    <EnergyPicker client:load />
+    <EnergyPicker
+      initialEnergy={energy ?? undefined}
+      initialTopicId={topic ?? undefined}
+      initialFormatId={format ?? undefined}
+      initialMode={mode ?? undefined}
+      client:load
+    />
   </div>
 </Layout>

@@ -205,28 +205,28 @@ None — no schema changes. The relaxed invariant produces rows with `timer_mode
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npm run lint`
-- [x] 1.2 Continue integration tests pass: `npm test -- sessions.continue`
-- [x] 1.3 Full test suite passes: `npm test`
+- [x] 1.1 Type checking passes: `npm run lint` — 8e91578
+- [x] 1.2 Continue integration tests pass: `npm test -- sessions.continue` — 8e91578
+- [x] 1.3 Full test suite passes: `npm test` — 8e91578
 
 #### Manual
 
-- [x] 1.4 Continue → stop → "Take a break" offered and runs original break duration
-- [x] 1.5 Reload continued session → break still available afterward
-- [x] 1.6 Native count-up session still offers no break
+- [x] 1.4 Continue → stop → "Take a break" offered and runs original break duration — 8e91578
+- [x] 1.5 Reload continued session → break still available afterward — 8e91578
+- [x] 1.6 Native count-up session still offers no break — 8e91578
 
 ### Phase 2: Preset-carrying redirect after break
 
 #### Automated
 
-- [ ] 2.1 Type checking + lint pass: `npm run lint`
-- [ ] 2.2 Full test suite passes: `npm test`
-- [ ] 2.3 Build passes: `npm run build`
+- [x] 2.1 Type checking + lint pass: `npm run lint`
+- [x] 2.2 Full test suite passes: `npm test`
+- [x] 2.3 Build passes: `npm run build`
 
 #### Manual
 
-- [ ] 2.4 Normal preset break completes → prefilled `/session/new` (energy/topic/format/preset chip)
-- [ ] 2.5 Manual "End break" → same prefilled `/session/new`
-- [ ] 2.6 Continued session break → prefilled `/session/new` with count-up mode
-- [ ] 2.7 Deleted topic → falls back to "none", no error
-- [ ] 2.8 Rating-screen "Go to dashboard" still goes to `/dashboard`
+- [x] 2.4 Normal preset break completes → prefilled `/session/new` (energy/topic/format/preset chip)
+- [x] 2.5 Manual "End break" → same prefilled `/session/new`
+- [x] 2.6 Continued session break → prefilled `/session/new` with count-up mode
+- [x] 2.7 Deleted topic → falls back to "none", no error
+- [x] 2.8 Rating-screen "Go to dashboard" still goes to `/dashboard`
