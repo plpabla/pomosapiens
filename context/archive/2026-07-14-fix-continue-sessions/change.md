@@ -1,10 +1,10 @@
 ---
 change_id: fix-continue-sessions
 title: Preserve break time when user continues session
-status: impl_reviewed
+status: archived
 created: 2026-07-14
 updated: 2026-07-14
-archived_at: null
+archived_at: 2026-07-14T20:23:53Z
 ---
 
 ## Notes
