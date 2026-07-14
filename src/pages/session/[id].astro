@@ -43,7 +43,7 @@ if (!data) return Astro.redirect("/dashboard");
 const { startedAtMs } = access;
 const focusSeconds = data.planned_focus_seconds ?? 25 * 60;
 const mode = data.timer_mode === "count_up" ? "count_up" : "preset";
-const breakSeconds = mode === "count_up" ? null : (data.planned_break_seconds ?? 0);
+const breakSeconds = data.planned_break_seconds ?? 0;
 ---
 
 <Layout title="Session">

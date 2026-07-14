@@ -205,15 +205,15 @@ None — no schema changes. The relaxed invariant produces rows with `timer_mode
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `npm run lint`
-- [ ] 1.2 Continue integration tests pass: `npm test -- sessions.continue`
-- [ ] 1.3 Full test suite passes: `npm test`
+- [x] 1.1 Type checking passes: `npm run lint`
+- [x] 1.2 Continue integration tests pass: `npm test -- sessions.continue`
+- [x] 1.3 Full test suite passes: `npm test`
 
 #### Manual
 
-- [ ] 1.4 Continue → stop → "Take a break" offered and runs original break duration
-- [ ] 1.5 Reload continued session → break still available afterward
-- [ ] 1.6 Native count-up session still offers no break
+- [x] 1.4 Continue → stop → "Take a break" offered and runs original break duration
+- [x] 1.5 Reload continued session → break still available afterward
+- [x] 1.6 Native count-up session still offers no break
 
 ### Phase 2: Preset-carrying redirect after break
 

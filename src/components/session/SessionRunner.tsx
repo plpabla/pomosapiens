@@ -183,7 +183,7 @@ export default function SessionRunner({
     <FocusRating
       onSubmit={submitRating}
       error={error}
-      canTakeBreak={mode !== "count_up" && breakSeconds !== null && breakSeconds > 0}
+      canTakeBreak={(breakSeconds ?? 0) > 0}
       canContinue={canContinue && mode === "preset"}
       onContinue={() => void handleContinue()}
       continuing={continuing}
