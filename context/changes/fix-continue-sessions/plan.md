@@ -219,14 +219,14 @@ None — no schema changes. The relaxed invariant produces rows with `timer_mode
 
 #### Automated
 
-- [x] 2.1 Type checking + lint pass: `npm run lint`
-- [x] 2.2 Full test suite passes: `npm test`
-- [x] 2.3 Build passes: `npm run build`
+- [x] 2.1 Type checking + lint pass: `npm run lint` — d3dc7b4
+- [x] 2.2 Full test suite passes: `npm test` — d3dc7b4
+- [x] 2.3 Build passes: `npm run build` — d3dc7b4
 
 #### Manual
 
-- [x] 2.4 Normal preset break completes → prefilled `/session/new` (energy/topic/format/preset chip)
-- [x] 2.5 Manual "End break" → same prefilled `/session/new`
-- [x] 2.6 Continued session break → prefilled `/session/new` with count-up mode
-- [x] 2.7 Deleted topic → falls back to "none", no error
-- [x] 2.8 Rating-screen "Go to dashboard" still goes to `/dashboard`
+- [x] 2.4 Normal preset break completes → prefilled `/session/new` (energy/topic/format/preset chip) — d3dc7b4
+- [x] 2.5 Manual "End break" → same prefilled `/session/new` — d3dc7b4
+- [x] 2.6 Continued session break → prefilled `/session/new` with count-up mode — d3dc7b4
+- [x] 2.7 Deleted topic → falls back to "none", no error — d3dc7b4
+- [x] 2.8 Rating-screen "Go to dashboard" still goes to `/dashboard` — d3dc7b4
