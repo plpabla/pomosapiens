@@ -6,6 +6,7 @@ export function useTopicsAndFormats(options?: { enabled?: boolean }): {
   topics: Topic[];
   formats: MaterialFormat[];
   loadError: string | null;
+  loaded: boolean;
 } {
   const enabled = options?.enabled ?? true;
   const [topics, setTopics] = useState<Topic[]>([]);
@@ -32,5 +33,5 @@ export function useTopicsAndFormats(options?: { enabled?: boolean }): {
       });
   }, [enabled, loaded]);
 
-  return { topics, formats, loadError };
+  return { topics, formats, loadError, loaded };
 }

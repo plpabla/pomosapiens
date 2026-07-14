@@ -22,7 +22,9 @@ if (!user) {
 
 const { data, error } = await supabase
   .from("sessions")
-  .select("id, started_at, ended_at, energy_level, planned_focus_seconds, planned_break_seconds, timer_mode")
+  .select(
+    "id, started_at, ended_at, energy_level, planned_focus_seconds, planned_break_seconds, timer_mode, topic_id, material_format_id",
+  )
   .eq("id", id)
   .eq("user_id", user.id)
   .maybeSingle();
@@ -43,7 +45,13 @@ if (!data) return Astro.redirect("/dashboard");
 const { startedAtMs } = access;
 const focusSeconds = data.planned_focus_seconds ?? 25 * 60;
 const mode = data.timer_mode === "count_up" ? "count_up" : "preset";
-const breakSeconds = mode === "count_up" ? null : (data.planned_break_seconds ?? 0);
+const breakSeconds = data.planned_break_seconds ?? 0;
+
+const prefillParams = new URLSearchParams({ energy: data.energy_level });
+if (data.timer_mode) prefillParams.set("mode", data.timer_mode);
+if (data.topic_id) prefillParams.set("topic", data.topic_id);
+if (data.material_format_id) prefillParams.set("format", data.material_format_id);
+const breakCompleteHref = `/session/new?${prefillParams.toString()}`;
 ---
 
 <Layout title="Session">
@@ -54,6 +62,7 @@ const breakSeconds = mode === "count_up" ? null : (data.planned_break_seconds ??
       focusSeconds={focusSeconds}
       mode={mode}
       breakSeconds={breakSeconds}
+      breakCompleteHref={breakCompleteHref}
       fullHeight={false}
       client:load
     />

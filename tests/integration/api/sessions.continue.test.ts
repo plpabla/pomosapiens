@@ -35,7 +35,7 @@ describe("POST /api/sessions/[id]/continue", () => {
     await fixture.cleanup();
   });
 
-  it("flips a running preset session to count_up and nulls both planned_* columns", async () => {
+  it("flips a running preset session to count_up, nulls planned_focus_seconds, and preserves planned_break_seconds", async () => {
     const session = await createSession(fixture.cookieFor(fixture.userA.id));
 
     const res = await SELF.fetch(`${BASE}/api/sessions/${session.id}/continue`, {
@@ -49,7 +49,7 @@ describe("POST /api/sessions/[id]/continue", () => {
     const row = await readSession(session.id);
     expect(row.timer_mode).toBe("count_up");
     expect(row.planned_focus_seconds).toBeNull();
-    expect(row.planned_break_seconds).toBeNull();
+    expect(row.planned_break_seconds).toBe(5 * 60);
     expect(row.ended_at).toBeNull();
   });
 

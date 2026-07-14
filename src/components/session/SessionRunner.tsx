@@ -20,6 +20,11 @@ interface Props {
   /** Gates the "I'm still working" affordance; the anon flow opts out. */
   canContinue?: boolean;
   onGoToDashboard?: () => void;
+  /** Retargets navigation after a break completes (natural, hidden-tab, or manual "End break").
+   * Defaults to onGoToDashboard when neither this nor breakCompleteHref is provided. */
+  onBreakComplete?: () => void;
+  /** Serializable alternative to onBreakComplete for Astro islands, which cannot pass functions as props. */
+  breakCompleteHref?: string;
   onStartNewSession?: () => void;
   /** Standalone pages want the timer centered in the full viewport; embedded
    * usage (e.g. the anon landing-page island) should size to its content. */
@@ -41,6 +46,12 @@ export default function SessionRunner({
   onGoToDashboard = () => {
     window.location.assign("/dashboard");
   },
+  breakCompleteHref,
+  onBreakComplete = breakCompleteHref
+    ? () => {
+        window.location.assign(breakCompleteHref);
+      }
+    : onGoToDashboard,
   onStartNewSession = () => {
     window.location.assign("/session/new");
   },
@@ -76,14 +87,14 @@ export default function SessionRunner({
     if (breakDoneWhileHidden) return;
     const audio = audioRef.current;
     if (!audio) {
-      onGoToDashboard();
+      onBreakComplete();
       return;
     }
     let gone = false;
     const go = () => {
       if (gone) return;
       gone = true;
-      onGoToDashboard();
+      onBreakComplete();
     };
     audio.addEventListener("ended", go, { once: true });
     const timeoutId = setTimeout(go, 5000); // fallback if ended never fires
@@ -91,7 +102,7 @@ export default function SessionRunner({
       clearTimeout(timeoutId);
       audio.removeEventListener("ended", go);
     };
-  }, [breakComplete, breakDoneWhileHidden, audioRef, onGoToDashboard]);
+  }, [breakComplete, breakDoneWhileHidden, audioRef, onBreakComplete]);
 
   const title = getRunningTabTitle({ phase, internalPhase, mode, remaining, elapsed, breakRemaining });
   const alert =
@@ -103,7 +114,7 @@ export default function SessionRunner({
   const onAlertDismiss =
     breakComplete && breakDoneWhileHidden
       ? () => {
-          onGoToDashboard();
+          onBreakComplete();
         }
       : undefined;
   useTabTitle({ title, alert, onAlertDismiss });
@@ -169,7 +180,7 @@ export default function SessionRunner({
         <Button
           variant="outline"
           onClick={() => {
-            onGoToDashboard();
+            onBreakComplete();
           }}
           className="border-charred text-ash hover:text-off-white mt-4"
         >
@@ -183,7 +194,7 @@ export default function SessionRunner({
     <FocusRating
       onSubmit={submitRating}
       error={error}
-      canTakeBreak={mode !== "count_up" && breakSeconds !== null && breakSeconds > 0}
+      canTakeBreak={(breakSeconds ?? 0) > 0}
       canContinue={canContinue && mode === "preset"}
       onContinue={() => void handleContinue()}
       continuing={continuing}
