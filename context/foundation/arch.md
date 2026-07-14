@@ -285,7 +285,7 @@ erDiagram
 
 Modeling decisions:
 
-- **`planned_*_seconds` are snapshots, not references.** There is deliberately no FK from `sessions` to `user_presets`: the planned durations are copied onto the row at POST time so that editing a preset slot later never rewrites how past sessions are summarised. The `count_up ⇒ null planned` invariant is app-maintained, not DB-enforced, at both write sites: the POST insert and the S-10 continue endpoint, which nulls both columns when converting a running preset session to count-up (no audit of the origin preset is kept).
+- **`planned_*_seconds` are snapshots, not references.** There is deliberately no FK from `sessions` to `user_presets`: the planned durations are copied onto the row at POST time so that editing a preset slot later never rewrites how past sessions are summarised. The `count_up ⇒ null planned` invariant is app-maintained, not DB-enforced, and (since fix-continue-sessions) relaxed to insert-time-only: the POST insert nulls both planned columns for count-up, but the S-10 continue endpoint nulls only `planned_focus_seconds` when converting a running preset session to count-up -- it deliberately preserves `planned_break_seconds` so the user keeps their break (no audit of the origin preset is kept).
 - **`duration_seconds` is a generated column** (from `started_at`/`ended_at`), so "actual elapsed wall time" is correct for every mode, count-up included, with no application arithmetic.
 - **A session's lifecycle is written in `ended_at`**: `NULL` means in progress (any age -- there is no time-based "abandoned" heuristic, lesson L-05), non-NULL means done. Status is derived, never stored.
 
@@ -428,7 +428,7 @@ sequenceDiagram
         SR->>SR: chime (fail-open), phase = rating
         opt "I'm still working" (preset focus-end only)
             SR->>API3: POST (no body)
-            API3->>PG: UPDATE timer_mode = count_up,<br/>planned_* = NULL WHERE id AND user_id<br/>AND ended_at IS NULL
+            API3->>PG: UPDATE timer_mode = count_up,<br/>planned_focus_seconds = NULL WHERE id AND user_id<br/>AND ended_at IS NULL (planned_break_seconds preserved)
             API3-->>SR: 200 (409 if already ended)
             SR->>SR: mode -> count_up, phase = running<br/>(elapsed keeps deriving from started_at)
             Note over SR: session now behaves as count-up:<br/>only Stop ends it, no further chime
@@ -463,7 +463,7 @@ Invariants on this path (pinned by lessons L-01/L-02/L-03 and the test suite):
 - **Two-stage audio prime**: stage 1 in the Start click handler ([useSessionStart](src/lib/session/useSessionStart.ts)), stage 2 on runner mount, chime fired from the stored `audioRef`, always fail-open.
 - **Column-scope discipline (L-01)**: zod strips unknown keys, and every write uses a hand-picked column set (`POST` insert, `PATCH` exactly `{ ended_at, focus_rating, note }`) -- never `.update(parsed.data)`.
 - **Write-once end**: `PATCH` filters `.is("ended_at", null)`; a second attempt returns 409. The `[now-2h, now+5s]` plausibility window is a clock-tampering guard, not a duration cap.
-- **Mid-flight conversion is persist-first (S-10)**: the "I'm still working" handler `await`s the continue POST and only on success flips the client's reactive mode -- on failure the UI stays on the focus-end screen, consistent with the still-preset server row. The conversion endpoint carries its own hand-picked write-set (`timer_mode`, nulled `planned_*`) and the same `.is("ended_at", null)` guard, leaving the PATCH contract (L-01) untouched. Persisting the flip is what makes S-11 reopen re-derive count-up instead of a countdown.
+- **Mid-flight conversion is persist-first (S-10)**: the "I'm still working" handler `await`s the continue POST and only on success flips the client's reactive mode -- on failure the UI stays on the focus-end screen, consistent with the still-preset server row. The conversion endpoint carries its own hand-picked write-set (`timer_mode`, nulled `planned_focus_seconds`; `planned_break_seconds` preserved since fix-continue-sessions) and the same `.is("ended_at", null)` guard, leaving the PATCH contract (L-01) untouched. Persisting the flip is what makes S-11 reopen re-derive count-up instead of a countdown.
 - **Access guard** ([access.ts](src/lib/session/access.ts)): `/session/[id]` redirects only on a missing row (covers cross-user via RLS) or an already-ended row. No age-based logic anywhere (L-05).
 - **Tab title** ([useTabTitle](src/lib/timer/useTabTitle.ts)): the running phases mirror the clock into `document.title`; details in §7.
 

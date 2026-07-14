@@ -33,10 +33,11 @@ export default function EnergyPicker({ initialEnergy, initialTopicId, initialFor
   const loadError = catalogLoadError ?? presetsLoadError;
 
   const [lastMode, persistMode] = useLastMode();
-  const [mode, setMode] = useState<Mode>(isMode(initialMode) ? initialMode : lastMode);
+  const [modeOverride, setModeOverride] = useState<Mode | null>(isMode(initialMode) ? initialMode : null);
+  const mode = modeOverride ?? lastMode;
 
   function handleModeChange(next: Mode) {
-    setMode(next);
+    setModeOverride(next);
     persistMode(next);
   }
 
