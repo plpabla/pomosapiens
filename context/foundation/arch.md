@@ -122,8 +122,8 @@ flowchart LR
     subgraph pages[src/pages - SSR]
         idx["index.astro (anon capture)"]
         dash[dashboard.astro]
-        sessNew[session/new.astro]
-        sessId["session/[id].astro"]
+        sessNew["session/new.astro<br/>(reads prefill params)"]
+        sessId["session/[id].astro<br/>(builds prefill URL)"]
         mgmtPg[topics/ formats/ presets pages]
         authPg[auth/*.astro]
     end
@@ -145,6 +145,8 @@ flowchart LR
     anonC --> sessC
 ```
 
+**Prefill data flow (Phase 2):** `session/[id].astro` SELECTs `topic_id, material_format_id` and constructs a prefill query string (`/session/new?energy=<energy>&mode=<mode>&topic=<topic>&format=<format>`), which `session/new.astro` reads and passes to `EnergyPicker` as initial values.
+
 ### 3.2 Client islands and shared logic
 
 Short labels for the component directories; their full contents are in §3.1. `ui/` (shadcn primitives) sits on the component side.
@@ -153,7 +155,7 @@ Short labels for the component directories; their full contents are in §3.1. `u
 flowchart LR
     subgraph components[src/components]
         anonC[anon/]
-        sessC[session/]
+        sessC[session/<br/>SessionRunner now accepts<br/>breakCompleteHref prop]
         dashC[dashboard/]
         resC[resource/ + catalog + preset managers]
         uiC[ui/ shadcn primitives]
@@ -172,6 +174,10 @@ flowchart LR
     dashC --> MISC & uiC
     resC --> RESL & MISC
 ```
+
+**Phase 2 updates:**
+- **SessionRunner**: New `breakCompleteHref?: string` prop (Phase 2). Builds `onBreakComplete` callback: if provided, navigates to the URL; else falls back to `onGoToDashboard`. The callback replaces direct `onGoToDashboard()` calls at break-completion sites.
+- **EnergyPicker**: New optional props `initialEnergy?`, `initialTopicId?`, `initialFormatId?`, `initialMode?` (from URL params). Seeds form state, validates against loaded catalogs, and silently resets stale topics/formats to `null`.
 
 ### 3.3 Server side: middleware and API routes
 
@@ -341,6 +347,8 @@ classDiagram
         +persistContinue prop (default: remote continue POST)
         +canContinue prop (default: true)
         +onGoToDashboard / onStartNewSession props
+        +breakCompleteHref prop (Phase 2, optional)
+        +onBreakComplete callback (Phase 2, default: onGoToDashboard)
     }
 
     class EnergyPicker {
@@ -365,7 +373,10 @@ classDiagram
 
 Why a port and not branching: six call sites would otherwise each need an `if (anonymous)` arm, and history/chart components would silently read only one backend. Instead the backend choice is made once, at the island boundary, and every shared component stays oblivious. The two implementations also differ in navigation semantics -- the remote path navigates to `/session/[id]` (unmounting the form), while the local path stays mounted on `/` and swaps the runner in place via the `onStarted` / `onGoToDashboard` callbacks.
 
-One asymmetry: `continueSession` (the S-10 mid-flight conversion, §7) is an **optional** port member implemented only by `remotePersistence`. The anonymous island passes `canContinue={false}` to `SessionRunner`, so `localPersistence` never needs it -- continue-past-end is authenticated-only this slice.
+Two asymmetries:
+
+1. **`continueSession`** (the S-10 mid-flight conversion, §7) is an **optional** port member implemented only by `remotePersistence`. The anonymous island passes `canContinue={false}` to `SessionRunner`, so `localPersistence` never needs it -- continue-past-end is authenticated-only this slice.
+2. **`onBreakComplete`** (Phase 2) is a new callback on `SessionRunner` that routes break-completion navigation. Default is `onGoToDashboard` (preserving today's behavior for anonymous and any non-overriding context). The authed `[id].astro` overrides it by passing `breakCompleteHref` (a prefill URL string), which `SessionRunner` converts to a closure that navigates there. This decouples break-end from the rating-screen "Go to dashboard" button, which still uses `onGoToDashboard` directly.
 
 ---
 
@@ -437,6 +448,11 @@ sequenceDiagram
         SR-->>U: "Session saved" screen: new session | take a break | dashboard
         opt preset with breakSeconds > 0, user takes break
             SR->>SR: useBreakTimer counts down, chimes at 0 (same primed audio)
+            opt break completes naturally or user clicks "End break"
+                SR->>SR: onBreakComplete() called (Phase 2)
+                Note over SR: authed [id].astro passes breakCompleteHref<br/>-- navigates to /session/new?energy=...&topic=...&format=...&mode=...<br/>anonymous island uses default onGoToDashboard<br/>-- lands on form as before
+                SR->>B: navigate (preset-carrying redirect or dashboard)
+            end
         end
     end
 ```
@@ -515,8 +531,8 @@ stateDiagram-v2
     saved --> [*] : Go to dashboard
     saved --> running_break : Take a break<br/>(preset only, positive breakSeconds,<br/>anchor set to Date.now())
 
-    running_break --> [*] : break reaches 0 (chime,<br/>navigate after chime finishes)
-    running_break --> [*] : End break (no chime)
+    running_break --> [*] : break reaches 0 (chime,<br/>navigate via onBreakComplete after chime)
+    running_break --> [*] : End break (manual,<br/>navigate via onBreakComplete)
 ```
 
 Properties worth knowing before touching it:
@@ -524,8 +540,8 @@ Properties worth knowing before touching it:
 - **`mode` is reactive state, no longer fixed for the session's lifetime** (since S-10). `useFocusTimer` seeds internal `mode` state from the prop and exposes it plus a `continueAsCountUp()` action (sets `mode → count_up`, `phase → running`, clears the stop snapshot). `SessionRunner` reads the hook's effective mode for all display branches, so button wording and tab title flip automatically. Conversion is one-way: `count_up` never fires focus-end, so the "I'm still working" choice cannot reappear and no chime can re-fire (the one-way `firedRef` latch is short-circuited by the count-up gate). The flip is persisted first via `POST /api/sessions/[id]/continue` (§6.1); the rating screen's `canContinue` gate requires `mode === "preset"` and is forced off for the anonymous island.
 - **The DB row is terminal before the break starts.** Everything from `saved` onward is client-only; a refresh during a break simply lands wherever the exit callback points (dashboard for signed-in, the form for anonymous).
 - **One chime asset, two fire sites** (focus-end, break-end), both through the same primed `audioRef`. User-initiated stops never chime.
-- **Tab title tracks the phase**: `⏱ MM:SS - PomoSapiens` while focusing / counting up, `☕ MM:SS - PomoSapiens` during a break, restored on stop/unmount. If a phase ends while the tab is hidden, the title blinks an alert (`✅ Focus done!` / `Break over!` alternating with `⏰ ⏰ ⏰`) until the user refocuses; a break that ends hidden also holds the dashboard navigation until refocus. Worst-case failure is a stale title string -- cosmetic by design.
-- **Exit callbacks are injected** (`onGoToDashboard`, `onStartNewSession`, `persistEnd`), which is exactly what lets the anonymous island reuse the whole machine without navigation.
+- **Tab title tracks the phase**: `⏱ MM:SS - PomoSapiens` while focusing / counting up, `☕ MM:SS - PomoSapiens` during a break, restored on stop/unmount. If a phase ends while the tab is hidden, the title blinks an alert (`✅ Focus done!` / `Break over!` alternating with `⏰ ⏰ ⏰`) until the user refocuses; a break that ends hidden also holds the navigation until refocus. Worst-case failure is a stale title string -- cosmetic by design.
+- **Exit callbacks are injected** (`onGoToDashboard`, `onStartNewSession`, `persistEnd`, `onBreakComplete`), which is exactly what lets the anonymous island reuse the whole machine without navigation. **Phase 2**: `onBreakComplete` (defaulting to `onGoToDashboard`) replaces direct navigation calls at break-end sites, unlocking preset-carrying redirect in the authed path while keeping anonymous behavior unchanged.
 
 ---
 
@@ -592,7 +608,7 @@ Shipped and reflected in this document (see `context/foundation/roadmap.md` and 
 - **S-05 / S-07 / S-11** - the dashboard row-action set: Abandon (delete, in-progress), Edit + Delete (done rows), Resume (back into a running session).
 - **S-06** (`tab-title-timer`) - `useTabTitle` with hidden-tab blink alerts.
 - **S-08** (`anonymous-sessions`) - the localStorage tier, the `SessionPersistence` port, `AnonSessionApp` on `/`.
-- **S-10** (`continue-session-past-end`) - the "I'm still working" choice at preset focus-end: `POST /api/sessions/[id]/continue` converts the running row to count-up in place (nulling `planned_*`), and `useFocusTimer`'s reactive `mode` + `continueAsCountUp()` resume the timer client-side. Signed-in only; the anonymous island opts out.
+- **S-10** (`continue-session-past-end`) - the "I'm still working" choice at preset focus-end: `POST /api/sessions/[id]/continue` converts the running row to count-up in place (nulling `planned_*`), and `useFocusTimer`'s reactive `mode` + `continueAsCountUp()` resume the timer client-side. Signed-in only; the anonymous island opts out. **Refined by fix-continue-sessions**: preserves `planned_break_seconds` on continue (relaxes the invariant to insert-time-only) and adds preset-carrying redirect after break-completion (`SessionRunner.onBreakComplete` callback, `[id].astro` prefill URL construction, `new.astro` prefill param reading, `EnergyPicker` seeding).
 - **S-12** + the 2026-07-10 React refactor - the current component decomposition (🍅 duration badges, `SessionStartForm` extraction, shared CRUD/confirm/catalog modules).
 - Test hardening changes (`testing-api-contract`, `test-timer-sm`, `testing-schema-validation-gate`, `testing-e2e-session-capture-flow`) - the suites that pin §6's invariants.
 
