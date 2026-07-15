@@ -78,3 +78,17 @@ Build compositions of small, reusable components. When a component accumulates c
 **Applies to:** plan, implement, impl-review, plan-review
 
 **Source:** `reopen-running-session` Phase 1 -- `SessionTile` grew a second in-progress control (Resume beside Abandon); extracted into `InProgressSessionActions.tsx`, mirroring `dashboard/CompletedSessionActions.tsx`.
+
+---
+
+## L-08: "Type checking" gate must actually run the compiler
+
+**Context:** context/changes/chart-tooltip-context/plan.md:97 (Automated Verification gate), src/components/dashboard/FocusRatingChartTooltip.tsx:26
+
+**Problem:** The plan's automated gate read "Type checking passes: `npm run lint`". Neither `npm run lint` (type-checked ESLint) nor `npm run build` (Astro/Vite, no `tsc`) runs the TypeScript compiler, so `.tsx`/`.astro` prop-wiring type errors are not caught by the stated gate. Two real type errors (`duration_seconds: number | null` passed unguarded to `tomatoCount`/`formatDuration`; `AnonSessionApp` still narrowed to `{ started_at, focus_rating }`) slipped past Phase 1's gate -- all four automated checkboxes were marked done -- and were only caught by a follow-up fix commit (2412196).
+
+**Rule:** Plans that claim a "type checking" gate must name a command that actually invokes `tsc`/`astro check` on the changed files, not `eslint` or the Vite build. `npm run lint` and `npm run build` do not substitute for a compiler pass on `.tsx`/`.astro` prop-wiring.
+
+**Applies to:** plan, plan-review, impl-review
+
+**Source:** chart-tooltip-context impl-review F1.

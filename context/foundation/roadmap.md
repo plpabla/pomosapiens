@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-07-13
+updated: 2026-07-15
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -43,6 +43,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-10 | `continue-session-past-end`        | choose to keep working past a session's scheduled end, converting it to count-up without losing the original start time             | S-03          | — (gap; extends FR-011, FR-005)                       | done        |
 | S-11 | `reopen-running-session`           | return to an in-progress session from the dashboard after its tab/window was closed                                                 | S-05          | — (gap; extends FR-015)                               | done        |
 | S-12 | `ui-improvements`                  | see accurate 🍅 time badges, correct stop-button wording, a pre-selected energy default, relocated badges, and a bigger timer clock | S-03          | — (cosmetic; no FR)                                   | done        |
+| S-13 | `chart-tooltip-context`            | see 🍅 count and topic/format badges in the focus-rating chart tooltip instead of just the raw rating number                       | S-04          | — (gap; extends FR-016)                              | done |
 
 ## Baseline
 
@@ -261,6 +262,19 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Risk:** Five independent, low-risk cosmetic changes with no schema or API impact — pure frontend. The only coordination risk is touching the same files (`dashboard.astro`, `session/[id].astro`) as S-10 / S-11 if picked up in the same window.
 - **Status:** done
 
+### S-13: Focus-rating chart tooltip shows meaningful context
+
+- **Outcome:** User hovers a point on the focus-rating chart (`FocusRatingChart`, `src/components/dashboard/FocusRatingChart.tsx`) and sees, alongside the focus rating already shown, the session's energy level, duration, 🍅 count, and its topic/material-format badges (when present) — instead of just the bare `focus_rating` number.
+- **Change ID:** `chart-tooltip-context`
+- **PRD refs:** No new PRD FR — extends FR-016 (focus-rating chart, delivered by S-04). Gap promoted from Parked ("Graph tooltip showing meaningful data") 2026-07-15.
+- **Prerequisites:** S-04 (the chart and its tooltip must exist to extend)
+- **Parallel with:** S-09
+- **Blockers:** —
+- **Unknowns:**
+  - Whether sessions with no topic/format (both optional per S-02) should omit those badge rows entirely from the tooltip, or show an explicit "no topic" placeholder. — Owner: project author. Block: no.
+- **Risk:** Small, additive, frontend-only slice. `SessionListItem` (`src/lib/types.ts`) already carries `topic`, `material_format`, and `duration_seconds`, and `tomatoCount()` (`src/lib/session/format.ts`) already derives the 🍅 count from duration — reused by `DurationLabel.tsx`. The work is: thread the extra fields through the `sessions` prop into `FocusRatingChart` (currently narrowed to `{ started_at, focus_rating }`) and swap Recharts' default `Tooltip` for a custom `content` renderer. No schema or API change.
+- **Status:** done
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                          | Suggested issue title                                                                         | Ready for `/10x-plan` | Notes                                                                                                           |
@@ -279,6 +293,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-10       | `continue-session-past-end`        | Continue past a session's scheduled end, converting it to count-up                            | no                    | Promoted from Parked ("Contiue timer" / "Continue focus") 2026-07-12                                            |
 | S-11       | `reopen-running-session`           | Resume an in-progress session from the dashboard                                              | no                    | Promoted from Parked ("Re-open running session from a dashboard") 2026-07-12                                    |
 | S-12       | `ui-improvements`                  | UI improvements bundle — time badges, stop-button wording, energy default, layout, clock size | no                    | Promoted from Parked ("UI improvements") 2026-07-12                                                             |
+| S-13       | `chart-tooltip-context`            | Focus-rating chart tooltip shows 🍅 count and topic/format badges                             | no                    | Promoted from Parked ("Graph tooltip showing meaningful data") 2026-07-15                                       |
 
 ## Open Roadmap Questions
 
@@ -299,12 +314,12 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Admin user-facing UI** — Why parked: Access Control describes the Admin role conceptually ("not exposed in normal user-facing UI"; "assigned out-of-band"). No FR demands v1 admin tooling — the project owner inspects user records via Supabase Studio.
 - **Account-merging UI** — Why parked: Open Roadmap Question #1; defer until real-user friction surfaces.
 - **Account deletion (GDPR right to erasure)** — User can permanently delete their account and all associated data (sessions, topics, profile) from within the app, satisfying GDPR Art. 17. Why parked: requires a hard-delete or anonymisation cascade across all user-owned tables, a confirmation UX with a mandatory re-auth step, and a Supabase Auth user deletion call -- non-trivial work that has no impact on the MVP capture loop. Revisit once the product has real users who may invoke their erasure right.
-- **Auto-resume running session on app open** — when a signed-in user opens the app and has an in-progress session (no `ended_at`), redirect them straight to that session's page so they can interact with it (rate, stop early, abandon), instead of only seeing it listed on the dashboard. Pairs with a single-active-session guarantee: starting a new session must be blocked while one is already running, so it is not possible to run multiple sessions in parallel for the same user. Motivation: today, if the user closes the tab mid-session there is no way to reopen and finish that exact session from the dashboard. Why parked: outside MVP scope; revisit after S-01..S-04 land.
 - **Web Notifications API fallback for focus-end chime** — request `Notification.requestPermission()` inside the "Start session" click and, if granted, fire a system notification at focus-end alongside (or instead of) the `<audio>` chime. Motivation: when the user refreshes the session page mid-session, the reloaded document has no transient user activation and browsers block unmuted `<audio>.play()` at fire-time -- so the chime is silent even though the timer works. A Notification does not require gesture at fire-time and survives refresh, tab-switch, and minimised windows. Why parked: MVP already ships an audible chime on the happy path (no refresh); the refresh-without-interaction hole is real but narrow. Revisit after MVP to close it. Also consider pairing with a purely-visual fallback (S-06 tab-title timer + favicon swap + full-screen "Focus done" banner) that requires no permission.
   Another option to consider is to show popup on the page after refresh - it will request user' interaction and unlocks chime (right?)
 - **Server-side ownership validation of `topic_id` / `material_format_id` on session writes** — the session write schemas (`createSessionSchema`, and the planned `editSessionSchema` for S-07) validate `topic_id` / `material_format_id` as well-formed UUIDs only, not that the referenced topic/format belongs to the caller. Postgres FK checks bypass RLS, so a user could associate their own session with another user's topic/format UUID (they still can't read that row's name via RLS, so the leak is narrow). Fix would add an owner-scoped existence check (or a trigger/RLS `WITH CHECK`) on both write paths — `POST /api/sessions` and `PUT /api/sessions/[id]`. Why parked: pre-existing behavior shared by the create path, not introduced by S-07; the privacy impact is limited (no cross-user data is readable). Surfaced during the S-07 (`edit-delete-sessions`) plan review; tighten across both write paths together, outside MVP.
 - **Add session manually** it is possible that user wants to track also "unplanned" session - he just started timer on his stopwatch and jumped into deep work. when he is done, he realized he was working for 1h and really wants to add this to his dashboard - why don't we allow that? He can add a session with its start time, duration and other fields and this entry will be visible on a dashboard.
-- **Graph tooltip showing meaningful data** - right now graph tooltip shows only `focus_rating` - we see it already. Instead it can show e.g. count of 🍅 and topic/format badges (if preent)
+- **Timeline graph** shows focus session on a timeline. Add dynamic coloring based on topic or format. Place focus / energy rating (checkboxes to enable/disable it on the view). Define time scale (day, week, month) and range (e.g. January, March, CW22)
+- **Summary statistics** - total time spend in given project. Weekly summary in a table
 
 ## Done
 
@@ -321,3 +336,4 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **S-12: User sees five small polish changes bundled together: session-history badges show actual time as 🍅 (one per 20 min) instead of P1/P2/P3/∞; the stop control on a count-up session reads "Stop" instead of "Stop early" (there's no "early" without a fixed duration); the pre-session energy picker defaults to "Medium" instead of requiring an explicit pick; the time badges sit directly above the "Start" button; and the running-timer clock face is noticeably bigger.** — Archived 2026-07-12 → `context/archive/2026-07-12-ui-improvements/`. Lesson: —.
 - **S-11: A dashboard row for an in-progress session (no `ended_at`) shows a "Resume" control that takes the user back to that session's `/session/[id]` page, correctly redrawing the running timer via S-01's `started_at`-based reconciliation. Today, once the session tab/window is closed, its UUID is lost and the dashboard only lets the user see that a session is running or abandon it — there is no way back into it. Ended sessions are unaffected; this only adds a control to in-progress rows.** — Archived 2026-07-13 → `context/archive/2026-07-13-reopen-running-session/`. Lesson: —.
 - **S-10: When a preset session reaches its scheduled end (focus phase completes and the auto focus→break transition, or the timer, would normally fire), the user can tap "I'm still working" / "Continue" instead of stopping. The session converts to count-up mode and keeps running from its original `started_at` (elapsed time is preserved, not reset), so the user is not forced out of flow state at an arbitrary preset boundary. When they eventually do stop, the normal end-of-session flow (rating, note, history) applies as usual, and the session is recorded as having run in count-up mode for its total elapsed duration.** — Archived 2026-07-13 → `context/archive/2026-07-13-continue-session-past-end/`. Lesson: —.
+- **S-13: User hovers a point on the focus-rating chart (`FocusRatingChart`, `src/components/dashboard/FocusRatingChart.tsx`) and sees, alongside the focus rating already shown, the session's energy level, duration, 🍅 count, and its topic/material-format badges (when present) — instead of just the bare `focus_rating` number.** — Archived 2026-07-15 → `context/archive/2026-07-15-chart-tooltip-context/`. Lesson: L-08 ("type checking" gate must actually run the compiler).

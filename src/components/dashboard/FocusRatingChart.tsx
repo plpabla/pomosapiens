@@ -1,12 +1,9 @@
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { Card } from "@/components/ui/card";
+import FocusRatingChartTooltip, { formatTick, type ChartSession } from "@/components/dashboard/FocusRatingChartTooltip";
 
 interface FocusRatingChartProps {
-  sessions: { started_at: string; focus_rating: number }[];
-}
-
-function formatTick(iso: string) {
-  return new Intl.DateTimeFormat(undefined, { month: "short", day: "2-digit" }).format(new Date(iso));
+  sessions: ChartSession[];
 }
 
 export default function FocusRatingChart({ sessions }: FocusRatingChartProps) {
@@ -25,15 +22,7 @@ export default function FocusRatingChart({ sessions }: FocusRatingChartProps) {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="started_at" tickFormatter={formatTick} />
           <YAxis domain={[1, 5]} allowDecimals={false} />
-          <Tooltip
-            labelFormatter={formatTick}
-            contentStyle={{
-              backgroundColor: "var(--color-card)",
-              borderColor: "var(--color-border)",
-            }}
-            labelStyle={{ color: "var(--color-foreground)" }}
-            itemStyle={{ color: "var(--color-foreground)" }}
-          />
+          <Tooltip content={<FocusRatingChartTooltip />} />
           <Line type="monotone" dataKey="focus_rating" stroke="var(--color-chart-focus)" dot />
         </LineChart>
       </ResponsiveContainer>
