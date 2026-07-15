@@ -264,7 +264,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 
 ### S-13: Focus-rating chart tooltip shows meaningful context
 
-- **Outcome:** User hovers a point on the focus-rating chart (`FocusRatingChart`, `src/components/dashboard/FocusRatingChart.tsx`) and sees, alongside the focus rating already shown, the session's 🍅 count and its topic/material-format badges (when present) — instead of just the bare `focus_rating` number.
+- **Outcome:** User hovers a point on the focus-rating chart (`FocusRatingChart`, `src/components/dashboard/FocusRatingChart.tsx`) and sees, alongside the focus rating already shown, the session's energy level, duration, 🍅 count, and its topic/material-format badges (when present) — instead of just the bare `focus_rating` number.
 - **Change ID:** `chart-tooltip-context`
 - **PRD refs:** No new PRD FR — extends FR-016 (focus-rating chart, delivered by S-04). Gap promoted from Parked ("Graph tooltip showing meaningful data") 2026-07-15.
 - **Prerequisites:** S-04 (the chart and its tooltip must exist to extend)

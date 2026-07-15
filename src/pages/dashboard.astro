@@ -32,10 +32,7 @@ if (!supabase) {
   }
 }
 
-const ratedSessions = sessions
-  .filter(isRated)
-  .map((s) => ({ started_at: s.started_at, focus_rating: s.focus_rating }))
-  .reverse();
+const ratedSessions = sessions.filter(isRated).reverse();
 ---
 
 <Layout title="Dashboard">

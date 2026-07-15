@@ -69,7 +69,7 @@ Thread full session data into the chart and replace the default Recharts tooltip
 
 **Contract**: `CustomTooltip({ active, payload }: TooltipProps)` returns `null` unless `active && payload?.length`. Reads the session via `payload[0].payload`. Composes:
 - Header: `formatTick(session.started_at)` and `` `${session.focus_rating} / 5` ``.
-- Row 2: `<EnergyPill energyLevel={session.energy_level} />` + `` `${formatDuration(session.duration_seconds)} ${"🍅".repeat(tomatoCount(session.duration_seconds))}`.trim() ``.
+- Row 2: `<EnergyPill energyLevel={session.energy_level} />` + `` `${formatDuration(session.duration_seconds)} ${tomatoDisplay}`.trim() ``, where `tomatoDisplay` is `"🍅".repeat(tomatoCount(...))` capped at 4 tomatoes plus a trailing `…` when the count is 5 or more (amendment, see `change.md`).
 - Row 3: `<SessionTags session={session} />` (returns `null` when no topic/format, so no extra guard needed).
 
 Card styling reuses the design's tokens (`bg-card`, `border-charred`, `rounded`, shadow, `min-w-[140px]`). Import `EnergyPill`, `SessionTags`, `formatDuration`, `tomatoCount`. Type the props with Recharts' tooltip prop type (or a minimal local interface reading `payload[0].payload` as the session subset) to satisfy `strictTypeChecked`.
@@ -138,14 +138,14 @@ Card styling reuses the design's tokens (`bg-card`, `border-charred`, `rounded`,
 
 #### Automated
 
-- [ ] 1.1 Type checking passes: `npm run lint`
-- [ ] 1.2 Chart unit test passes: `npx vitest run tests/unit/dashboard/FocusRatingChart.test.tsx`
-- [ ] 1.3 Full unit suite passes: `npx vitest run`
-- [ ] 1.4 Production build succeeds: `npm run build`
+- [x] 1.1 Type checking passes: `npm run lint`
+- [x] 1.2 Chart unit test passes: `npx vitest run tests/unit/dashboard/FocusRatingChart.test.tsx`
+- [x] 1.3 Full unit suite passes: `npx vitest run`
+- [x] 1.4 Production build succeeds: `npm run build`
 
 #### Manual
 
-- [ ] 1.5 Tooltip shows date + rating header, energy pill, and duration/🍅 line on hover
-- [ ] 1.6 Badge row shows when topic/format present, omitted when both absent
-- [ ] 1.7 Dark-theme readability of card and badges is correct
-- [ ] 1.8 No regression in the empty-state message for fewer than 2 rated sessions
+- [x] 1.5 Tooltip shows date + rating header, energy pill, and duration/🍅 line on hover
+- [x] 1.6 Badge row shows when topic/format present, omitted when both absent
+- [x] 1.7 Dark-theme readability of card and badges is correct
+- [x] 1.8 No regression in the empty-state message for fewer than 2 rated sessions
