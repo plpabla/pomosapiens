@@ -1,7 +1,7 @@
 ---
 change_id: chart-tooltip-context
 title: Chart tooltip context
-status: implemented
+status: impl_reviewed
 created: 2026-07-15
 updated: 2026-07-15
 archived_at: null

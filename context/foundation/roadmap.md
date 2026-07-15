@@ -43,7 +43,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-10 | `continue-session-past-end`        | choose to keep working past a session's scheduled end, converting it to count-up without losing the original start time             | S-03          | — (gap; extends FR-011, FR-005)                       | done        |
 | S-11 | `reopen-running-session`           | return to an in-progress session from the dashboard after its tab/window was closed                                                 | S-05          | — (gap; extends FR-015)                               | done        |
 | S-12 | `ui-improvements`                  | see accurate 🍅 time badges, correct stop-button wording, a pre-selected energy default, relocated badges, and a bigger timer clock | S-03          | — (cosmetic; no FR)                                   | done        |
-| S-13 | `chart-tooltip-context`            | see 🍅 count and topic/format badges in the focus-rating chart tooltip instead of just the raw rating number                       | S-04          | — (gap; extends FR-016)                              | not started |
+| S-13 | `chart-tooltip-context`            | see 🍅 count and topic/format badges in the focus-rating chart tooltip instead of just the raw rating number                       | S-04          | — (gap; extends FR-016)                              | done |
 
 ## Baseline
 
@@ -273,7 +273,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Unknowns:**
   - Whether sessions with no topic/format (both optional per S-02) should omit those badge rows entirely from the tooltip, or show an explicit "no topic" placeholder. — Owner: project author. Block: no.
 - **Risk:** Small, additive, frontend-only slice. `SessionListItem` (`src/lib/types.ts`) already carries `topic`, `material_format`, and `duration_seconds`, and `tomatoCount()` (`src/lib/session/format.ts`) already derives the 🍅 count from duration — reused by `DurationLabel.tsx`. The work is: thread the extra fields through the `sessions` prop into `FocusRatingChart` (currently narrowed to `{ started_at, focus_rating }`) and swap Recharts' default `Tooltip` for a custom `content` renderer. No schema or API change.
-- **Status:** not started
+- **Status:** done
 
 ## Backlog Handoff
 

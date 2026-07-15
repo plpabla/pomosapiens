@@ -94,7 +94,7 @@ Card styling reuses the design's tokens (`bg-card`, `border-charred`, `rounded`,
 
 #### Automated Verification:
 
-- Type checking passes: `npm run lint`
+- Type checking passes: `npx tsc --noEmit` output contains no errors for `src/components/dashboard/FocusRatingChart.tsx`, `src/components/dashboard/FocusRatingChartTooltip.tsx`, `src/pages/dashboard.astro`, or `src/components/anon/AnonSessionApp.tsx` (whole-project run required so paths/jsx compiler options resolve; pre-existing unrelated errors elsewhere are expected and not a gate failure) -- `npm run lint`/`npm run build` do not run the compiler (see `lessons.md` L-08)
 - Unit tests pass: `npx vitest run tests/unit/dashboard/FocusRatingChart.test.tsx`
 - Full unit suite passes: `npx vitest run`
 - Production build succeeds: `npm run build`
@@ -107,6 +107,11 @@ Card styling reuses the design's tokens (`bg-card`, `border-charred`, `rounded`,
 - No regression in the empty-state message for fewer than 2 rated sessions.
 
 **Implementation Note**: After completing this phase and all automated verification passes, pause for manual confirmation that hover behavior and styling look right before considering the change done.
+
+## Addendum (post-implementation, impl-review)
+
+- **Missed consumer**: `FocusRatingChart` has a second call site, `src/components/anon/AnonSessionApp.tsx`, which applied the same narrowing `.map()` as `dashboard.astro`. The plan's "Current State Analysis" only enumerated `dashboard.astro`. Fixed in commit 2412196. Lesson for future prop-widening plans: grep the component name for all call sites, not just the one named in the trigger.
+- **Tooltip location**: `CustomTooltip` was extracted into its own file, `FocusRatingChartTooltip.tsx` (commit 6190ef5), rather than staying inline in `FocusRatingChart.tsx` as originally planned. `formatTick` and the `ChartSession` type moved with it. Benign structural deviation, not a defect.
 
 ---
 
