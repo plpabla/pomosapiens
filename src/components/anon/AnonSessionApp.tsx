@@ -100,10 +100,7 @@ export default function AnonSessionApp() {
   }
 
   const historyItems = toSessionListItems(sessions, topics);
-  const ratedSessions = historyItems
-    .filter(isRated)
-    .map((s) => ({ started_at: s.started_at, focus_rating: s.focus_rating }))
-    .reverse();
+  const ratedSessions = historyItems.filter(isRated).reverse();
 
   return (
     <>

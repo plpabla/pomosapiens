@@ -23,7 +23,8 @@ export default function FocusRatingChartTooltip({ active, payload }: FocusRating
   }
 
   const session = payload[0].payload;
-  const tomatoes = tomatoCount(session.duration_seconds);
+  const durationSeconds = session.duration_seconds ?? 0;
+  const tomatoes = tomatoCount(durationSeconds);
   const tomatoDisplay = tomatoes >= 5 ? `${"🍅".repeat(4)}…` : "🍅".repeat(tomatoes);
 
   return (
@@ -34,9 +35,7 @@ export default function FocusRatingChartTooltip({ active, payload }: FocusRating
       </div>
       <div className="flex items-center gap-2">
         <EnergyPill energyLevel={session.energy_level} />
-        <span className="text-ash text-xs">
-          {`${formatDuration(session.duration_seconds)} ${tomatoDisplay}`.trim()}
-        </span>
+        <span className="text-ash text-xs">{`${formatDuration(durationSeconds)} ${tomatoDisplay}`.trim()}</span>
       </div>
       <SessionTags session={session} />
     </div>
