@@ -138,14 +138,14 @@ Card styling reuses the design's tokens (`bg-card`, `border-charred`, `rounded`,
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npm run lint`
-- [x] 1.2 Chart unit test passes: `npx vitest run tests/unit/dashboard/FocusRatingChart.test.tsx`
-- [x] 1.3 Full unit suite passes: `npx vitest run`
-- [x] 1.4 Production build succeeds: `npm run build`
+- [x] 1.1 Type checking passes: `npm run lint` — f8a8b91
+- [x] 1.2 Chart unit test passes: `npx vitest run tests/unit/dashboard/FocusRatingChart.test.tsx` — f8a8b91
+- [x] 1.3 Full unit suite passes: `npx vitest run` — f8a8b91
+- [x] 1.4 Production build succeeds: `npm run build` — f8a8b91
 
 #### Manual
 
-- [x] 1.5 Tooltip shows date + rating header, energy pill, and duration/🍅 line on hover
-- [x] 1.6 Badge row shows when topic/format present, omitted when both absent
-- [x] 1.7 Dark-theme readability of card and badges is correct
-- [x] 1.8 No regression in the empty-state message for fewer than 2 rated sessions
+- [x] 1.5 Tooltip shows date + rating header, energy pill, and duration/🍅 line on hover — f8a8b91
+- [x] 1.6 Badge row shows when topic/format present, omitted when both absent — f8a8b91
+- [x] 1.7 Dark-theme readability of card and badges is correct — f8a8b91
+- [x] 1.8 No regression in the empty-state message for fewer than 2 rated sessions — f8a8b91
