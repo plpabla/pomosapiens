@@ -1,7 +1,7 @@
 ---
 change_id: timeline-graph
 title: Timeline graph of sessions with topic/format coloring and time-scale selection
-status: new
+status: planned
 created: 2026-07-16
 updated: 2026-07-16
 archived_at: null
@@ -21,7 +21,7 @@ Requirements below were extracted from the imported design file `Focus Timeline 
 - Standalone single-page dashboard: "Focus Timeline" heading + subtitle "Session history across topics and formats".
 - Centered content, max width 1440px, dark PomoSapiens theme, generous padding.
 - Four stacked sections, each a `Card`:
-  1. **Toolbar** — scale selector, date navigation, "Color by" switch, visible-hours range selector, ratings toggles.
+  1. **Toolbar** — scale selector, date navigation, "Color by" switch, visible-hours range selector, "Show" toggle group (Focus / Energy / Dots).
   2. **Legend** — Topic chips and Format chips (with per-chip color dots).
   3. **Timeline** — hour axis header + one swimlane row per day; horizontally scrollable (min-width ~820px) on narrow screens.
   4. **Dialogs** (overlay) — session detail, color palette, color wheel.
@@ -48,7 +48,17 @@ Requirements below were extracted from the imported design file `Focus Timeline 
 
 - **Topic**: Project A, Math, Physics, Python (4). **Format**: Video, Reading, Programming (3). Each has a default color.
 - Filter each axis independently via legend chips: clicking a chip's **label** toggles that value on/off; filtered-out chips dim (reduced opacity). A session shows only when both its topic and its format are enabled.
-- **"Color by" switch** (Topic / Format, default **Topic**): the chosen axis drives the block's fill color; the other axis is shown as a top-stripe accent (a colored top border on the block). The stripe is only rendered in Day/Week (not Month).
+- **"Main color by" switch** (Topic / Format, default **Topic**): the chosen axis drives the block's fill color; the other axis is shown via pomodoro dots (see below).
+
+### Secondary highlight (pomodoro dots)
+
+- Each session block shows pomodoro-pip dots representing its duration, absolutely positioned top-left of the block (`left: 5px, top: 4px`, 3px gap between dots).
+- Duration mapping: sessions **≥ 20 min** → `floor(duration / 20)` full dots, one per completed 20-min slot, no partial remainder. Sessions **< 20 min** → a single dot, half-filled via a conic-gradient pie at 180° over a dim base (`rgba(0,0,0,0.35)`), so they never read as a full pomodoro.
+- Color = secondary axis: dots use whichever axis is **not** the "Main color by" selection — block fill = main axis color, dots = the other axis's color (format dots when main is Topic, topic dots when main is Format).
+- Dots inherit live custom colors from the palette/color-wheel, same as blocks.
+- Dots render only when: the **Dots** toggle in the "Show" group is active, the block is wide enough (**width > 4%** of the axis), and the view is **Day/Week** (never in the compact Month view — where the Dots toggle is hidden entirely).
+- Each dot is 9px, fully round, with a dual ring for legibility on any block color: `box-shadow: 0 0 0 1.5px rgba(0,0,0,0.35), 0 0 0 2.5px rgba(255,255,255,0.4)`.
+- The old top-stripe accent (colored top border) is removed; blocks no longer render a `border-top` for the secondary axis.
 
 ### Time scale & navigation
 
@@ -59,10 +69,13 @@ Requirements below were extracted from the imported design file `Focus Timeline 
   - **Week**: ISO calendar week + span (e.g. "CW29 · Jul 13 – Jul 19, 2026"); weeks start Monday.
   - **Month**: month + year (e.g. "July 2026").
 
-### Ratings — Focus & Energy
+### Ratings & dots — the "Show" toggle group
 
 - **Focus** 1–5 (can be missing/unrated on a session). **Energy** 1–3 → Low / Medium / High (always present).
-- Focus and Energy are **toggle buttons** with color dots (Focus = orange, Energy = cream), not checkboxes. The toggles' group label reads **"Show"** in Day/Week and **"Shade by"** in Month.
+- **Focus**, **Energy**, and **Dots** are a single toggle-button **group** (matching toggle-button style), **no leading color dots on the labels**. Each button is the **`default` variant when active, `outline` when inactive**.
+  - **Dots** toggles the pomodoro secondary-color dots on session blocks (see "Secondary highlight" above).
+  - The **Dots** button is **hidden in Month view** (dots never render there); Focus/Energy remain.
+  - The group label reads **"Show"** in Day/Week and **"Shade by"** in Month.
 - **Day/Week** — both toggles independent, both can be on:
   - When on and the block is wide enough (roughly >4% of the axis), ratings render as on-block badges: **focus ★N bottom-left**, **energy L/M/H bottom-right**.
   - Unrated focus shows **★ n/a** (dimmed) and the block gets a **dashed outline** — but only while Focus is active.
@@ -70,7 +83,7 @@ Requirements below were extracted from the imported design file `Focus Timeline 
   - Block opacity encodes the active metric (higher rating → brighter; focus scaled over 1–5, energy over 1–3).
   - Clicking one metric activates it and turns the other off; clicking the active one turns it off (no shading). Entering Month with both on auto-drops Energy (keeps Focus).
   - Unrated-focus sessions are left at **full brightness** (not shaded to the darkest step); they still get the dashed outline when Focus is active.
-  - No stripe and no badges in Month.
+  - No dots and no badges in Month.
 
 ### Interactions
 
@@ -83,17 +96,9 @@ Requirements below were extracted from the imported design file `Focus Timeline 
 - Palette: a 6-column grid of **17 curated, well-separated presets** (Orange, Red, Crimson, Rose, Pink, Fuchsia, Violet, Indigo, Blue, Sky, Cyan, Teal, Emerald, Green, Lime, Gold, Amber). Clicking a preset applies it immediately and **keeps the dialog open**; the active swatch is outlined.
 - An **18th cell** shows a rainbow conic gradient with a pencil (✎) icon → opens a **color-wheel** sub-dialog.
 - Color wheel: hue/saturation disc (drag to pick — angle = hue, distance from center = saturation, with a live position marker) + a **Lightness** slider + a live preview swatch + a **Done** button. Done applies and closes both dialogs.
-- Custom colors apply **live everywhere** the category appears: blocks, top-stripes, badges, and the legend dot.
+- Custom colors apply **live everywhere** the category appears: blocks, pomodoro dots, badges, and the legend dot.
 
 ### Design
 
 - PomoSapiens dark design system throughout, built from its components: `Card`, `Dialog` (`DialogContent`/`DialogHeader`/`DialogTitle`/`DialogDescription`), `Button` (default/outline/ghost variants, icon/sm sizes), and `Select` (`SelectTrigger`/`SelectValue`/`SelectContent`/`SelectItem`).
 - Orange (`#ff5722` / accent) is the highlight color (today's row, Focus dot, active states).
-
-# PROMPT
-
-use the claude_design MCP (https://api.anthropic.com/v1/design/mcp, auth via /design-login) to import this project:
-https://claude.ai/design/p/c7a42c1a-1314-493d-9fa3-fcba8df8462e?file=Focus+Timeline+Dashboard.dc.html
-
-extract all requirements from the focus timeline page and summarize them in @context/changes/timeline-graph/change.md description.
-Some of requrements are alredy mentioned in "Core view" section but a lot is missing, I'm sure of that
