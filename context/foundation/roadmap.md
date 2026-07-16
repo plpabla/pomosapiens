@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-07-15
+updated: 2026-07-16
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -44,6 +44,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-11 | `reopen-running-session`           | return to an in-progress session from the dashboard after its tab/window was closed                                                 | S-05          | — (gap; extends FR-015)                               | done        |
 | S-12 | `ui-improvements`                  | see accurate 🍅 time badges, correct stop-button wording, a pre-selected energy default, relocated badges, and a bigger timer clock | S-03          | — (cosmetic; no FR)                                   | done        |
 | S-13 | `chart-tooltip-context`            | see 🍅 count and topic/format badges in the focus-rating chart tooltip instead of just the raw rating number                       | S-04          | — (gap; extends FR-016)                              | done |
+| S-14 | `timeline-graph`                   | view a timeline graph of sessions with dynamic topic/format coloring, toggleable focus/energy indicators, and a selectable time scale + range | S-02          | — (gap; extends FR-015/FR-016)                       | not started |
 
 ## Baseline
 
@@ -275,6 +276,20 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **Risk:** Small, additive, frontend-only slice. `SessionListItem` (`src/lib/types.ts`) already carries `topic`, `material_format`, and `duration_seconds`, and `tomatoCount()` (`src/lib/session/format.ts`) already derives the 🍅 count from duration — reused by `DurationLabel.tsx`. The work is: thread the extra fields through the `sessions` prop into `FocusRatingChart` (currently narrowed to `{ started_at, focus_rating }`) and swap Recharts' default `Tooltip` for a custom `content` renderer. No schema or API change.
 - **Status:** done
 
+### S-14: Timeline graph
+
+- **Outcome:** User can view their focus sessions as a horizontal timeline: one swimlane row per day, each session a block placed by time of day within a configurable visible-hours range (default 6 AM–11 PM). A day / week / month scale selector with prev / next / today navigation sets the visible date range. Sessions can be filtered and colored by topic or material format (whichever isn't driving the fill shows as a stripe accent), and focus / energy can be toggled on — shown as on-block badges in day/week and as brightness shading in month. Clicking a session opens a detail dialog; each category's color is customizable via a preset palette + color wheel. Full behavioral spec lives in `context/changes/timeline-graph/change.md` (extracted from the imported Claude Design file).
+- **Change ID:** `timeline-graph`
+- **PRD refs:** No new PRD FR — extends FR-015 (history list) and FR-016 (focus-rating chart, delivered by S-04) with an alternate, timeline-shaped visualization of the same session data. Promoted from Parked ("Timeline graph") 2026-07-16.
+- **Prerequisites:** S-02 (topic and material format must exist to drive the dynamic coloring)
+- **Parallel with:** S-09
+- **Blockers:** —
+- **Unknowns:**
+  - The interaction/visual design is settled by the imported design and captured in `change.md`; the remaining open decision is real-data plumbing vs. the design's seeded sample data — which fields map onto the design's topic/format/focus/energy model and how the timeline behaves at low session counts. — Owner: implementer (decided at `/10x-plan` time). Block: no.
+  - Where the view lives — a new dashboard tab/section vs. a dedicated route. — Owner: implementer. Block: no.
+- **Risk:** A new view rather than an extension of an existing route. No schema or API change expected: `SessionListItem` already carries `topic`, `material_format`, `duration_seconds`, `focus_rating`, and `energy`. The main risk is scope creep — the design bundles three time scales, independent topic/format filtering + color-by, two rating encodings (day/week badges vs. month shading), and per-category color customization (palette + wheel). Consider splitting a smaller S-14 core (timeline + scale/range + single color-by) from the color-customization and month-shading refinements if the calendar tightens.
+- **Status:** not started
+
 ## Backlog Handoff
 
 | Roadmap ID | Change ID                          | Suggested issue title                                                                         | Ready for `/10x-plan` | Notes                                                                                                           |
@@ -294,6 +309,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 | S-11       | `reopen-running-session`           | Resume an in-progress session from the dashboard                                              | no                    | Promoted from Parked ("Re-open running session from a dashboard") 2026-07-12                                    |
 | S-12       | `ui-improvements`                  | UI improvements bundle — time badges, stop-button wording, energy default, layout, clock size | no                    | Promoted from Parked ("UI improvements") 2026-07-12                                                             |
 | S-13       | `chart-tooltip-context`            | Focus-rating chart tooltip shows 🍅 count and topic/format badges                             | no                    | Promoted from Parked ("Graph tooltip showing meaningful data") 2026-07-15                                       |
+| S-14       | `timeline-graph`                   | Timeline graph — session timeline with topic/format coloring and rating toggles               | no                    | Promoted from Parked ("Timeline graph") 2026-07-16                                                              |
 
 ## Open Roadmap Questions
 
@@ -318,7 +334,6 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   Another option to consider is to show popup on the page after refresh - it will request user' interaction and unlocks chime (right?)
 - **Server-side ownership validation of `topic_id` / `material_format_id` on session writes** — the session write schemas (`createSessionSchema`, and the planned `editSessionSchema` for S-07) validate `topic_id` / `material_format_id` as well-formed UUIDs only, not that the referenced topic/format belongs to the caller. Postgres FK checks bypass RLS, so a user could associate their own session with another user's topic/format UUID (they still can't read that row's name via RLS, so the leak is narrow). Fix would add an owner-scoped existence check (or a trigger/RLS `WITH CHECK`) on both write paths — `POST /api/sessions` and `PUT /api/sessions/[id]`. Why parked: pre-existing behavior shared by the create path, not introduced by S-07; the privacy impact is limited (no cross-user data is readable). Surfaced during the S-07 (`edit-delete-sessions`) plan review; tighten across both write paths together, outside MVP.
 - **Add session manually** it is possible that user wants to track also "unplanned" session - he just started timer on his stopwatch and jumped into deep work. when he is done, he realized he was working for 1h and really wants to add this to his dashboard - why don't we allow that? He can add a session with its start time, duration and other fields and this entry will be visible on a dashboard.
-- **Timeline graph** shows focus session on a timeline. Add dynamic coloring based on topic or format. Place focus / energy rating (checkboxes to enable/disable it on the view). Define time scale (day, week, month) and range (e.g. January, March, CW22)
 - **Summary statistics** - total time spend in given project. Weekly summary in a table
 
 ## Done
