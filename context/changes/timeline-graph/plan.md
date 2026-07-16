@@ -342,18 +342,18 @@ None. No schema or API changes; colors are `localStorage`-only.
 
 #### Automated
 
-- [x] 1.1 Type checking passes: `npx astro check`
-- [x] 1.2 Linting passes: `npm run lint`
-- [x] 1.3 Build passes: `npm run build`
-- [x] 1.4 `dateRange.ts` unit tests pass: `npm test`
+- [x] 1.1 Type checking passes: `npx astro check` — 4001270
+- [x] 1.2 Linting passes: `npm run lint` — 4001270
+- [x] 1.3 Build passes: `npm run build` — 4001270
+- [x] 1.4 `dateRange.ts` unit tests pass: `npm test` — 4001270
 
 #### Manual
 
-- [x] 1.5 `/timeline` gated by auth (redirect logged out, render logged in)
-- [x] 1.6 Scale selector + range label correct per scale
-- [x] 1.7 Prev/Next/Today navigate and clamp at both bounds
-- [x] 1.8 Timezone-correct day labels + "today" (no off-by-one / hydration warning)
-- [x] 1.9 Zero-session account shows empty state
+- [x] 1.5 `/timeline` gated by auth (redirect logged out, render logged in) — 4001270
+- [x] 1.6 Scale selector + range label correct per scale — 4001270
+- [x] 1.7 Prev/Next/Today navigate and clamp at both bounds — 4001270
+- [x] 1.8 Timezone-correct day labels + "today" (no off-by-one / hydration warning) — 4001270
+- [x] 1.9 Zero-session account shows empty state — 4001270
 
 ### Phase 2: Grid rendering & layout
 
