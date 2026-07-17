@@ -8,7 +8,8 @@ interface HoursRangeSelectProps {
 
 export default function HoursRangeSelect({ hoursRange, onHoursRangeChange }: HoursRangeSelectProps) {
   const startOptions = Array.from({ length: hoursRange.end }, (_, hour) => hour);
-  const endOptions = Array.from({ length: 24 - (hoursRange.start + 1) }, (_, index) => hoursRange.start + 1 + index);
+  // End options run through 24 (midnight, end of day), not just 23 -- lets the range cover the full 24h.
+  const endOptions = Array.from({ length: 24 - hoursRange.start }, (_, index) => hoursRange.start + 1 + index);
 
   return (
     <div className="flex items-center gap-2">

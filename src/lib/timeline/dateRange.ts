@@ -101,6 +101,11 @@ const weekPartFormatterWithYear = new Intl.DateTimeFormat("en-US", {
 });
 const monthLabelFormatter = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
 
+/** Full weekday + date label, e.g. "Monday, Jul 16, 2026" -- shared by the Day range label and the detail dialog. */
+export function formatFullDate(date: Date): string {
+  return dayLabelFormatter.format(date);
+}
+
 export function rangeLabel(anchor: Date, scale: Scale): string {
   const range = rangeForScale(anchor, scale);
   switch (scale) {
@@ -130,7 +135,7 @@ export function axisTicks(hoursRange: HoursRange): number[] {
   return ticks;
 }
 
-/** Formats an on-the-hour value (0-23) as a zero-padded 24h clock label, e.g. `6` -> "06:00", `23` -> "23:00". */
+/** Formats an on-the-hour value (0-24) as a zero-padded 24h clock label, e.g. `6` -> "06:00", `24` (end-of-day) -> "00:00". */
 export function formatHour(hour: number): string {
-  return `${String(hour).padStart(2, "0")}:00`;
+  return `${String(hour % 24).padStart(2, "0")}:00`;
 }

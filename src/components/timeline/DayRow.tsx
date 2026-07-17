@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import SessionBlock from "@/components/timeline/SessionBlock";
 import { axisPercent, LABEL_COLUMN_WIDTH_PX, ROW_HEIGHT_PX } from "@/lib/timeline/layout";
+import type { ColorAxis } from "@/lib/timeline/color";
 import type { HoursRange, Scale } from "@/lib/timeline/dateRange";
 import type { SessionListItem } from "@/lib/types";
 
@@ -16,9 +17,26 @@ interface DayRowProps {
   hoursRange: HoursRange;
   ticks: number[];
   isToday: boolean;
+  colorBy: ColorAxis;
+  focusOn: boolean;
+  energyOn: boolean;
+  dotsOn: boolean;
+  onSelectSession: (session: SessionListItem) => void;
 }
 
-export default function DayRow({ date, sessions, scale, hoursRange, ticks, isToday }: DayRowProps) {
+export default function DayRow({
+  date,
+  sessions,
+  scale,
+  hoursRange,
+  ticks,
+  isToday,
+  colorBy,
+  focusOn,
+  energyOn,
+  dotsOn,
+  onSelectSession,
+}: DayRowProps) {
   return (
     <div
       className="border-charred flex border-b last:border-b-0"
@@ -52,7 +70,17 @@ export default function DayRow({ date, sessions, scale, hoursRange, ticks, isTod
           />
         ))}
         {sessions.map((session) => (
-          <SessionBlock key={session.id} session={session} scale={scale} hoursRange={hoursRange} />
+          <SessionBlock
+            key={session.id}
+            session={session}
+            scale={scale}
+            hoursRange={hoursRange}
+            colorBy={colorBy}
+            focusOn={focusOn}
+            energyOn={energyOn}
+            dotsOn={dotsOn}
+            onSelect={onSelectSession}
+          />
         ))}
       </div>
     </div>

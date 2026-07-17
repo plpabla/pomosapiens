@@ -359,27 +359,27 @@ None. No schema or API changes; colors are `localStorage`-only.
 
 #### Automated
 
-- [x] 2.1 Type checking passes: `npx astro check`
-- [x] 2.2 Linting passes: `npm run lint`
-- [x] 2.3 Build passes: `npm run build`
-- [x] 2.4 `layout.ts` unit tests pass: `npm test`
+- [x] 2.1 Type checking passes: `npx astro check` — 808c2b6
+- [x] 2.2 Linting passes: `npm run lint` — 808c2b6
+- [x] 2.3 Build passes: `npm run build` — 808c2b6
+- [x] 2.4 `layout.ts` unit tests pass: `npm test` — 808c2b6
 
 #### Manual
 
-- [ ] 2.5 Blocks positioned/sized correctly against axis
-- [ ] 2.6 Row heights per scale; today's row highlighted
-- [ ] 2.7 Pomodoro dots only Day/Week + wide blocks; <20-min half dot
-- [ ] 2.8 Horizontal scroll keeps axis/rows aligned
-- [ ] 2.9 Hover tooltip summarizes session
+- [x] 2.5 Blocks positioned/sized correctly against axis — 808c2b6
+- [x] 2.6 Row heights per scale; today's row highlighted — 808c2b6
+- [x] 2.7 Pomodoro dots only Day/Week + wide blocks; <20-min half dot — 808c2b6
+- [x] 2.8 Horizontal scroll keeps axis/rows aligned — 808c2b6
+- [x] 2.9 Hover tooltip summarizes session — 808c2b6
 
 ### Phase 3: Filtering, ratings & detail dialog
 
 #### Automated
 
-- [ ] 3.1 Type checking passes: `npx astro check`
-- [ ] 3.2 Linting passes: `npm run lint`
-- [ ] 3.3 Build passes: `npm run build`
-- [ ] 3.4 Existing tests still pass: `npm test`
+- [x] 3.1 Type checking passes: `npx astro check`
+- [x] 3.2 Linting passes: `npm run lint`
+- [x] 3.3 Build passes: `npm run build`
+- [x] 3.4 Existing tests still pass: `npm test`
 
 #### Manual
 

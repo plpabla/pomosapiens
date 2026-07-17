@@ -42,3 +42,20 @@ export function categoryName(axis: ColorAxis, session: CategorySession): string 
   const name = axis === "topic" ? session.topic?.name : session.material_format?.name;
   return name ?? "Unassigned";
 }
+
+export interface LegendCategory {
+  id: string;
+  name: string;
+}
+
+/** Dedupes a session list's category ids/names for a legend axis, in first-seen order. */
+export function collectCategories(sessions: CategorySession[], axis: ColorAxis): LegendCategory[] {
+  const seen = new Map<string, string>();
+  for (const session of sessions) {
+    const id = categoryId(axis, session);
+    if (!seen.has(id)) {
+      seen.set(id, categoryName(axis, session));
+    }
+  }
+  return Array.from(seen, ([id, name]) => ({ id, name }));
+}
