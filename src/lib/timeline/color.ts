@@ -7,8 +7,34 @@ interface CategorySession {
   material_format: { name: string } | null;
 }
 
-// Static default palette; Phase 4 extends this file with the full 17-preset grid and
-// live per-category overrides persisted to localStorage.
+export interface PresetColor {
+  readonly name: string;
+  readonly hex: string;
+}
+
+/** 17 curated, well-separated presets for the color-palette dialog's 6-col grid (change.md §Color customization). */
+export const PRESET_COLORS: readonly PresetColor[] = [
+  { name: "Orange", hex: "#ff5722" },
+  { name: "Red", hex: "#e53935" },
+  { name: "Crimson", hex: "#dc143c" },
+  { name: "Rose", hex: "#f43f5e" },
+  { name: "Pink", hex: "#ec4899" },
+  { name: "Fuchsia", hex: "#d946ef" },
+  { name: "Violet", hex: "#8b5cf6" },
+  { name: "Indigo", hex: "#6366f1" },
+  { name: "Blue", hex: "#3b82f6" },
+  { name: "Sky", hex: "#0ea5e9" },
+  { name: "Cyan", hex: "#06b6d4" },
+  { name: "Teal", hex: "#14b8a6" },
+  { name: "Emerald", hex: "#10b981" },
+  { name: "Green", hex: "#22c55e" },
+  { name: "Lime", hex: "#84cc16" },
+  { name: "Gold", hex: "#eab308" },
+  { name: "Amber", hex: "#f59e0b" },
+];
+
+// Static default palette; used to seed a category's color before any live override
+// (Phase 4's useTimelineColors) is persisted.
 const DEFAULT_PALETTE: readonly string[] = [
   "#ff5722", // Orange
   "#3b82f6", // Blue

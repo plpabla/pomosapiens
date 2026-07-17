@@ -1,5 +1,6 @@
-import { useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import ColorPaletteDialog, { type ColorPaletteTarget } from "@/components/timeline/ColorPaletteDialog";
 import Legend from "@/components/timeline/Legend";
 import SessionDetailDialog from "@/components/timeline/SessionDetailDialog";
 import TimelineEmptyState from "@/components/timeline/TimelineEmptyState";
@@ -8,6 +9,7 @@ import TimelineShell from "@/components/timeline/TimelineShell";
 import Toolbar from "@/components/timeline/Toolbar";
 import { deriveTimelineView } from "@/lib/timeline/deriveView";
 import { shiftAnchor, startOfDay } from "@/lib/timeline/dateRange";
+import { useTimelineColors } from "@/lib/timeline/useTimelineColors";
 import { useTimelineViewState } from "@/lib/timeline/useTimelineViewState";
 import type { SessionListItem } from "@/lib/types";
 
@@ -33,6 +35,8 @@ export default function TimelineApp({ sessions, error }: TimelineAppProps) {
   // wait for this client-only mount gate, mirroring LocalDateTime.tsx.
   const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const view = useTimelineViewState(sessions);
+  const colors = useTimelineColors();
+  const [colorTarget, setColorTarget] = useState<ColorPaletteTarget | null>(null);
 
   if (!mounted) {
     return <TimelineShell />;
@@ -105,6 +109,10 @@ export default function TimelineApp({ sessions, error }: TimelineAppProps) {
         formatFilter={view.formatFilter}
         onToggleTopic={view.toggleTopic}
         onToggleFormat={view.toggleFormat}
+        getColor={colors.getColor}
+        onOpenColor={(id, name) => {
+          setColorTarget({ categoryId: id, categoryName: name });
+        }}
       />
 
       <TimelineGrid
@@ -118,6 +126,7 @@ export default function TimelineApp({ sessions, error }: TimelineAppProps) {
         focusOn={view.focusOn}
         energyOn={view.energyOn}
         dotsOn={view.dotsOn}
+        getColor={colors.getColor}
         onSelectSession={view.setSelectedSession}
       />
 
@@ -126,6 +135,15 @@ export default function TimelineApp({ sessions, error }: TimelineAppProps) {
         onOpenChange={(open) => {
           if (!open) view.setSelectedSession(null);
         }}
+      />
+
+      <ColorPaletteDialog
+        target={colorTarget}
+        currentColor={colorTarget ? colors.getColor(colorTarget.categoryId) : "#000000"}
+        onClose={() => {
+          setColorTarget(null);
+        }}
+        onApply={colors.setColor}
       />
     </TimelineShell>
   );

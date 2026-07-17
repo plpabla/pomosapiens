@@ -376,29 +376,29 @@ None. No schema or API changes; colors are `localStorage`-only.
 
 #### Automated
 
-- [x] 3.1 Type checking passes: `npx astro check`
-- [x] 3.2 Linting passes: `npm run lint`
-- [x] 3.3 Build passes: `npm run build`
-- [x] 3.4 Existing tests still pass: `npm test`
+- [x] 3.1 Type checking passes: `npx astro check` — 2a1dfa3
+- [x] 3.2 Linting passes: `npm run lint` — 2a1dfa3
+- [x] 3.3 Build passes: `npm run build` — 2a1dfa3
+- [x] 3.4 Existing tests still pass: `npm test` — 2a1dfa3
 
 #### Manual
 
-- [ ] 3.5 Topic/format chip filtering with AND semantics; dim = off
-- [ ] 3.6 Color-by switch swaps fill vs. dot axes
-- [ ] 3.7 "Show" group: Focus/Energy/Dots buttons render default-when-active / outline-when-inactive, no leading color dots
-- [ ] 3.8 Dots toggle shows/hides block dots; Dots button hidden in Month
-- [ ] 3.9 Day/Week focus/energy badges + unrated ★ n/a dashed outline
-- [ ] 3.10 Month single-channel shading + both-on-drops-Energy + unrated full-bright
-- [ ] 3.11 Detail dialog opens with correct content
+- [x] 3.5 Topic/format chip filtering with AND semantics; dim = off — 2a1dfa3
+- [x] 3.6 Color-by switch swaps fill vs. dot axes — 2a1dfa3
+- [x] 3.7 "Show" group: Focus/Energy/Dots buttons render default-when-active / outline-when-inactive, no leading color dots — 2a1dfa3
+- [x] 3.8 Dots toggle shows/hides block dots; Dots button hidden in Month — 2a1dfa3
+- [x] 3.9 Day/Week focus/energy badges + unrated ★ n/a dashed outline — 2a1dfa3
+- [x] 3.10 Month single-channel shading + both-on-drops-Energy + unrated full-bright — 2a1dfa3
+- [x] 3.11 Detail dialog opens with correct content — 2a1dfa3
 
 ### Phase 4: Color customization (cuttable)
 
 #### Automated
 
-- [ ] 4.1 Type checking passes: `npx astro check`
-- [ ] 4.2 Linting passes: `npm run lint`
-- [ ] 4.3 Build passes: `npm run build`
-- [ ] 4.4 `color.ts` unit tests pass: `npm test`
+- [x] 4.1 Type checking passes: `npx astro check`
+- [x] 4.2 Linting passes: `npm run lint`
+- [x] 4.3 Build passes: `npm run build`
+- [x] 4.4 `color.ts` unit tests pass: `npm test`
 
 #### Manual
 

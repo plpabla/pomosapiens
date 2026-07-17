@@ -21,6 +21,7 @@ interface DayRowProps {
   focusOn: boolean;
   energyOn: boolean;
   dotsOn: boolean;
+  getColor: (id: string) => string;
   onSelectSession: (session: SessionListItem) => void;
 }
 
@@ -35,6 +36,7 @@ export default function DayRow({
   focusOn,
   energyOn,
   dotsOn,
+  getColor,
   onSelectSession,
 }: DayRowProps) {
   return (
@@ -79,6 +81,7 @@ export default function DayRow({
             focusOn={focusOn}
             energyOn={energyOn}
             dotsOn={dotsOn}
+            getColor={getColor}
             onSelect={onSelectSession}
           />
         ))}

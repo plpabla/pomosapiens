@@ -1,6 +1,6 @@
 import { isRated } from "@/lib/session/format";
 import { blockPosition, pomodoroDots } from "@/lib/timeline/layout";
-import { categoryId, categoryName, defaultColorFor, type ColorAxis } from "@/lib/timeline/color";
+import { categoryId, categoryName, type ColorAxis } from "@/lib/timeline/color";
 import type { HoursRange, Scale } from "@/lib/timeline/dateRange";
 import { cn } from "@/lib/utils";
 import type { EnergyLevel, SessionListItem } from "@/lib/types";
@@ -13,6 +13,7 @@ interface SessionBlockProps {
   focusOn: boolean;
   energyOn: boolean;
   dotsOn: boolean;
+  getColor: (id: string) => string;
   onSelect: (session: SessionListItem) => void;
 }
 
@@ -40,13 +41,14 @@ export default function SessionBlock({
   focusOn,
   energyOn,
   dotsOn,
+  getColor,
   onSelect,
 }: SessionBlockProps) {
   const { left, width } = blockPosition(session, hoursRange);
 
   const dotAxis: ColorAxis = colorBy === "topic" ? "format" : "topic";
-  const mainColor = defaultColorFor(categoryId(colorBy, session));
-  const dotColor = defaultColorFor(categoryId(dotAxis, session));
+  const mainColor = getColor(categoryId(colorBy, session));
+  const dotColor = getColor(categoryId(dotAxis, session));
 
   const start = new Date(session.started_at);
   const end = session.ended_at !== null ? new Date(session.ended_at) : null;

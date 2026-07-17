@@ -16,6 +16,7 @@ interface TimelineGridProps {
   focusOn: boolean;
   energyOn: boolean;
   dotsOn: boolean;
+  getColor: (id: string) => string;
   onSelectSession: (session: SessionListItem) => void;
 }
 
@@ -30,6 +31,7 @@ export default function TimelineGrid({
   focusOn,
   energyOn,
   dotsOn,
+  getColor,
   onSelectSession,
 }: TimelineGridProps) {
   return (
@@ -49,6 +51,7 @@ export default function TimelineGrid({
             focusOn={focusOn}
             energyOn={energyOn}
             dotsOn={dotsOn}
+            getColor={getColor}
             onSelectSession={onSelectSession}
           />
         ))}
