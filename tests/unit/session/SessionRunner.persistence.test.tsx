@@ -8,10 +8,12 @@ const mockedHook = vi.mocked(useFocusTimer);
 
 const RATING_HOOK_RESULT = {
   phase: "rating" as const,
+  mode: "preset" as const,
   remaining: 0,
   elapsed: 60,
   stoppedAtMs: 1000,
   stopEarly: vi.fn(),
+  continueAsCountUp: vi.fn(),
   audioRef: { current: null },
 };
 

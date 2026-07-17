@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { createClient } from "@/lib/supabase";
 import { parseJson } from "@/lib/parse-request";
 import { updateTopicSchema } from "@/lib/schemas/topic";
+import type { TablesUpdate } from "@/db/database.types";
 
 export const prerender = false;
 
@@ -25,7 +26,7 @@ export const PATCH: APIRoute = async (context) => {
     return Response.json({ error: parsed.error }, { status: 400 });
   }
 
-  const update: Record<string, unknown> = {};
+  const update: TablesUpdate<"topics"> = {};
   if (parsed.data.name !== undefined) update.name = parsed.data.name;
   if (parsed.data.archived_at !== undefined) update.archived_at = parsed.data.archived_at;
 

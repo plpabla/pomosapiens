@@ -10,10 +10,12 @@ const mockedHook = vi.mocked(useFocusTimer);
 beforeEach(() => {
   mockedHook.mockReturnValue({
     phase: "running",
+    mode: "preset",
     remaining: 1500,
     elapsed: 0,
     stoppedAtMs: null,
     stopEarly: vi.fn(),
+    continueAsCountUp: vi.fn(),
     audioRef: { current: null },
   });
 });
