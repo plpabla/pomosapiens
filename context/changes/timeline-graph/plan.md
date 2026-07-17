@@ -359,10 +359,10 @@ None. No schema or API changes; colors are `localStorage`-only.
 
 #### Automated
 
-- [ ] 2.1 Type checking passes: `npx astro check`
-- [ ] 2.2 Linting passes: `npm run lint`
-- [ ] 2.3 Build passes: `npm run build`
-- [ ] 2.4 `layout.ts` unit tests pass: `npm test`
+- [x] 2.1 Type checking passes: `npx astro check`
+- [x] 2.2 Linting passes: `npm run lint`
+- [x] 2.3 Build passes: `npm run build`
+- [x] 2.4 `layout.ts` unit tests pass: `npm test`
 
 #### Manual
 

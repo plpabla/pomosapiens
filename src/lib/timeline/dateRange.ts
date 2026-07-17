@@ -129,3 +129,8 @@ export function axisTicks(hoursRange: HoursRange): number[] {
   }
   return ticks;
 }
+
+/** Formats an on-the-hour value (0-23) as a zero-padded 24h clock label, e.g. `6` -> "06:00", `23` -> "23:00". */
+export function formatHour(hour: number): string {
+  return `${String(hour).padStart(2, "0")}:00`;
+}

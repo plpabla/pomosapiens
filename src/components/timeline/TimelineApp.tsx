@@ -1,9 +1,21 @@
 import { useState, useSyncExternalStore } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import DayRow from "@/components/timeline/DayRow";
+import TimeAxisHeader from "@/components/timeline/TimeAxisHeader";
 import TimelineEmptyState from "@/components/timeline/TimelineEmptyState";
 import TimelineShell from "@/components/timeline/TimelineShell";
 import Toolbar from "@/components/timeline/Toolbar";
-import { clampAnchor, rangeForScale, rangeLabel, shiftAnchor, startOfDay, type Scale } from "@/lib/timeline/dateRange";
+import {
+  addDays,
+  axisTicks,
+  clampAnchor,
+  rangeForScale,
+  rangeLabel,
+  shiftAnchor,
+  startOfDay,
+  type Scale,
+} from "@/lib/timeline/dateRange";
+import { useHoursRange } from "@/lib/timeline/useHoursRange";
 import type { SessionListItem } from "@/lib/types";
 
 interface TimelineAppProps {
@@ -29,6 +41,7 @@ export default function TimelineApp({ sessions, error }: TimelineAppProps) {
   const mounted = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const [scale, setScale] = useState<Scale>("week");
   const [anchorOverride, setAnchorOverride] = useState<Date | null>(null);
+  const [hoursRange, setHoursRange] = useHoursRange();
 
   if (!mounted) {
     return <TimelineShell />;
@@ -70,6 +83,23 @@ export default function TimelineApp({ sessions, error }: TimelineAppProps) {
   const canGoPrev = anchor.getTime() > rangeForScale(earliest, scale).start.getTime();
   const canGoNext = anchor.getTime() < rangeForScale(today, scale).start.getTime();
 
+  const range = rangeForScale(anchor, scale);
+  const dayCount = Math.round((range.end.getTime() - range.start.getTime()) / 86_400_000);
+  const days = Array.from({ length: dayCount }, (_, index) => addDays(range.start, index));
+
+  const sessionsByDay = new Map<number, SessionListItem[]>();
+  for (const session of sessions) {
+    const key = startOfDay(new Date(session.started_at)).getTime();
+    const bucket = sessionsByDay.get(key);
+    if (bucket) {
+      bucket.push(session);
+    } else {
+      sessionsByDay.set(key, [session]);
+    }
+  }
+
+  const ticks = axisTicks(hoursRange);
+
   return (
     <TimelineShell>
       <Toolbar
@@ -87,7 +117,26 @@ export default function TimelineApp({ sessions, error }: TimelineAppProps) {
         onToday={() => {
           setAnchorOverride(null);
         }}
+        hoursRange={hoursRange}
+        onHoursRangeChange={setHoursRange}
       />
+
+      <Card>
+        <CardContent className="px-4">
+          <TimeAxisHeader hoursRange={hoursRange} />
+          {days.map((day) => (
+            <DayRow
+              key={day.getTime()}
+              date={day}
+              sessions={sessionsByDay.get(day.getTime()) ?? []}
+              scale={scale}
+              hoursRange={hoursRange}
+              ticks={ticks}
+              isToday={day.getTime() === today.getTime()}
+            />
+          ))}
+        </CardContent>
+      </Card>
     </TimelineShell>
   );
 }
