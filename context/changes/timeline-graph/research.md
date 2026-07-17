@@ -7,8 +7,9 @@ repository: pomosapiens
 topic: "Timeline graph (S-14) — architecture: functional component breakdown and fit into existing arch"
 tags: [research, codebase, timeline-graph, architecture, dashboard, ui-components, data-model]
 status: complete
-last_updated: 2026-07-16
+last_updated: 2026-07-17
 last_updated_by: Claude
+last_updated_note: "Added follow-up research: Recharts vs. from-scratch for the timeline grid, and Phase-1 rollback cost."
 ---
 
 # Research: Timeline graph (S-14) — architecture and functional component breakdown
@@ -242,3 +243,63 @@ None — this is the first research artifact for `timeline-graph`.
 2. **Where do custom per-topic/per-format colors live?** DB column (fits the stance, costs a migration + API surface) vs. `localStorage` (fast, but a bigger exception to "server owns truth" than the one documented precedent). Directly affects whether this slice touches `supabase/migrations/`, `src/lib/schemas/`, and the topics/formats API routes at all.
 3. **Full-range fetch vs. a new filtered/paginated sessions endpoint.** At current scale (single-user RLS, no existing pagination anywhere) an unbounded or wide-bounded SSR fetch in `timeline.astro` is likely simplest, but should be confirmed against expected real session volumes before assuming `dashboard.astro`'s `.limit(50)` pattern can just be dropped.
 4. **Color-wheel implementation: hand-roll vs. a small new dependency.** No precedent either way exists in the codebase; "reuse existing libraries" argues for hand-rolling (no new dependency) but the pointer-drag hue/saturation math is real, non-trivial, novel work — worth an explicit cost/benefit call rather than a default.
+
+## Follow-up Research 2026-07-17: Recharts vs. from-scratch for the timeline grid
+
+### Question
+
+Should the timeline grid be built from scratch (plain CSS/DOM absolute positioning, as the current plan mandates), or can we utilize **Recharts** (already a dependency, `package.json:44` — `recharts ^3.9.2`)? And what is the sunk / rollback cost given Phase 1 is already done?
+
+### Verdict
+
+**Keep the plan's decision: build the grid from scratch (plain CSS/DOM percentage positioning). Do not route it through Recharts.** The current plan is correct on this point, and there is effectively **nothing to roll back** — Phase 1 contains zero rendering code coupled to the choice.
+
+### Why Recharts does not fit this visualization
+
+The design (`change.md`) is a **swimlane / Gantt grid**, not a chart type Recharts ships. Assessed against authoritative Recharts 3.3.x docs (Context7 `/recharts/recharts/v3.3.0`):
+
+1. **N free-positioned blocks per row breaks the categorical-axis model.** Recharts positions bars by category (one bar per `dataKey` series per category row). A day-row holds a *variable* number of sessions at *arbitrary* start/end times. There is no clean series mapping — the only viable Recharts path is a `ScatterChart` with a **custom `shape`** rendering one rectangle per session. Custom shapes exist (`Bar`/`Scatter` `shape` prop, verified), but a Scatter point's shape receives only a center `x,y`; the rectangle's **pixel width from duration** must be derived by reading the axis scale yourself. At that point Recharts contributes only the x/y scales — you still hand-author every rectangle.
+
+2. **All block decorations are custom SVG regardless.** Pomodoro dots (top-left, `left:5px/top:4px`), focus/energy badges (bottom-left `★N` / bottom-right `L/M/H`), dashed unrated outlines, and Month opacity shading have **no chart-primitive equivalent** — they live inside the custom shape as bespoke SVG. Recharts supplies none of them.
+
+3. **Fixed pixel row heights + horizontal scroll fight `ResponsiveContainer`.** The spec pins Day 120 / Week 60 / Month 22px rows and a min-width ~820px horizontal-scroll wrapper. Recharts' `ResponsiveContainer` wants to fill its box and auto-distribute band heights — the opposite of fixed per-scale pixel rows and overflow scrolling.
+
+4. **Recharts would force `client:only`, losing the SSR-prop path.** `FocusRatingChart.tsx:20` is mounted `client:only="react"` precisely because `ResponsiveContainer` needs real browser layout at mount (research §3, arch insights). The timeline's chosen mount is `client:load` fed by an SSR-fetched `sessions` prop (already wired — `TimelineApp.tsx:26`). Adopting Recharts drags the whole surface to `client:only`.
+
+5. **The from-scratch path is genuinely *less* code here.** Block position is `left%` + `width%` from `layout.ts` (a couple of arithmetic lines per block); the axis ticks already exist (`dateRange.axisTicks`, `dateRange.ts:120-131`). The Recharts route adds scale-reading, custom-shape plumbing, and container/SSR friction on top of the same custom SVG. This aligns with the repo's "Simplicity First" rule — Recharts would be the *more* complex option.
+
+**What Recharts is genuinely good for (and is already used for):** a conventional categorical line/bar/area/scatter chart — e.g. `FocusRatingChart` (focus trend over time). If a future slice wants an aggregate "minutes focused per day" bar chart, Recharts is the right tool. It is simply not the right tool for a per-session swimlane/Gantt.
+
+### Is there a "Timeline" chart type? (asked 2026-07-17)
+
+**Recharts has no Timeline or Gantt chart type.** Verified against Context7 `/recharts/recharts/v3.3.0`: the complete top-level roster is line, bar, area, pie, radar, scatter, composed, treemap, sankey, sunburst, funnel. Nothing timeline-shaped.
+
+A dedicated "Timeline" chart type *does* exist in other libraries (ApexCharts `rangeBar`/timeline, vis-timeline, Google Charts Timeline, react-chrono, MUI X Charts) — but adopting one is still the wrong call, for a **structural** reason, not just the new-dependency cost:
+
+- **Off-the-shelf timeline/Gantt charts assume a single continuous datetime axis** — a bar's x-position/length encodes *absolute calendar time*, lanes group tasks.
+- **This design is not that.** Per `change.md`: the **row encodes the day**, and the **x-axis is hour-of-day (default 6 AM–11 PM) reset on every row**. Sessions are positioned by time-of-day; the day is the swimlane. This is "small multiples of a daily clock," not one continuous timeline. No timeline/Gantt chart type models "reset the time axis per lane" — feed it sessions and it draws a continuous calendar timeline instead.
+- Even if the axis matched, a timeline chart type supplies only bars-in-lanes; every decoration (pomodoro dots, focus/energy badges, dashed unrated outlines, Month opacity, live custom colors, hour-window config, three fixed-px scales) remains custom — the same trap, one dependency heavier.
+
+CSS `%`-positioning (`left%`/`width%` from `layout.ts`) maps the hour-of-day-per-row model directly. The from-scratch decision is reaffirmed.
+
+### Rollback cost of Phase 1: effectively zero
+
+The "we can rollback if needed" caveat does not bite, because **the Recharts-vs-scratch decision only affects Phase 2 (grid rendering), which has not started.** Everything shipped in Phase 1 is required identically under either approach:
+
+- `src/lib/timeline/dateRange.ts` — pure day/week/month/ISO-week/nav-clamp/tick math (`dateRange.ts:1-131`). Approach-agnostic; a Recharts grid would consume the exact same range + tick outputs.
+- `src/components/timeline/TimelineApp.tsx` — SSR-prop island + `useSyncExternalStore` UTC hydration gate (`TimelineApp.tsx:14-33`) + scale/anchor state + toolbar wiring. All needed regardless.
+- `TimelineShell.tsx`, `TimelineHeader.tsx`, `TimelineEmptyState.tsx`, `Toolbar.tsx`, `timeline.astro` route + `middleware.ts` gating — layout/auth/empty-state scaffold, orthogonal to grid rendering.
+
+No Phase-1 file draws a block, an axis body, or a session. There is no Recharts code to remove and no CSS-grid code to remove — the choice is still fully open going into Phase 2, at no cost.
+
+### Recommendation
+
+Proceed to Phase 2 as written (`layout.ts` + `DayRow`/`SessionBlock` with CSS `%` positioning). No plan change required; the existing "No Recharts" entries in `plan.md:48`, `plan-brief.md:38`, and `delta-arch.md:21,111` remain the right call and are now re-validated against Recharts 3.3.x docs rather than prior-knowledge assumption.
+
+### Follow-up Code References
+
+- `package.json:44` — `recharts ^3.9.2` already installed (used by `FocusRatingChart`).
+- `src/components/dashboard/FocusRatingChart.tsx:1,20` — the one Recharts surface today; `client:only` due to `ResponsiveContainer`.
+- `src/components/timeline/TimelineApp.tsx:14-33` — Phase-1 island + hydration gate (approach-agnostic).
+- `src/lib/timeline/dateRange.ts:1-131` — Phase-1 date/tick math (approach-agnostic).
+- Recharts 3.3.x capabilities verified via Context7 `/recharts/recharts/v3.3.0`: custom `Bar`/`Scatter` `shape` prop, per-`Cell` fills, custom `Tooltip` content, horizontal `layout="vertical"` bars, `[start,end]` array values — all real, none of which removes the custom-SVG burden for this swimlane spec.
