@@ -11,7 +11,7 @@ interface Props {
 
 export default function ModePicker({ presets, value, onChange }: Props) {
   const chips: { mode: Mode; label: string }[] = [
-    ...presets.map((p) => ({
+    ...presets.map((p): { mode: Mode; label: string } => ({
       mode: `preset_${p.slot}`,
       label: `${minutesFromSeconds(p.focus_seconds)} / ${minutesFromSeconds(p.break_seconds)}`,
     })),

@@ -1,0 +1,35 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import { createClient } from "@/lib/supabase";
+import TimelineApp from "@/components/timeline/TimelineApp";
+import type { SessionListItem } from "@/lib/types";
+
+const { user } = Astro.locals;
+const supabase = createClient(Astro.request.headers, Astro.cookies);
+
+let sessions: SessionListItem[] = [];
+let dbError: string | null = null;
+
+if (!supabase) {
+  dbError = "Supabase is not configured. Set SUPABASE_URL and SUPABASE_KEY.";
+} else if (!user) {
+  dbError = "Not authenticated.";
+} else {
+  const { data, error } = await supabase
+    .from("sessions")
+    .select(
+      "id, started_at, energy_level, duration_seconds, focus_rating, ended_at, timer_mode, note, topic_id, material_format_id, topic:topics(name), material_format:material_formats(name)",
+    )
+    .eq("user_id", user.id)
+    .order("started_at", { ascending: false });
+  if (error) {
+    dbError = error.message;
+  } else {
+    sessions = data;
+  }
+}
+---
+
+<Layout title="Focus Timeline">
+  <TimelineApp sessions={sessions} error={dbError} client:load />
+</Layout>

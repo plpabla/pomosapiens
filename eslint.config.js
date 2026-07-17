@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-deprecated -- tseslint.config() is the only way to use extends; core defineConfig has incompatible API */
+import { defineConfig } from "eslint/config";
 import { includeIgnoreFile } from "@eslint/config-helpers";
 import eslint from "@eslint/js";
 import eslintPluginPrettier from "eslint-plugin-prettier/recommended";
@@ -11,7 +11,7 @@ import tseslint from "typescript-eslint";
 
 const gitignorePath = path.resolve(import.meta.dirname, ".gitignore");
 
-const baseConfig = tseslint.config({
+const baseConfig = defineConfig({
   extends: [eslint.configs.recommended, tseslint.configs.strictTypeChecked, tseslint.configs.stylisticTypeChecked],
   languageOptions: {
     parserOptions: {
@@ -37,7 +37,7 @@ const baseConfig = tseslint.config({
   },
 });
 
-const reactConfig = tseslint.config({
+const reactConfig = defineConfig({
   files: ["**/*.{js,jsx,ts,tsx}"],
   extends: [pluginReact.configs.flat.recommended],
   languageOptions: {
@@ -59,7 +59,7 @@ const reactConfig = tseslint.config({
   },
 });
 
-const astroConfig = tseslint.config({
+const astroConfig = defineConfig({
   files: ["**/*.astro"],
   languageOptions: {
     parserOptions: {
@@ -79,7 +79,7 @@ const astroConfig = tseslint.config({
   },
 });
 
-const nodeScriptsConfig = tseslint.config({
+const nodeScriptsConfig = defineConfig({
   files: ["scripts/**"],
   languageOptions: {
     globals: {
@@ -94,7 +94,7 @@ const nodeScriptsConfig = tseslint.config({
   },
 });
 
-export default tseslint.config(
+export default defineConfig(
   includeIgnoreFile(gitignorePath),
   { ignores: ["src/db/database.types.ts", ".claude/**"] },
   baseConfig,

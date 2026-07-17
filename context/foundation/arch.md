@@ -1,14 +1,14 @@
 # PomoSapiens - Architecture
 
-Snapshot as of 2026-07-14. Derived from `src/` and the closed changes in `context/archive/` (foundation through `2026-07-13-continue-session-past-end`). Edit-in-place; per-change deltas live next to their plans in `context/archive/<change>/`.
+Snapshot as of 2026-07-16. Derived from `src/` and the closed changes in `context/archive/` (foundation through `2026-07-13-continue-session-past-end`), plus the focus-timeline surface. Edit-in-place; per-change deltas live next to their plans in `context/archive/<change>/`.
 
 ---
 
 ## 1. Introduction
 
-PomoSapiens is a Pomodoro-style focus tracker whose product wedge is **contextual capture bound to each timed session**: before a session the student records energy level (plus optional topic, material format, and timer mode), and after it a 1-5 focus rating and an optional note. The history view and a focus-rating chart let the user see which study conditions correlate with their own self-rated focus.
+PomoSapiens is a Pomodoro-style focus tracker whose product wedge is **contextual capture bound to each timed session**: before a session the student records energy level (plus optional topic, material format, and timer mode), and after it a 1-5 focus rating and an optional note. The history view, a focus-rating chart, and a Day/Week/Month focus timeline let the user see which study conditions correlate with their own self-rated focus.
 
-The system is an **Astro 6 SSR application** (`output: "server"`) with **React 19 islands**, styled with **Tailwind 4** and **shadcn/ui**, deployed to **Cloudflare Workers** via `@astrojs/cloudflare`. Persistence and identity run on **Supabase** (Postgres with row-level security + Supabase Auth with cookie-based SSR sessions). Request bodies are validated with **zod**; the focus-rating chart uses **Recharts**.
+The system is an **Astro 6 SSR application** (`output: "server"`) with **React 19 islands**, styled with **Tailwind 4** and **shadcn/ui**, deployed to **Cloudflare Workers** via `@astrojs/cloudflare`. Persistence and identity run on **Supabase** (Postgres with row-level security + Supabase Auth with cookie-based SSR sessions). Request bodies are validated with **zod**; the focus-rating chart uses **Recharts**, while the focus timeline is a custom CSS/DOM swimlane grid (no charting library).
 
 Two architectural stances shape everything below:
 
@@ -29,7 +29,7 @@ flowchart LR
 
     subgraph Client[Browser]
         DOC[SSR document + React islands]
-        LS[(localStorage<br/>anon sessions + topics,<br/>last-used mode)]
+        LS[(localStorage<br/>anon sessions + topics,<br/>last-used mode,<br/>timeline colors)]
         DOC <--> LS
     end
 
@@ -62,14 +62,14 @@ flowchart LR
 
 Constraints baked into this picture:
 
-- Every request passes through [middleware.ts](src/middleware.ts) first. It builds a Supabase client from the inbound cookies, resolves the user into `context.locals.user`, redirects signed-in visitors off exact-match paths in `AUTHED_REDIRECTS` (`/`, `/auth/signin`, `/auth/signup` all lead to `/dashboard`), and redirects anonymous visitors off prefix-matched `PROTECTED_ROUTES` (`/dashboard`, `/session/`, `/topics`, `/formats`, `/presets`).
+- Every request passes through [middleware.ts](src/middleware.ts) first. It builds a Supabase client from the inbound cookies, resolves the user into `context.locals.user`, redirects signed-in visitors off exact-match paths in `AUTHED_REDIRECTS` (`/`, `/auth/signin`, `/auth/signup` all lead to `/dashboard`), and redirects anonymous visitors off prefix-matched `PROTECTED_ROUTES` (`/dashboard`, `/session/`, `/topics`, `/formats`, `/presets`, `/timeline`).
 - The Worker holds no in-process state. Every Supabase call is scoped to the caller's cookie, so RLS does the user-isolation work; API handlers add `.eq("user_id", ...)` filters as defence in depth.
 - API routes are SSR-only (`export const prerender = false;`); prerendering them would fail the Cloudflare build.
-- `localStorage` is a real persistence tier, not a cache: for anonymous visitors it is the _only_ store (sessions + topics, versioned envelopes, cross-tab sync). For signed-in users it carries exactly one convenience key, the last-used timer mode.
+- `localStorage` is a real persistence tier, not a cache: for anonymous visitors it is the _only_ store (sessions + topics, versioned envelopes, cross-tab sync). For signed-in users it carries two display-preference keys that never touch the server: the last-used timer mode, and the per-category custom colors for the timeline surface.
 
 ### 2.2 High-level module interaction
 
-The application has four interaction surfaces, all composed from one shared capture core:
+The application has five interaction surfaces. Four are composed from one shared capture core; the fifth -- the timeline -- reads the same `sessions` domain data through its own SSR query without touching the capture core:
 
 ```mermaid
 flowchart TB
@@ -78,6 +78,7 @@ flowchart TB
         CAP["/session/new + /session/[id]<br/>(signed-in capture)"]
         DASH["/dashboard<br/>(history, chart, row actions)"]
         MGMT["/topics /formats /presets<br/>(catalog + preset management)"]
+        TL["/timeline<br/>(session history as a<br/>Day/Week/Month grid)"]
     end
 
     subgraph core[Shared capture core - React]
@@ -96,6 +97,7 @@ flowchart TB
     CAP --> FORM & RUN
     DASH --> LIST
     MGMT -.-> |useCrudResource| REMOTE
+    TL -.-> |SSR sessions SELECT| DB
 
     FORM --> PORT
     RUN --> PORT
@@ -108,6 +110,7 @@ flowchart TB
 - The **capture core** (form, runner, tile list) is presentational and backend-agnostic. Which backend it writes to is decided by the mounting island: `EnergyPicker` (signed-in) injects `remotePersistence`, `AnonSessionApp` (landing page) injects `localPersistence`.
 - The **dashboard** is signed-in only and reads Postgres directly in Astro frontmatter (RLS-scoped SELECT), then hands plain rows to the `SessionList` island. The anonymous landing page renders the same `SessionList` in `readOnly` mode from localStorage-derived rows.
 - **Management pages** (topics, formats, presets) are thin CRUD UIs over their API routes, unified behind the `useCrudResource` hook.
+- The **timeline** is signed-in only and read-only: it reuses the dashboard's SSR-query-into-island pattern (widened past `.limit(50)`) to feed one large stateful island (`TimelineApp`) the user's `SessionListItem` rows, which it lays out as a custom swimlane grid. It never writes a session, so it stays clear of the capture core and the `SessionPersistence` port entirely; its only durable output is per-category display colors in `localStorage`.
 
 ---
 
@@ -125,6 +128,7 @@ flowchart LR
         sessNew["session/new.astro<br/>(reads prefill params)"]
         sessId["session/[id].astro<br/>(builds prefill URL)"]
         mgmtPg[topics/ formats/ presets pages]
+        tl["timeline.astro<br/>(wide SSR sessions SELECT)"]
         authPg[auth/*.astro]
     end
 
@@ -132,6 +136,7 @@ flowchart LR
         anonC["anon/<br/>AnonSessionApp, InlineTopicCreate,<br/>ClearHistoryButton"]
         sessC["session/<br/>SessionStartForm, EnergyPicker, ModePicker,<br/>EnergyLevelPicker, CatalogSelects, SessionRunner,<br/>FocusRating, SessionList, SessionTile + parts"]
         dashC["dashboard/<br/>FocusRatingChart, LocalDateTime,<br/>InProgressSessionActions (Resume + Abandon),<br/>CompletedSessionActions (Edit + Delete dialogs),<br/>ConfirmActionButton"]
+        tlC["timeline/<br/>TimelineApp, Toolbar, Legend, ShowToggles,<br/>TimeAxisHeader, DayRow, SessionBlock,<br/>SessionDetailDialog, Color*Dialog, EmptyState"]
         resC["resource/ + topics/ + material-formats/ + presets/<br/>CRUD managers built on shared rows/dialogs"]
         authC[auth/ forms]
     end
@@ -141,6 +146,7 @@ flowchart LR
     sessId --> sessC
     dash --> sessC & dashC
     mgmtPg --> resC
+    tl --> tlC
     authPg --> authC
     anonC --> sessC
 ```
@@ -157,14 +163,16 @@ flowchart LR
         anonC[anon/]
         sessC[session/<br/>SessionRunner now accepts<br/>breakCompleteHref prop]
         dashC[dashboard/]
+        tlC[timeline/]
         resC[resource/ + catalog + preset managers]
-        uiC[ui/ shadcn primitives]
+        uiC["ui/ shadcn primitives<br/>(+ switch)"]
     end
 
     subgraph lib[src/lib - shared client logic]
         TIMER["timer/<br/>useFocusTimer, useBreakTimer,<br/>useTabTitle, tabTitle, formatTime,<br/>preset-defaults"]
         SESSL["session/<br/>persistence (port), useSessionStart,<br/>useCatalog, useLastMode, usePresetEditor,<br/>access, format"]
         LOCL["local/<br/>collectionStore, localSessions, localTopics,<br/>localCatalog, localPersistence, localSessionList"]
+        TLL["timeline/<br/>dateRange, layout, color,<br/>useTimelineColors"]
         RESL[resource/useCrudResource.ts]
         MISC[api/fetchJson, types, time, utils]
     end
@@ -172,8 +180,14 @@ flowchart LR
     anonC --> LOCL & SESSL
     sessC --> TIMER & SESSL & uiC
     dashC --> MISC & uiC
+    tlC --> TLL & LOCL & uiC & MISC
     resC --> RESL & MISC
 ```
+
+**Timeline island and shared logic:**
+- **TimelineApp** is the single stateful island (`client:load`), owning all view state (scale, anchor date, `colorBy`, hours range, topic/format filter sets, Focus/Energy/Dots toggles, custom colors) and feeding dumb children -- the orchestrator role `AnonSessionApp` plays for the anonymous surface. Every date-derived label follows `LocalDateTime`'s `useSyncExternalStore` hydration gate, because Workers SSR runs UTC.
+- **`src/lib/timeline/`** holds the pure, unit-tested logic: `dateRange` (hand-rolled day/week/month ranges, ISO week numbers, nav clamping, adaptive axis ticks -- there is no date library in the repo), `layout` (session start/end → left%/width% within the hours axis, min-width floor, in-progress end derivation, right-edge clamp), `color` (preset palette + default per-category color map + hex/HSL helpers), and `useTimelineColors` (custom colors persisted via `collectionStore`, stored as `{ categoryId, hex }` entries).
+- New **`ui/switch.tsx`** (shadcn, Radix already transitively installed -- zero new npm dep) backs the Color-by control; the Focus/Energy/Dots "Show" group is hand-rolled from `Button variant`. The HSV color wheel comes from **`@uiw/react-color`** (`Wheel`, `ShadeSlider`, `hsvaToHex`) -- the one new npm dependency.
 
 **Phase 2 updates:**
 - **SessionRunner**: New `breakCompleteHref?: string` prop (Phase 2). Builds `onBreakComplete` callback: if provided, navigates to the URL; else falls back to `onGoToDashboard`. The callback replaces direct `onGoToDashboard()` calls at break-completion sites.
@@ -288,6 +302,7 @@ Modeling decisions:
 - **`planned_*_seconds` are snapshots, not references.** There is deliberately no FK from `sessions` to `user_presets`: the planned durations are copied onto the row at POST time so that editing a preset slot later never rewrites how past sessions are summarised. The `count_up ⇒ null planned` invariant is app-maintained, not DB-enforced, and (since fix-continue-sessions) relaxed to insert-time-only: the POST insert nulls both planned columns for count-up, but the S-10 continue endpoint nulls only `planned_focus_seconds` when converting a running preset session to count-up -- it deliberately preserves `planned_break_seconds` so the user keeps their break (no audit of the origin preset is kept).
 - **`duration_seconds` is a generated column** (from `started_at`/`ended_at`), so "actual elapsed wall time" is correct for every mode, count-up included, with no application arithmetic.
 - **A session's lifecycle is written in `ended_at`**: `NULL` means in progress (any age -- there is no time-based "abandoned" heuristic, lesson L-05), non-NULL means done. Status is derived, never stored.
+- **Per-category display colors are not modeled in Postgres.** `topics` and `material_formats` carry no `color` column; the timeline's custom per-category colors are a client display preference persisted to `localStorage` (keyed by category id), merged over a static default palette in `src/lib/timeline/color.ts`. This is the one signed-in exception to "server owns truth" beyond the last-used timer mode -- defensible because a color choice is presentation, not durable domain data.
 
 RLS posture:
 
@@ -506,6 +521,12 @@ The `PUT` edit path is deliberately separate from the end-session `PATCH`: it re
 
 Cookie-based Supabase SSR auth: email + password with verification (redirect to `/auth/confirm-email`) plus Google OAuth (`/api/auth/oauth` + `/api/auth/callback`). Sign-in POSTs to `/api/auth/signin`, which calls `signInWithPassword` through the SSR client; Supabase sets `sb-*` cookies on the response, and the follow-up request to `/` is bounced by the middleware's `AUTHED_REDIRECTS` to `/dashboard`. [supabase.ts](src/lib/supabase.ts) returns `null` when env is unconfigured, and every caller branches on that -- this is what keeps CI's lint/build green without a live Supabase. `SUPABASE_SERVICE_ROLE_KEY` is never read by app code; it exists only for the test runners.
 
+### 6.5 Focus timeline (signed-in, read-only)
+
+`middleware.ts` gates `/timeline` behind auth like `/dashboard`. `timeline.astro` runs one RLS-scoped SELECT for the user's sessions -- the same joined columns as the dashboard query but without `.limit(50)`, wide enough to feed a full navigable history -- and mounts `<TimelineApp sessions={...} client:load />`. There is no timeline API route, no mutation path, and no new endpoint: the surface only reads.
+
+On the client, `TimelineApp` buckets each session onto the day of its *local* `started_at` and lays blocks out as absolutely-positioned spans over a configurable hour axis, at Day / Week / Month scales. All time-derived work (day bucketing, "today" highlight, hour-axis math) defers behind the `LocalDateTime` hydration gate because the SSR pass runs in UTC; getting this wrong produces off-by-one-day rows and hydration warnings. Navigation is clamped to `[period-containing-earliest-session, period-containing-today]` (the current period renders in full even where future days are empty). Filtering (topic AND format), the Color-by axis swap, Focus/Energy/Dots display toggles, and the session-detail dialog are all pure client state over the already-fetched rows; recoloring a category writes through `useTimelineColors` to `localStorage` and re-renders live. A full page reload simply re-runs the SSR SELECT -- there is no client cache to invalidate, consistent with the rest of the app.
+
 ---
 
 ## 7. Timer state machine
@@ -557,7 +578,8 @@ Properties worth knowing before touching it:
 | Domain vocabulary     | [lib/types.ts](src/lib/types.ts) + [db/database.types.ts](src/db/database.types.ts)     | Generated DB types (`npm run db:types`, committed) + hand-written view types (`SessionListItem`, `Mode`, ...).    |
 | Timer correctness     | [lib/timer/](src/lib/timer/)                                                            | Wall-clock derivation on three anchors (focus, count-up, break). Pinned by L-03 and the unit suite.               |
 | Audio                 | stage-1 prime in `useSessionStart`, stage-2 in `useFocusTimer`                          | Two-stage to satisfy Safari autoplay; fail-open. Pinned by L-02.                                                  |
-| Client persistence    | [lib/local/](src/lib/local/) + [useLastMode](src/lib/session/useLastMode.ts)            | Versioned envelopes, SSR-safe `useSyncExternalStore`, `storage`-event cross-tab sync, 200-session cap, fail-open. |
+| Client persistence    | [lib/local/](src/lib/local/) + [useLastMode](src/lib/session/useLastMode.ts) + [useTimelineColors](src/lib/timeline/useTimelineColors.ts) | Versioned envelopes, SSR-safe `useSyncExternalStore`, `storage`-event cross-tab sync, 200-session cap, fail-open. Timeline colors reuse `collectionStore` (array-shaped: `{ categoryId, hex }` entries). |
+| Local-time rendering  | [LocalDateTime](src/components/dashboard/LocalDateTime.tsx) + `lib/timeline/`            | Workers SSR runs UTC; every local-date-derived label (dashboard timestamps, the whole timeline axis/rows) defers behind a `useSyncExternalStore` hydration gate to avoid SSR/CSR mismatch. |
 | Style + class merging | [lib/utils.ts](src/lib/utils.ts) `cn()`                                                 | `clsx` + `tailwind-merge`; never concatenate class strings.                                                       |
 | Config health         | [lib/config-status.ts](src/lib/config-status.ts) + `Banner`                             | Missing env surfaces as an in-app banner instead of a crash.                                                      |
 | Pre-commit gating     | `.husky/` + `lint-staged`                                                               | `eslint --fix` (React Compiler rule at `error`) + `prettier`.                                                     |
@@ -610,6 +632,7 @@ Shipped and reflected in this document (see `context/foundation/roadmap.md` and 
 - **S-08** (`anonymous-sessions`) - the localStorage tier, the `SessionPersistence` port, `AnonSessionApp` on `/`.
 - **S-10** (`continue-session-past-end`) - the "I'm still working" choice at preset focus-end: `POST /api/sessions/[id]/continue` converts the running row to count-up in place (nulling `planned_*`), and `useFocusTimer`'s reactive `mode` + `continueAsCountUp()` resume the timer client-side. Signed-in only; the anonymous island opts out. **Refined by fix-continue-sessions**: preserves `planned_break_seconds` on continue (relaxes the invariant to insert-time-only) and adds preset-carrying redirect after break-completion (`SessionRunner.onBreakComplete` callback, `[id].astro` prefill URL construction, `new.astro` prefill param reading, `EnergyPicker` seeding).
 - **S-12** + the 2026-07-10 React refactor - the current component decomposition (🍅 duration badges, `SessionStartForm` extraction, shared CRUD/confirm/catalog modules).
+- **S-14** (`timeline-graph`) - the `/timeline` surface: a read-only Day/Week/Month swimlane grid of the user's real sessions, fed by a wide-bounded SSR SELECT and rendered by the `TimelineApp` island with hand-rolled date/layout math (`src/lib/timeline/`). No schema, API, or persistence-seam changes; per-category colors persist to `localStorage` via `collectionStore`. Adds one shadcn primitive (`switch`) and one dependency (`@uiw/react-color`).
 - Test hardening changes (`testing-api-contract`, `test-timer-sm`, `testing-schema-validation-gate`, `testing-e2e-session-capture-flow`) - the suites that pin §6's invariants.
 
 Not built yet (and deliberately absent above): **S-09** `anonymous-session-sync` (merging local data into an account on sign-in). Also deliberately skipped: continue-past-end for the anonymous flow (S-10 shipped authenticated-only).

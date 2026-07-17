@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import FocusRating from "@/components/session/FocusRating";
 import { useFocusTimer } from "@/lib/timer/useFocusTimer";
@@ -41,7 +41,7 @@ export default function SessionRunner({
   mode: initialMode = "preset",
   breakSeconds = null,
   persistEnd = (args) => remotePersistence.endSession(sessionId, args),
-  persistContinue = () => remotePersistence.continueSession(sessionId),
+  persistContinue = () => remotePersistence.continueSession?.(sessionId) ?? Promise.resolve(),
   canContinue = true,
   onGoToDashboard = () => {
     window.location.assign("/dashboard");

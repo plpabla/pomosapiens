@@ -27,11 +27,12 @@ describe("useTabTitle", () => {
   });
 
   it("restores the captured default when title is null", () => {
+    const initialProps: { title: string | null } = { title: "⏱ 05:00 – PomoSapiens" };
     const { rerender } = renderHook(
       ({ title }: { title: string | null }) => {
         useTabTitle({ title });
       },
-      { initialProps: { title: "⏱ 05:00 – PomoSapiens" } },
+      { initialProps },
     );
     expect(document.title).toBe("⏱ 05:00 – PomoSapiens");
 

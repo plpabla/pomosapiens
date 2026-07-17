@@ -10,19 +10,23 @@ const mockedHook = vi.mocked(useFocusTimer);
 
 const RUNNING_HOOK_RESULT = {
   phase: "running" as const,
+  mode: "preset" as const,
   remaining: 1500,
   elapsed: 0,
   stoppedAtMs: null,
   stopEarly: vi.fn(),
+  continueAsCountUp: vi.fn(),
   audioRef: { current: null },
 };
 
 const RATING_HOOK_RESULT = {
   phase: "rating" as const,
+  mode: "preset" as const,
   remaining: 0,
   elapsed: 60,
   stoppedAtMs: 1000,
   stopEarly: vi.fn(),
+  continueAsCountUp: vi.fn(),
   audioRef: { current: null },
 };
 
