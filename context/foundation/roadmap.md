@@ -3,7 +3,7 @@ project: PomoSapiens
 version: 1
 status: draft
 created: 2026-05-28
-updated: 2026-07-16
+updated: 2026-07-17
 prd_version: 1
 main_goal: speed
 top_blocker: time
@@ -44,7 +44,7 @@ PomoSapiens captures what existing Pomodoro trackers miss: pre-session context (
 | S-11 | `reopen-running-session`           | return to an in-progress session from the dashboard after its tab/window was closed                                                 | S-05          | — (gap; extends FR-015)                               | done        |
 | S-12 | `ui-improvements`                  | see accurate 🍅 time badges, correct stop-button wording, a pre-selected energy default, relocated badges, and a bigger timer clock | S-03          | — (cosmetic; no FR)                                   | done        |
 | S-13 | `chart-tooltip-context`            | see 🍅 count and topic/format badges in the focus-rating chart tooltip instead of just the raw rating number                       | S-04          | — (gap; extends FR-016)                              | done |
-| S-14 | `timeline-graph`                   | view a timeline graph of sessions with dynamic topic/format coloring, toggleable focus/energy indicators, and a selectable time scale + range | S-02          | — (gap; extends FR-015/FR-016)                       | not started |
+| S-14 | `timeline-graph`                   | view a timeline graph of sessions with dynamic topic/format coloring, toggleable focus/energy indicators, and a selectable time scale + range | S-02          | — (gap; extends FR-015/FR-016)                       | done |
 
 ## Baseline
 
@@ -288,7 +288,7 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
   - The interaction/visual design is settled by the imported design and captured in `change.md`; the remaining open decision is real-data plumbing vs. the design's seeded sample data — which fields map onto the design's topic/format/focus/energy model and how the timeline behaves at low session counts. — Owner: implementer (decided at `/10x-plan` time). Block: no.
   - Where the view lives — a new dashboard tab/section vs. a dedicated route. — Owner: implementer. Block: no.
 - **Risk:** A new view rather than an extension of an existing route. No schema or API change expected: `SessionListItem` already carries `topic`, `material_format`, `duration_seconds`, `focus_rating`, and `energy`. The main risk is scope creep — the design bundles three time scales, independent topic/format filtering + color-by, two rating encodings (day/week badges vs. month shading), and per-category color customization (palette + wheel). Consider splitting a smaller S-14 core (timeline + scale/range + single color-by) from the color-customization and month-shading refinements if the calendar tightens.
-- **Status:** not started
+- **Status:** done
 
 ## Backlog Handoff
 
@@ -351,4 +351,5 @@ What's already in place in the codebase as of 2026-05-28 (auto-researched + user
 - **S-12: User sees five small polish changes bundled together: session-history badges show actual time as 🍅 (one per 20 min) instead of P1/P2/P3/∞; the stop control on a count-up session reads "Stop" instead of "Stop early" (there's no "early" without a fixed duration); the pre-session energy picker defaults to "Medium" instead of requiring an explicit pick; the time badges sit directly above the "Start" button; and the running-timer clock face is noticeably bigger.** — Archived 2026-07-12 → `context/archive/2026-07-12-ui-improvements/`. Lesson: —.
 - **S-11: A dashboard row for an in-progress session (no `ended_at`) shows a "Resume" control that takes the user back to that session's `/session/[id]` page, correctly redrawing the running timer via S-01's `started_at`-based reconciliation. Today, once the session tab/window is closed, its UUID is lost and the dashboard only lets the user see that a session is running or abandon it — there is no way back into it. Ended sessions are unaffected; this only adds a control to in-progress rows.** — Archived 2026-07-13 → `context/archive/2026-07-13-reopen-running-session/`. Lesson: —.
 - **S-10: When a preset session reaches its scheduled end (focus phase completes and the auto focus→break transition, or the timer, would normally fire), the user can tap "I'm still working" / "Continue" instead of stopping. The session converts to count-up mode and keeps running from its original `started_at` (elapsed time is preserved, not reset), so the user is not forced out of flow state at an arbitrary preset boundary. When they eventually do stop, the normal end-of-session flow (rating, note, history) applies as usual, and the session is recorded as having run in count-up mode for its total elapsed duration.** — Archived 2026-07-13 → `context/archive/2026-07-13-continue-session-past-end/`. Lesson: —.
+- **S-14: User can view their focus sessions as a horizontal timeline: one swimlane row per day, each session a block placed by time of day within a configurable visible-hours range (default 6 AM–11 PM). A day / week / month scale selector with prev / next / today navigation sets the visible date range. Sessions can be filtered and colored by topic or material format (whichever isn't driving the fill shows as a stripe accent), and focus / energy can be toggled on — shown as on-block badges in day/week and as brightness shading in month. Clicking a session opens a detail dialog; each category's color is customizable via a preset palette + color wheel. Full behavioral spec lives in `context/changes/timeline-graph/change.md` (extracted from the imported Claude Design file).** — Archived 2026-07-17 → `context/archive/2026-07-16-timeline-graph/`. Lesson: —.
 - **S-13: User hovers a point on the focus-rating chart (`FocusRatingChart`, `src/components/dashboard/FocusRatingChart.tsx`) and sees, alongside the focus rating already shown, the session's energy level, duration, 🍅 count, and its topic/material-format badges (when present) — instead of just the bare `focus_rating` number.** — Archived 2026-07-15 → `context/archive/2026-07-15-chart-tooltip-context/`. Lesson: L-08 ("type checking" gate must actually run the compiler).
