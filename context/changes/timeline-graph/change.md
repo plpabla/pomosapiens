@@ -1,7 +1,7 @@
 ---
 change_id: timeline-graph
 title: Timeline graph of sessions with topic/format coloring and time-scale selection
-status: implementing
+status: implemented
 created: 2026-07-16
 updated: 2026-07-17
 archived_at: null

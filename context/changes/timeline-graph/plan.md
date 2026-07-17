@@ -395,14 +395,14 @@ None. No schema or API changes; colors are `localStorage`-only.
 
 #### Automated
 
-- [x] 4.1 Type checking passes: `npx astro check`
-- [x] 4.2 Linting passes: `npm run lint`
-- [x] 4.3 Build passes: `npm run build`
-- [x] 4.4 `color.ts` unit tests pass: `npm test`
+- [x] 4.1 Type checking passes: `npx astro check` — 4d9367e
+- [x] 4.2 Linting passes: `npm run lint` — 4d9367e
+- [x] 4.3 Build passes: `npm run build` — 4d9367e
+- [x] 4.4 `color.ts` unit tests pass: `npm test` — 4d9367e
 
 #### Manual
 
-- [ ] 4.5 Legend dot → palette; preset applies live, dialog stays open
-- [ ] 4.6 Rainbow cell → wheel; disc + lightness update preview; Done applies/closes
-- [ ] 4.7 Custom colors survive reload + sync cross-tab
-- [ ] 4.8 Cleared localStorage falls back to defaults without error
+- [x] 4.5 Legend dot → palette; preset applies live, dialog stays open — 4d9367e
+- [x] 4.6 Rainbow cell → wheel; disc + lightness update preview; Done applies/closes — 4d9367e
+- [x] 4.7 Custom colors survive reload + sync cross-tab — 4d9367e
+- [x] 4.8 Cleared localStorage falls back to defaults without error — 4d9367e
