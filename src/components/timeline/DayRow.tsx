@@ -64,13 +64,17 @@ export default function DayRow({
       </div>
 
       <div className="relative flex-1">
-        {ticks.map((hour) => (
-          <div
-            key={hour}
-            className="bg-charred/60 absolute top-0 bottom-0 w-px"
-            style={{ left: `${String(axisPercent(hour * 60, hoursRange))}%` }}
-          />
-        ))}
+        {ticks.map((hour, index) => {
+          const percent = axisPercent(hour * 60, hoursRange);
+          const isLast = index === ticks.length - 1;
+          return (
+            <div
+              key={hour}
+              className="bg-charred/60 absolute top-0 bottom-0 w-px"
+              style={isLast ? { right: 0 } : { left: `${String(percent)}%` }}
+            />
+          );
+        })}
         {sessions.map((session) => (
           <SessionBlock
             key={session.id}

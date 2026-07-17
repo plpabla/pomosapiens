@@ -26,9 +26,10 @@ function LegendGroup({ title, categories, enabled, onToggle, getColor, onOpenCol
               onClick={() => {
                 onOpenColor(category.id, category.name);
               }}
-              className="ring-offset-background hover:ring-ash size-2.5 shrink-0 rounded-full hover:ring-1 hover:ring-offset-1"
-              style={{ backgroundColor: getColor(category.id) }}
-            />
+              className="ring-offset-background hover:ring-ash flex size-6 shrink-0 items-center justify-center rounded-full hover:ring-1 hover:ring-offset-1"
+            >
+              <span className="size-2.5 rounded-full" style={{ backgroundColor: getColor(category.id) }} />
+            </button>
             <Button
               type="button"
               variant="ghost"

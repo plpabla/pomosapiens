@@ -5,12 +5,9 @@ const HOURS_RANGE_KEY = "pomosapiens.timeline.hours_range";
 const DEFAULT_HOURS_RANGE: HoursRange = { start: 6, end: 23 };
 
 function isHoursRange(value: unknown): value is HoursRange {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    typeof (value as HoursRange).start === "number" &&
-    typeof (value as HoursRange).end === "number"
-  );
+  if (typeof value !== "object" || value === null) return false;
+  const { start, end } = value as HoursRange;
+  return Number.isInteger(start) && Number.isInteger(end) && start >= 0 && end <= 24 && start < end;
 }
 
 // useSyncExternalStore store for the timeline's visible-hours setting, mirroring

@@ -37,24 +37,28 @@ export default function TimelineGrid({
   return (
     <Card>
       <CardContent className="px-4">
-        <TimeAxisHeader hoursRange={hoursRange} />
-        {days.map((day) => (
-          <DayRow
-            key={day.getTime()}
-            date={day}
-            sessions={sessionsByDay.get(day.getTime()) ?? []}
-            scale={scale}
-            hoursRange={hoursRange}
-            ticks={ticks}
-            isToday={day.getTime() === today.getTime()}
-            colorBy={colorBy}
-            focusOn={focusOn}
-            energyOn={energyOn}
-            dotsOn={dotsOn}
-            getColor={getColor}
-            onSelectSession={onSelectSession}
-          />
-        ))}
+        <div className="overflow-x-auto">
+          <div className="min-w-[820px]">
+            <TimeAxisHeader hoursRange={hoursRange} />
+            {days.map((day) => (
+              <DayRow
+                key={day.getTime()}
+                date={day}
+                sessions={sessionsByDay.get(day.getTime()) ?? []}
+                scale={scale}
+                hoursRange={hoursRange}
+                ticks={ticks}
+                isToday={day.getTime() === today.getTime()}
+                colorBy={colorBy}
+                focusOn={focusOn}
+                energyOn={energyOn}
+                dotsOn={dotsOn}
+                getColor={getColor}
+                onSelectSession={onSelectSession}
+              />
+            ))}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

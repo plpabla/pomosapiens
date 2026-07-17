@@ -369,7 +369,7 @@ None. No schema or API changes; colors are `localStorage`-only.
 - [x] 2.5 Blocks positioned/sized correctly against axis — 808c2b6
 - [x] 2.6 Row heights per scale; today's row highlighted — 808c2b6
 - [x] 2.7 Pomodoro dots only Day/Week + wide blocks; <20-min half dot — 808c2b6
-- [x] 2.8 Horizontal scroll keeps axis/rows aligned — 808c2b6
+- [x] 2.8 Horizontal scroll keeps axis/rows aligned — implemented post-review (impl-review F1); not part of 808c2b6
 - [x] 2.9 Hover tooltip summarizes session — 808c2b6
 
 ### Phase 3: Filtering, ratings & detail dialog
@@ -406,3 +406,10 @@ None. No schema or API changes; colors are `localStorage`-only.
 - [x] 4.6 Rainbow cell → wheel; disc + lightness update preview; Done applies/closes — 4d9367e
 - [x] 4.7 Custom colors survive reload + sync cross-tab — 4d9367e
 - [x] 4.8 Cleared localStorage falls back to defaults without error — 4d9367e
+
+## Review Addenda
+
+> Decisions recorded during post-implementation review (context/changes/timeline-graph/reviews/impl-review.md) that deviate from the original plan.
+
+- **Hour labels stay 24h, not 12h** (impl-review F3): `formatHour` in `src/lib/timeline/dateRange.ts` renders zero-padded 24h ("06:00") instead of the planned `Intl` 12h format. Kept as-is — considered clearer for the product's locale and already consistent across `TimeAxisHeader.tsx` and `HoursRangeSelect.tsx`.
+- **Unplanned but benign extras** (impl-review F9): (1) commit 09d78ad split `TimelineApp` into `Toolbar`/`TimelineGrid`/`TimelineShell`/`DateNav`/etc. — a faithful decomposition, all state contracts intact; (2) hours-range persisted to `localStorage` (key `pomosapiens.timeline.hours_range`), not planned as stateful; (3) hours end options extend to 24 (midnight) vs. the plan's 11 PM cap; (4) a Topbar "Timeline" nav link was added post-close-out (5830ab3). All respect the change's guardrails (no API/DB changes, `localStorage` only).

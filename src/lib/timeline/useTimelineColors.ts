@@ -28,7 +28,11 @@ export function useTimelineColors(): TimelineColors {
     setColor(id: string, hex: string) {
       const next = items.filter((item) => item.categoryId !== id);
       next.push({ categoryId: id, hex });
-      store.setItems(next);
+      try {
+        store.setItems(next);
+      } catch {
+        // fail open: localStorage unavailable (private mode, partitioned storage, etc.)
+      }
     },
   };
 }

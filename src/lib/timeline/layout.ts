@@ -41,19 +41,26 @@ export function axisPercent(minutes: number, hoursRange: HoursRange): number {
 /**
  * Maps a session's local start/end onto `hoursRange` as left%/width%, clamped at both
  * edges and floored at `MIN_BLOCK_WIDTH_PERCENT` so very short sessions stay visible.
- * In-progress sessions (`ended_at === null`) derive an end from `started_at + duration_seconds`.
+ * In-progress sessions (`ended_at === null`) derive an end from `started_at + duration_seconds`,
+ * or clamp to the axis end when duration is unknown. An end before start (unknown duration,
+ * or a session crossing midnight) also clamps to the axis end rather than collapsing to zero width.
  */
 export function blockPosition(session: SessionTiming, hoursRange: HoursRange): BlockPosition {
   const start = new Date(session.started_at);
-  const end =
-    session.ended_at !== null
-      ? new Date(session.ended_at)
-      : new Date(start.getTime() + (session.duration_seconds ?? 0) * 1000);
-
   const left = axisPercent(minutesSinceMidnight(start), hoursRange);
-  const right = axisPercent(minutesSinceMidnight(end), hoursRange);
 
-  return { left, width: Math.max(right - left, MIN_BLOCK_WIDTH_PERCENT) };
+  let right: number;
+  if (session.ended_at !== null) {
+    right = axisPercent(minutesSinceMidnight(new Date(session.ended_at)), hoursRange);
+  } else if (session.duration_seconds !== null) {
+    const end = new Date(start.getTime() + session.duration_seconds * 1000);
+    right = axisPercent(minutesSinceMidnight(end), hoursRange);
+  } else {
+    right = 100;
+  }
+
+  const width = right < left ? 100 - left : right - left;
+  return { left, width: Math.max(width, MIN_BLOCK_WIDTH_PERCENT) };
 }
 
 /**
