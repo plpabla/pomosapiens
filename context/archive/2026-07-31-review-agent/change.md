@@ -1,10 +1,10 @@
 ---
 change_id: review-agent
 title: Review agent
-status: impl_reviewed
+status: archived
 created: 2026-07-31
 updated: 2026-08-02
-archived_at: null
+archived_at: 2026-08-02T19:39:36Z
 ---
 
 ## Notes
