@@ -326,15 +326,15 @@ None — additive. No app code, schema, or migration is touched. The only edits 
 
 #### Automated
 
-- [ ] 1.1 Dependencies install inside the package (`cd review-agent && npm install`, produces lockfile)
-- [ ] 1.2 Repo lint still passes: `npm run lint` (root) exits 0
-- [ ] 1.3 Repo build still passes: `npm run build` (root) exits 0
-- [ ] 1.4 Package type-checks in isolation: `cd review-agent && npx tsc --noEmit` exits 0
+- [x] 1.1 Dependencies install inside the package (`cd review-agent && npm install`, produces lockfile)
+- [x] 1.2 Repo lint still passes: `npm run lint` (root) exits 0
+- [x] 1.3 Repo build still passes: `npm run build` (root) exits 0
+- [x] 1.4 Package type-checks in isolation: `cd review-agent && npx tsc --noEmit` exits 0
 
 #### Manual
 
-- [ ] 1.5 `git status` shows source tracked, `node_modules`/`.env` untracked
-- [ ] 1.6 Committing under `review-agent/` does not trip the `lint-staged` hook on those files
+- [x] 1.5 `git status` shows source tracked, `node_modules`/`.env` untracked
+- [x] 1.6 Committing under `review-agent/` does not trip the `lint-staged` hook on those files
 
 ### Phase 2: Review Schema + Reviewer Prompt
 
