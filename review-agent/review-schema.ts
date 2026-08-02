@@ -39,7 +39,7 @@ export const ReviewResult = z.object({
     "API routes in this repo must validate request bodies with a zod schema and write only a hand-picked, explicit set of columns (never `.update(parsed.data)` after a schema that could admit protected columns). Score 1 if the diff does not touch API request handling at all, OR if it touches it and both the schema-strip and hand-picked-write-set layers hold. Score 0 only if the diff skips body validation or widens the write set beyond what was requested.",
   ),
   summary: z.string().describe("Markdown summary of the review, suitable for posting as a PR comment."),
-  verdict: z.enum(["pass", "fail"]).describe("Overall pass/fail verdict for the diff as a whole."),
+  verdict: z.enum(["pass", "fail"]).describe("Overall pass/fail verdict for the diff as a whole. Pass if there are no critical/blocking issues and total score is at least 7"),
 });
 
 export type ReviewResult = z.infer<typeof ReviewResult>;
