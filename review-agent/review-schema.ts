@@ -3,8 +3,8 @@ import { z } from "zod";
 const Score = z.union([z.literal(0), z.literal(1)]).describe("0 = fail, 1 = pass");
 
 const Criterion = z.object({
-  score: Score,
   rationale: z.string().describe("One or two sentences explaining the score, citing the diff."),
+  score: Score,
 });
 
 export const ReviewResult = z.object({
