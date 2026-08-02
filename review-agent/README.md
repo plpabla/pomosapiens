@@ -23,7 +23,7 @@ git diff | npx tsx review-agent/review.ts
 | `OPENROUTER_MODEL` | no | `anthropic/claude-sonnet-5` | Any OpenRouter model id. |
 | `OPENROUTER_MAX_COST` | no | `0.5` | USD cap for a single review call (`stopWhen: maxCost(...)`). |
 
-Copy `.env.example` to `.env` for local runs (gitignored); `dotenv/config` loads it automatically.
+Copy `.env.example` to `.env` for local runs (gitignored); the agent loads `review-agent/.env` automatically regardless of your current working directory.
 
 ## Output contract (CI-readiness)
 
