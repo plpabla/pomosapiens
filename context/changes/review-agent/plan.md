@@ -326,27 +326,27 @@ None — additive. No app code, schema, or migration is touched. The only edits 
 
 #### Automated
 
-- [x] 1.1 Dependencies install inside the package (`cd review-agent && npm install`, produces lockfile)
-- [x] 1.2 Repo lint still passes: `npm run lint` (root) exits 0
-- [x] 1.3 Repo build still passes: `npm run build` (root) exits 0
-- [x] 1.4 Package type-checks in isolation: `cd review-agent && npx tsc --noEmit` exits 0
+- [x] 1.1 Dependencies install inside the package (`cd review-agent && npm install`, produces lockfile) — 5243804
+- [x] 1.2 Repo lint still passes: `npm run lint` (root) exits 0 — 5243804
+- [x] 1.3 Repo build still passes: `npm run build` (root) exits 0 — 5243804
+- [x] 1.4 Package type-checks in isolation: `cd review-agent && npx tsc --noEmit` exits 0 — 5243804
 
 #### Manual
 
-- [x] 1.5 `git status` shows source tracked, `node_modules`/`.env` untracked
-- [x] 1.6 Committing under `review-agent/` does not trip the `lint-staged` hook on those files
+- [x] 1.5 `git status` shows source tracked, `node_modules`/`.env` untracked — 5243804
+- [x] 1.6 Committing under `review-agent/` does not trip the `lint-staged` hook on those files — 5243804
 
 ### Phase 2: Review Schema + Reviewer Prompt
 
 #### Automated
 
-- [ ] 2.1 Schema module type-checks in isolation: `cd review-agent && npx tsc --noEmit` exits 0
-- [ ] 2.2 Schema round-trips: valid object parses, out-of-range score rejected
+- [x] 2.1 Schema module type-checks in isolation: `cd review-agent && npx tsc --noEmit` exits 0
+- [x] 2.2 Schema round-trips: valid object parses, out-of-range score rejected
 
 #### Manual
 
-- [ ] 2.3 The 10 `.describe()` strings read as a coherent rubric; project-criteria say "score 1 if untouched"
-- [ ] 2.4 `REVIEWER_PROMPT` is English, names the four concerns, forbids prose output
+- [x] 2.3 The 10 `.describe()` strings read as a coherent rubric; project-criteria say "score 1 if untouched"
+- [x] 2.4 `REVIEWER_PROMPT` is English, names the four concerns, forbids prose output
 
 ### Phase 3: Agent Core + Output Contract + Docs
 
