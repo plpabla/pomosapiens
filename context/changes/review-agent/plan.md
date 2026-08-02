@@ -352,14 +352,14 @@ None — additive. No app code, schema, or migration is touched. The only edits 
 
 #### Automated
 
-- [x] 3.1 Entrypoint type-checks in isolation: `cd review-agent && npx tsc --noEmit` exits 0
-- [x] 3.2 Empty-diff fail-fast: non-zero exit, stderr error, no stdout JSON
-- [x] 3.3 Repo gates still green: `npm run lint` and `npm run build` (root) exit 0
-- [x] 3.4 stdout purity: piped run yields valid single JSON; cost/diagnostics only on stderr
+- [x] 3.1 Entrypoint type-checks in isolation: `cd review-agent && npx tsc --noEmit` exits 0 — c52d4f8
+- [x] 3.2 Empty-diff fail-fast: non-zero exit, stderr error, no stdout JSON — c52d4f8
+- [x] 3.3 Repo gates still green: `npm run lint` and `npm run build` (root) exit 0 — c52d4f8
+- [x] 3.4 stdout purity: piped run yields valid single JSON; cost/diagnostics only on stderr — c52d4f8
 
 #### Manual
 
-- [x] 3.5 Real-key run: `review` + matching `totalScore` + non-null `cost.cost_usd`
-- [x] 3.6 Determinism: same diff twice yields same verdict (temperature 0)
-- [x] 3.7 Low `OPENROUTER_MAX_COST` on a large diff triggers the cap without breaking output
-- [x] 3.8 Project criteria score 1 on a diff not touching RLS/timers/SSR/zod
+- [x] 3.5 Real-key run: `review` + matching `totalScore` + non-null `cost.cost_usd` — c52d4f8
+- [x] 3.6 Determinism: same diff twice yields same verdict (temperature 0) — c52d4f8
+- [x] 3.7 Low `OPENROUTER_MAX_COST` on a large diff triggers the cap without breaking output — c52d4f8
+- [x] 3.8 Project criteria score 1 on a diff not touching RLS/timers/SSR/zod — c52d4f8
