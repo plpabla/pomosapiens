@@ -48,17 +48,19 @@ if (!call) {
   process.exit(1);
 }
 
+const response = await result.getResponse();
+
 let review: ReviewResult;
 try {
   review = ReviewResult.parse(call.arguments);
 } catch (error) {
   console.error("submit_review arguments failed schema validation:", error);
+  console.error("response status:", response.status, "incompleteDetails:", response.incompleteDetails);
+  console.error("raw call.arguments:", JSON.stringify(call.arguments, null, 2));
   process.exit(1);
 }
 
 const totalScore = CRITERIA.reduce((sum, key) => sum + review[key].score, 0);
-
-const response = await result.getResponse();
 const usage = response.usage;
 const cost = {
   cost_usd: usage?.cost ?? null,

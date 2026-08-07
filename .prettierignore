@@ -3,4 +3,4 @@
 src/db/database.types.ts
 
 # Standalone package, not part of the app - see context/changes/review-agent/plan.md
-review-agent/
+packages/review-agent/
