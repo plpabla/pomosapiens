@@ -374,20 +374,20 @@ None — this phase is verification only.
 
 #### Automated
 
-- [x] 1.1 TypeScript type-checking passes (`npm run lint`)
-- [x] 1.2 CLI runs and produces correct exit codes (0 on pass, 1 on fail)
+- [x] 1.1 TypeScript type-checking passes (`npm run lint`) — 116046d
+- [x] 1.2 CLI runs and produces correct exit codes (0 on pass, 1 on fail) — 116046d
 
 #### Manual
 
-- [x] 1.3 Verify exit code behavior locally with sample diffs
-- [x] 1.4 Confirm JSON output is still printed before exit
+- [x] 1.3 Verify exit code behavior locally with sample diffs — 116046d
+- [x] 1.4 Confirm JSON output is still printed before exit — 116046d
 
 ### Phase 2: Create Composite Action
 
 #### Automated
 
-- [ ] 2.1 Composite action YAML is valid
-- [ ] 2.2 `npx tsx` and `gh` CLI are available in runner
+- [x] 2.1 Composite action YAML is valid
+- [x] 2.2 `npx tsx` and `gh` CLI are available in runner
 
 #### Manual
 
