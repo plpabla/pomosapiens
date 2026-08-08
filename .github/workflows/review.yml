@@ -1,0 +1,41 @@
+name: Review Agent
+
+on:
+  # pull_request_target (not pull_request) so fork PRs still get secrets and a
+  # write-capable token; the composite action never checks out the fork's code,
+  # only reads its diff as text (see .github/actions/review-agent/action.yml).
+  pull_request_target:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    # Skip if a result label already exists, unless trigger-review was just added.
+    # Removing all review labels drops both contains() checks back to false, which
+    # re-runs a full review.
+    if: |
+      (!contains(github.event.pull_request.labels.*.name, 'review-agent-passed') &&
+       !contains(github.event.pull_request.labels.*.name, 'review-agent-failed')) ||
+      (github.event.action == 'labeled' && github.event.label.name == 'trigger-review')
+    steps:
+      # Needed so the runner can resolve the local `uses: ./...` action below;
+      # the composite action performs its own (fork-safe) checkout and Node setup internally too.
+      - uses: actions/checkout@v4
+
+      - name: Run review-agent
+        id: review
+        uses: ./.github/actions/review-agent
+        with:
+          openrouter-api-key: ${{ secrets.OPENROUTER_API_KEY }}
+          openrouter-model: ${{ vars.OPENROUTER_MODEL }}
+          openrouter-max-cost: ${{ vars.OPENROUTER_MAX_COST }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Job summary
+        if: always()
+        run: |
+          echo "review-agent verdict: **${{ steps.review.outputs.verdict }}**" >> "$GITHUB_STEP_SUMMARY"

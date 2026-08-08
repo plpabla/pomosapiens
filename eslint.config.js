@@ -96,7 +96,7 @@ const nodeScriptsConfig = defineConfig({
 
 export default defineConfig(
   includeIgnoreFile(gitignorePath),
-  { ignores: ["src/db/database.types.ts", ".claude/**"] },
+  { ignores: ["src/db/database.types.ts", ".claude/**", "packages/review-agent/**"] },
   baseConfig,
   reactConfig,
   eslintPluginAstro.configs["flat/recommended"],

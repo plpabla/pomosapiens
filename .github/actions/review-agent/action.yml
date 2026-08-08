@@ -1,0 +1,186 @@
+name: "Review Agent"
+description: "Runs the review-agent CLI against a PR diff, posts a comment with the verdict, and manages result labels."
+
+inputs:
+  openrouter-api-key:
+    description: "OpenRouter API key for the review-agent LLM call."
+    required: true
+  openrouter-model:
+    description: "OpenRouter model id passed to review-agent."
+    required: false
+    default: "anthropic/claude-sonnet-5"
+  openrouter-max-cost:
+    description: "Max cost in USD allowed for a single review-agent call."
+    required: false
+    default: "0.50"
+  github-token:
+    description: "Token with pull-requests: write, used by the gh CLI to read/post comments and manage labels."
+    required: true
+
+outputs:
+  verdict:
+    description: "Overall review verdict: pass or fail."
+    value: ${{ steps.run-agent.outputs.verdict }}
+  comment-id:
+    description: "ID of the PR comment posted with the review results."
+    value: ${{ steps.post-comment.outputs.comment-id }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout base branch
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version-file: .nvmrc
+        cache: npm
+        cache-dependency-path: packages/review-agent/package-lock.json
+
+    - name: Install review-agent dependencies
+      shell: bash
+      working-directory: packages/review-agent
+      run: npm ci
+
+    # pull_request_target runs with the base repo's workflow but must never execute the
+    # fork's code. Fetching the head SHA and diffing it as text (never checking it out)
+    # is what keeps this safe.
+    - name: Fetch PR head
+      shell: bash
+      run: git fetch origin "pull/${{ github.event.number }}/head:pr_head"
+
+    - name: Determine diff base
+      id: diff-base
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set -euo pipefail
+        base="origin/${{ github.base_ref }}"
+        if [[ "${{ contains(github.event.pull_request.labels.*.name, 'trigger-review') }}" == "true" ]]; then
+          last_comment="$(gh pr view "${{ github.event.number }}" --json comments \
+            --jq '[.comments[].body] | map(select(test("reviewed-sha=[0-9a-f]+"))) | last // ""')"
+          last_sha="$(grep -oE 'reviewed-sha=[0-9a-f]+' <<< "$last_comment" | tail -n1 | cut -d= -f2 || true)"
+          if [[ -n "$last_sha" ]]; then
+            base="$last_sha"
+          fi
+        fi
+        echo "base=$base" >> "$GITHUB_OUTPUT"
+
+    - name: Compute diff
+      id: compute-diff
+      shell: bash
+      run: |
+        set -euo pipefail
+        git diff "${{ steps.diff-base.outputs.base }}...pr_head" -- . ':!*.md' > diff.patch
+        if [[ -s diff.patch ]]; then
+          echo "empty=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "empty=true" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Run review-agent
+      id: run-agent
+      shell: bash
+      working-directory: packages/review-agent
+      env:
+        OPENROUTER_API_KEY: ${{ inputs.openrouter-api-key }}
+        OPENROUTER_MODEL: ${{ inputs.openrouter-model }}
+        OPENROUTER_MAX_COST: ${{ inputs.openrouter-max-cost }}
+      run: |
+        set -uo pipefail
+        delim="ghadelim_$(openssl rand -hex 8)"
+
+        if [[ "${{ steps.compute-diff.outputs.empty }}" == "true" ]]; then
+          echo "verdict=pass" >> "$GITHUB_OUTPUT"
+          {
+            echo "summary<<$delim"
+            echo "No reviewable changes (diff is empty after excluding markdown files)."
+            echo "$delim"
+          } >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        cat ../../diff.patch | npx tsx review.ts | tee ../../review-output.json
+        agent_exit=$?
+
+        verdict="$(jq -r '.review.verdict // empty' ../../review-output.json 2>/dev/null)"
+        if [[ -z "$verdict" ]]; then
+          echo "::error::review-agent exited $agent_exit before producing a verdict; see logs above."
+          exit "$agent_exit"
+        fi
+
+        summary="$(jq -r '.review.summary' ../../review-output.json)"
+        total_score="$(jq -r '.totalScore' ../../review-output.json)"
+        echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
+        echo "total-score=$total_score" >> "$GITHUB_OUTPUT"
+        {
+          echo "summary<<$delim"
+          echo "$summary"
+          echo "$delim"
+        } >> "$GITHUB_OUTPUT"
+
+        exit "$agent_exit"
+
+    - name: Post PR comment
+      id: post-comment
+      if: always()
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        VERDICT: ${{ steps.run-agent.outputs.verdict }}
+        TOTAL_SCORE: ${{ steps.run-agent.outputs.total-score }}
+        SUMMARY: ${{ steps.run-agent.outputs.summary }}
+        SHA: ${{ github.event.pull_request.head.sha }}
+      run: |
+        set -euo pipefail
+        verdict="$VERDICT"
+        total_score="$TOTAL_SCORE"
+        summary="$SUMMARY"
+        sha="$SHA"
+
+        case "$verdict" in
+          pass) icon="✅" ;;
+          fail) icon="❌" ;;
+          *)
+            icon="⚠️"
+            verdict="error"
+            summary="review-agent did not produce a verdict — see the workflow run logs."
+            ;;
+        esac
+
+        score_suffix=""
+        if [[ -n "$total_score" ]]; then
+          score_suffix=" (${total_score}/10)"
+        fi
+
+        body="### review-agent: ${icon} ${verdict}${score_suffix}
+
+        ${summary}
+
+        <!-- review-agent: reviewed-sha=${sha} -->"
+
+        comment_url="$(gh pr comment "${{ github.event.number }}" --body "$body")"
+        echo "comment-id=${comment_url##*-}" >> "$GITHUB_OUTPUT"
+
+    - name: Manage labels
+      if: always() && (steps.run-agent.outputs.verdict == 'pass' || steps.run-agent.outputs.verdict == 'fail')
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set -euo pipefail
+        if [[ "${{ steps.run-agent.outputs.verdict }}" == "pass" ]]; then
+          gh pr edit "${{ github.event.number }}" \
+            --add-label review-agent-passed \
+            --remove-label review-agent-failed \
+            --remove-label trigger-review
+        else
+          gh pr edit "${{ github.event.number }}" \
+            --add-label review-agent-failed \
+            --remove-label review-agent-passed \
+            --remove-label trigger-review
+        fi

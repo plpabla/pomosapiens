@@ -1,0 +1,27 @@
+diff --git a/src/pages/api/sessions/[id].ts b/src/pages/api/sessions/[id].ts
+new file mode 100644
+index 0000000..3333333
+--- /dev/null
++++ b/src/pages/api/sessions/[id].ts
+@@ -0,0 +1,24 @@
++import type { APIRoute } from "astro";
++import { supabase } from "@/lib/supabase";
++
++export const PATCH: APIRoute = async ({ params, request }) => {
++  const body = await request.json();
++  const client = supabase();
++  if (!client) {
++    return new Response("no db", { status: 500 });
++  }
++
++  const { data, error } = await client
++    .from("sessions")
++    .update(body)
++    .eq("id", params.id);
++
++  if (error) {
++    return new Response(JSON.stringify({ error: error.message }), { status: 500 });
++  }
++
++  return new Response(JSON.stringify(data), { status: 200 });
++};
