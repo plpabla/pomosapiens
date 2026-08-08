@@ -400,9 +400,9 @@ None — this phase is verification only.
 
 #### Automated
 
-- [x] 3.1 Workflow YAML is valid
-- [x] 3.2 Trigger types include all PR events and label events
-- [x] 3.3 Permissions are declared correctly
+- [x] 3.1 Workflow YAML is valid — 380f05d
+- [x] 3.2 Trigger types include all PR events and label events — 380f05d
+- [x] 3.3 Permissions are declared correctly — 380f05d
 
 #### Manual
 
