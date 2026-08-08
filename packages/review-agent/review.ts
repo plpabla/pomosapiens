@@ -70,3 +70,5 @@ const cost = {
 };
 
 console.log(JSON.stringify({ review, totalScore, cost }, null, 2));
+
+process.exit(review.verdict === "fail" ? 1 : 0);

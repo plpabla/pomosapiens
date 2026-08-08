@@ -42,3 +42,5 @@ blob-report/
 /playwright/.cache/
 .playwright-cli/
 /playwright/.auth/*
+
+.ai/

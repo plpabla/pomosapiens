@@ -32,3 +32,14 @@ Copy `.env.example` to `.env` for local runs (gitignored); the agent loads `revi
 - **Exit code** is non-zero on: empty/missing stdin diff, missing `OPENROUTER_API_KEY`, no `submit_review` tool call, or a schema-validation failure. Exit code is `0` only when a valid review was produced and printed.
 
 These three properties (explicit input, stdout-purity, exit-code gate semantics) are what let a future CI workflow pipe this command's output straight into `jq` and gate a merge on it, with no changes to the agent itself.
+
+## Verifying exit codes locally
+
+`samples/pass.diff` and `samples/fail.diff` are synthetic diffs (not applied to any real file — the agent only reads diff text) crafted to reliably produce a `pass` and a `fail` verdict respectively:
+
+```bash
+cat samples/pass.diff | npx tsx review.ts; echo "Exit code: $?"
+cat samples/fail.diff | npx tsx review.ts; echo "Exit code: $?"
+```
+
+Expect `Exit code: 0` for `pass.diff` (`"verdict": "pass"` in the JSON output) and `Exit code: 1` for `fail.diff` (`"verdict": "fail"`).

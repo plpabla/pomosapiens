@@ -374,13 +374,13 @@ None — this phase is verification only.
 
 #### Automated
 
-- [ ] 1.1 TypeScript type-checking passes (`npm run lint`)
-- [ ] 1.2 CLI runs and produces correct exit codes (0 on pass, 1 on fail)
+- [x] 1.1 TypeScript type-checking passes (`npm run lint`)
+- [x] 1.2 CLI runs and produces correct exit codes (0 on pass, 1 on fail)
 
 #### Manual
 
-- [ ] 1.3 Verify exit code behavior locally with sample diffs
-- [ ] 1.4 Confirm JSON output is still printed before exit
+- [x] 1.3 Verify exit code behavior locally with sample diffs
+- [x] 1.4 Confirm JSON output is still printed before exit
 
 ### Phase 2: Create Composite Action
 

@@ -1,7 +1,7 @@
 ---
 change_id: review-agent-in-github
 title: Run the review agent in the CI/CD pipeline
-status: planned
+status: implementing
 created: 2026-08-08
 updated: 2026-08-08
 archived_at: null
