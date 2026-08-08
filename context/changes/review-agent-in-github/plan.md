@@ -386,8 +386,8 @@ None — this phase is verification only.
 
 #### Automated
 
-- [x] 2.1 Composite action YAML is valid
-- [x] 2.2 `npx tsx` and `gh` CLI are available in runner
+- [x] 2.1 Composite action YAML is valid — b44d153
+- [x] 2.2 `npx tsx` and `gh` CLI are available in runner — b44d153
 
 #### Manual
 
@@ -400,9 +400,9 @@ None — this phase is verification only.
 
 #### Automated
 
-- [ ] 3.1 Workflow YAML is valid
-- [ ] 3.2 Trigger types include all PR events and label events
-- [ ] 3.3 Permissions are declared correctly
+- [x] 3.1 Workflow YAML is valid
+- [x] 3.2 Trigger types include all PR events and label events
+- [x] 3.3 Permissions are declared correctly
 
 #### Manual
 
