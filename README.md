@@ -2,6 +2,11 @@
 
 Hosted: https://pomo-sapiens.com/
 
+## API notes
+
+`PATCH /api/sessions/:id/note` lets the client patch a session's `note` field
+directly from the session detail view.
+
 ## Database migrations
 
 Local schema lives in `supabase/migrations/`. Production is a separate Supabase project; the committed `src/db/database.types.ts` is the TypeScript source of truth and **must match production** (CI's smoke gate enforces this via `diff`).
