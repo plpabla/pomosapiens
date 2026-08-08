@@ -91,7 +91,10 @@ runs:
         OPENROUTER_MODEL: ${{ inputs.openrouter-model }}
         OPENROUTER_MAX_COST: ${{ inputs.openrouter-max-cost }}
       run: |
-        set -uo pipefail
+        # +e: this step's bash is invoked with -e by default, which would abort the
+        # script the instant review.ts exits 1 for a "fail" verdict -- before agent_exit
+        # is captured and before verdict/summary/total-score are written to GITHUB_OUTPUT.
+        set +e -uo pipefail
         delim="ghadelim_$(openssl rand -hex 8)"
 
         if [[ "${{ steps.compute-diff.outputs.empty }}" == "true" ]]; then
