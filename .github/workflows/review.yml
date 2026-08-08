@@ -5,7 +5,7 @@ on:
   # write-capable token; the composite action never checks out the fork's code,
   # only reads its diff as text (see .github/actions/review-agent/action.yml).
   pull_request_target:
-    types: [opened, synchronize, reopened, labeled, unlabeled]
+    types: [opened, synchronize, reopened, labeled]
 
 permissions:
   contents: read
@@ -14,9 +14,9 @@ permissions:
 jobs:
   review:
     runs-on: ubuntu-latest
-    # Skip if a result label already exists, unless trigger-review was just added.
-    # Removing all review labels drops both contains() checks back to false, which
-    # re-runs a full review.
+    # Skip if a result label already exists, unless trigger-review was just added
+    # (the manual re-run path). Label removal never triggers this workflow at all
+    # (see `types` above), so unlabeling review-agent-passed/-failed is a no-op.
     if: |
       (!contains(github.event.pull_request.labels.*.name, 'review-agent-passed') &&
        !contains(github.event.pull_request.labels.*.name, 'review-agent-failed')) ||
