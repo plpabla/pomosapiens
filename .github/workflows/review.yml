@@ -20,15 +20,11 @@ jobs:
     if: |
       (!contains(github.event.pull_request.labels.*.name, 'review-agent-passed') &&
        !contains(github.event.pull_request.labels.*.name, 'review-agent-failed')) ||
-      github.event.label.name == 'trigger-review'
+      (github.event.action == 'labeled' && github.event.label.name == 'trigger-review')
     steps:
       # Needed so the runner can resolve the local `uses: ./...` action below;
-      # the composite action performs its own (fork-safe) checkout internally too.
+      # the composite action performs its own (fork-safe) checkout and Node setup internally too.
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: .nvmrc
-          cache: npm
 
       - name: Run review-agent
         id: review

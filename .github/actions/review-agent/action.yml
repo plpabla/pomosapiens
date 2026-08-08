@@ -92,13 +92,14 @@ runs:
         OPENROUTER_MAX_COST: ${{ inputs.openrouter-max-cost }}
       run: |
         set -uo pipefail
+        delim="ghadelim_$(openssl rand -hex 8)"
 
         if [[ "${{ steps.compute-diff.outputs.empty }}" == "true" ]]; then
           echo "verdict=pass" >> "$GITHUB_OUTPUT"
           {
-            echo "summary<<REVIEW_AGENT_SUMMARY_EOF_9f3a1c"
+            echo "summary<<$delim"
             echo "No reviewable changes (diff is empty after excluding markdown files)."
-            echo "REVIEW_AGENT_SUMMARY_EOF_9f3a1c"
+            echo "$delim"
           } >> "$GITHUB_OUTPUT"
           exit 0
         fi
@@ -117,9 +118,9 @@ runs:
         echo "verdict=$verdict" >> "$GITHUB_OUTPUT"
         echo "total-score=$total_score" >> "$GITHUB_OUTPUT"
         {
-          echo "summary<<REVIEW_AGENT_SUMMARY_EOF_9f3a1c"
+          echo "summary<<$delim"
           echo "$summary"
-          echo "REVIEW_AGENT_SUMMARY_EOF_9f3a1c"
+          echo "$delim"
         } >> "$GITHUB_OUTPUT"
 
         exit "$agent_exit"
@@ -130,12 +131,16 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ inputs.github-token }}
+        VERDICT: ${{ steps.run-agent.outputs.verdict }}
+        TOTAL_SCORE: ${{ steps.run-agent.outputs.total-score }}
+        SUMMARY: ${{ steps.run-agent.outputs.summary }}
+        SHA: ${{ github.event.pull_request.head.sha }}
       run: |
         set -euo pipefail
-        verdict="${{ steps.run-agent.outputs.verdict }}"
-        total_score="${{ steps.run-agent.outputs.total-score }}"
-        summary="${{ steps.run-agent.outputs.summary }}"
-        sha="${{ github.event.pull_request.head.sha }}"
+        verdict="$VERDICT"
+        total_score="$TOTAL_SCORE"
+        summary="$SUMMARY"
+        sha="$SHA"
 
         case "$verdict" in
           pass) icon="✅" ;;
